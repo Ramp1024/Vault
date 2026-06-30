@@ -1,0 +1,23 @@
+[project]
+name = "vault-backend"
+version = "0.1.0"
+description = "Backend API for Vault"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.138.2,<0.139.0",
+    "python-dotenv>=1.2.2,<2.0.0",
+    "uvicorn>=0.49.0,<0.50.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1,<0.29.0",
+]
+
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = false
