@@ -39,7 +39,7 @@ services:
 
   ui:
     build:
-      context: ./frontend/vault
+      context: ./frontend
       dockerfile: Dockerfile
     depends_on:
       - api
