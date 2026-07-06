@@ -17,16 +17,14 @@ class NotionParser:
 		title = self._extract_page_title(page)
 		body = self._extract_blocks_text(blocks)
 
-		text_parts = [part for part in [title, body] if part]
-
 		return Document(
 			id=page_id,
-			text="\n\n".join(text_parts),
+			title=title,
+			content=body,
 			metadata={
 				"source": "notion",
 				"data_source_id": data_source.id,
 				"data_source_name": data_source.name,
-				"page_title": title,
 				"url": page.get("url"),
 			},
 		)
