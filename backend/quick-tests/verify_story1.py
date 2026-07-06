@@ -27,5 +27,5 @@ check("Backend Running", f"{BACKEND_URL}/health")
 check("Ollama Running", f"{OLLAMA_URL}/api/tags")
 
 print("=" * 50)
-print("Verify ChromaDB manually or add a health endpoint if exposed.")
+print("Verify Qdrant health via the /health endpoint.")
 print("=" * 50)
