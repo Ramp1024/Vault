@@ -1,8 +1,8 @@
 
 from fastapi import APIRouter
 
-from services.qdrant import get_qdrant_client
-from services.ollama import get_ollama_client
+from app.services.qdrant import get_qdrant_client
+from app.services.ollama import get_ollama_client
 
 router = APIRouter()
 

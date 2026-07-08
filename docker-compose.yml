@@ -7,11 +7,11 @@ services:
       - "8000:8000"
     environment:
       OLLAMA_BASE_URL: http://ollama:11434
-      CHROMA_HOST: chroma
-      CHROMA_PORT: 8000
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
     depends_on:
       - ollama
-      - chroma
+      - qdrant
 
   ollama:
     image: ollama/ollama:latest
@@ -28,14 +28,14 @@ services:
     #           count: all
     #           capabilities: [gpu]
 
-  chroma:
-    image: chromadb/chroma:latest
+  qdrant:
+    image: qdrant/qdrant:latest
     ports:
-      - "8001:8000"
+      - "6333:6333"
     volumes:
-      - chroma_data:/chroma/chroma
+      - qdrant_data:/qdrant/storage
     environment:
-      IS_PERSISTENT: "TRUE"
+      QDRANT_API_KEY: ${QDRANT_API_KEY:-vault-dev-key}
 
   ui:
     build:
@@ -50,4 +50,4 @@ services:
 
 volumes:
   ollama_data:
-  chroma_data:
+  qdrant_data:

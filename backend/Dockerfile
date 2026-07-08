@@ -10,10 +10,9 @@ COPY pyproject.toml uv.lock ./
 RUN pip install --no-cache-dir uv \
     && uv sync --frozen --no-dev
 
+# Copy entire app directory with all subdirectories (core, models, services, processors, connectors, api)
 COPY app ./app
-COPY core ./core
-COPY models ./models
-COPY services ./services
+COPY config ./config
 
 EXPOSE 8000
 

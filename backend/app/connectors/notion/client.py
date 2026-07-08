@@ -90,15 +90,131 @@ class NotionClient:
             return []
 
     def get_page_blocks(self, page_id: str) -> list[dict[str, Any]]:
-        """Return top-level blocks for a page."""
+        """Return all blocks for a page, recursively fetching child blocks and table rows.
+        
+        This method:
+        1. Fetches top-level blocks from the page
+        2. For blocks with children (except child_page), recursively fetches those blocks
+        3. For tables, extracts row content from child blocks
+        4. Flattens the structure so child blocks are included in the main list
+        5. Child pages are NOT traversed - they are separate documents
+        """
         if self.client is None:
             return []
 
         try:
-            response = self.client.blocks.children.list(block_id=page_id)
-            return response.get("results", [])
+            blocks = self.client.blocks.children.list(block_id=page_id)
+            results = blocks.get("results", [])
+            all_blocks: list[dict[str, Any]] = []
+
+            for block in results:
+                block_type = block.get("type")
+                
+                # Skip child_page blocks - they are separate documents
+                if block_type == "child_page":
+                    continue
+                
+                all_blocks.append(block)
+                
+                # If block has children, recursively fetch them
+                if block.get("has_children"):
+                    block_id = block.get("id")
+                    
+                    if block_type == "table":
+                        # For tables, extract row content
+                        child_blocks = self._get_blocks_recursive(block_id)
+                        table_rows = self._extract_table_rows(child_blocks)
+                        # Add table rows as child data
+                        if table_rows:
+                            block["table_rows"] = table_rows
+                    else:
+                        # For other blocks with children, recursively fetch
+                        child_blocks = self._get_blocks_recursive(block_id)
+                        if child_blocks:
+                            block["children"] = child_blocks
+                            all_blocks.extend(child_blocks)
+
+            return all_blocks
         except APIResponseError:
             return []
+
+    def _get_blocks_recursive(self, block_id: str) -> list[dict[str, Any]]:
+        """Recursively fetch all child blocks for a given block ID.
+        
+        Note: child_page blocks are NOT traversed as they are separate documents.
+        """
+        if self.client is None:
+            return []
+
+        try:
+            response = self.client.blocks.children.list(block_id=block_id)
+            results = response.get("results", [])
+            all_blocks: list[dict[str, Any]] = []
+
+            for block in results:
+                block_type = block.get("type")
+                
+                # Skip child_page blocks - they are separate documents
+                if block_type == "child_page":
+                    continue
+                
+                all_blocks.append(block)
+                
+                # Continue recursion if this block also has children
+                if block.get("has_children"):
+                    child_block_id = block.get("id")
+                    child_blocks = self._get_blocks_recursive(child_block_id)
+                    if child_blocks:
+                        block["children"] = child_blocks
+                        all_blocks.extend(child_blocks)
+
+            return all_blocks
+        except APIResponseError:
+            return []
+
+    def _extract_table_rows(self, blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Extract table row content from a list of blocks.
+        
+        Notion represents table rows as child blocks of type 'table_row'.
+        Each table_row contains cells with rich_text.
+        """
+        rows: list[dict[str, Any]] = []
+        
+        for block in blocks:
+            if block.get("type") == "table_row":
+                row_data = {
+                    "type": "table_row",
+                    "id": block.get("id"),
+                    "cells": [],
+                }
+                
+                # Extract cell content
+                row_payload = block.get("table_row", {})
+                cells = row_payload.get("cells", [])
+                
+                for cell in cells:
+                    # Each cell is a list of rich text objects
+                    cell_text = self._extract_rich_text_from_cell(cell)
+                    row_data["cells"].append(cell_text)
+                
+                rows.append(row_data)
+        
+        return rows
+
+    @staticmethod
+    def _extract_rich_text_from_cell(cell: list[dict[str, Any]]) -> str:
+        """Extract plain text from a table cell (which is a list of rich_text objects)."""
+        if not isinstance(cell, list):
+            return ""
+        
+        parts: list[str] = []
+        for item in cell:
+            if isinstance(item, dict):
+                plain_text = item.get("plain_text", "")
+                if plain_text:
+                    parts.append(plain_text)
+        
+        return "".join(parts).strip()
 
     @staticmethod
     def _extract_title(result: dict[str, Any]) -> str:

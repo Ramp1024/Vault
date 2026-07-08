@@ -1,6 +1,6 @@
 from app.connectors.notion.client import NotionClient
 from app.connectors.notion.parser import NotionParser
-from models.document import Document
+from app.models.document import Document
 
 
 class NotionConnector:
