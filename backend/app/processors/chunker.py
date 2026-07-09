@@ -1,12 +1,21 @@
 from app.models.document import Document
 from app.models.chunk import Chunk
 import re
-import hashlib
 
 MAX_WORDS_PER_CHUNK = 250
 HEADING_PATTERN = re.compile(r"^(#{1,3}\s+.+)$", re.MULTILINE)
-SENTENCE_PATTERN = re.compile(r"(?<=[.!?])\s+")
-
+# Split on sentence-ending punctuation only when followed by an uppercase letter,
+# opening quote, or bracket — the hallmarks of a genuine new sentence.
+# Two negative lookbehinds suppress false splits on:
+#   (?<![A-Z][a-z]\.)   — 2-letter abbreviations: Mr. Dr. Ms. Sr. Jr.
+#   (?<![A-Z][a-z][a-z]\.) — 3-letter abbreviations: Mrs. etc.
+# Note: single-capital initials (A.) are not suppressed; they are rare in
+# notes and would otherwise block acronym endings like U.S.A.
+SENTENCE_PATTERN = re.compile(
+    r"(?<![A-Z][a-z]\.)"       # not after Mr. Dr. Ms. Sr. Jr.
+    r"(?<![A-Z][a-z][a-z]\.)"  # not after Mrs. etc.
+    r"(?<=[.!?])\s+(?=[A-Z\"(\[])"
+)
 
 class Chunker:
 	"""Source-agnostic, structure-aware adaptive chunker for documents.

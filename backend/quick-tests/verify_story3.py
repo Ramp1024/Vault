@@ -115,7 +115,7 @@ def verify_story3():
 
         print(f"{chunk.id}")
 
-        print(chunk.content[:300])
+        print(chunk.content)
 
         print("-" * 70)
 
