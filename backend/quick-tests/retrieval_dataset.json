@@ -1,0 +1,72 @@
+[
+  {
+    "query": "webpack",
+    "expected_titles": ["Webpack"],
+    "top_k": 3
+  },
+  {
+    "query": "module federation",
+    "expected_titles": ["Webpack"],
+    "top_k": 3
+  },
+  {
+    "query": "tree shaking",
+    "expected_titles": ["Webpack"],
+    "top_k": 3
+  },
+  {
+    "query": "columnar storage",
+    "expected_titles": ["Apache Arrow"],
+    "top_k": 3
+  },
+  {
+    "query": "in-memory tabular format",
+    "expected_titles": ["Apache Arrow"],
+    "top_k": 3
+  },
+  {
+    "query": "language agnostic data format",
+    "expected_titles": ["Apache Arrow"],
+    "top_k": 3
+  },
+  {
+    "query": "shared kernel",
+    "expected_titles": ["Docker vs VMs"],
+    "top_k": 3
+  },
+  {
+    "query": "hypervisor",
+    "expected_titles": ["Docker vs VMs"],
+    "top_k": 3
+  },
+  {
+    "query": "startup in seconds",
+    "expected_titles": ["Docker vs VMs"],
+    "top_k": 3
+  },
+  {
+    "query": "pipe operator",
+    "expected_titles": ["Terminal & Shell"],
+    "top_k": 3
+  },
+  {
+    "query": "grep sort uniq",
+    "expected_titles": ["Terminal & Shell"],
+    "top_k": 3
+  },
+  {
+    "query": "semantic retrieval",
+    "expected_titles": ["Semantic Indexing & Retrieval"],
+    "top_k": 3
+  },
+  {
+    "query": "notion ingestion pipeline",
+    "expected_titles": ["Knowledge Ingestion Pipeline"],
+    "top_k": 3
+  },
+  {
+    "query": "rag architecture",
+    "expected_titles": ["Retrieval Augmented Question Answering"],
+    "top_k": 3
+  }
+]
