@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
     OLLAMA_EMBED_MODEL: str = os.environ.get("OLLAMA_EMBED_MODEL", "nomic-embed-text")
     OLLAMA_TIMEOUT_SECONDS: float = float(
-        os.environ.get("OLLAMA_TIMEOUT_SECONDS", "30")
+        os.environ.get("OLLAMA_TIMEOUT_SECONDS", "90")
     )
     QDRANT_HOST: str = os.environ.get("QDRANT_HOST", "127.0.0.1")
     QDRANT_PORT: int = int(os.environ.get("QDRANT_PORT", "6333"))
