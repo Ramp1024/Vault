@@ -72,6 +72,15 @@ STOPWORDS = {
 }
 
 
+class VerificationFailure(Exception):
+    """Raised when a RAG verification check fails."""
+
+
+def _require(condition: bool, message: str) -> None:
+    if not condition:
+        raise VerificationFailure(message)
+
+
 def _normalize_tokens(text: str) -> set[str]:
     tokens = re.findall(r"[a-zA-Z0-9][a-zA-Z0-9_-]*", text.lower())
     return {t for t in tokens if len(t) >= 4 and t not in STOPWORDS}
@@ -117,12 +126,14 @@ def _print_prompt_stats(prompt: str, sources_count: int, context_word_count: int
     print(f"  Approx tokens     : {approx_tokens}")
     print(prompt[:500])
 
-    assert len(prompt) < MAX_PROMPT_CHARS, (
-        f"Prompt is too large: {len(prompt)} chars (max {MAX_PROMPT_CHARS})"
+    _require(
+        len(prompt) < MAX_PROMPT_CHARS,
+        f"Prompt is too large: {len(prompt)} chars (max {MAX_PROMPT_CHARS})",
     )
-    assert context_word_count <= MAX_CONTEXT_WORDS, (
+    _require(
+        context_word_count <= MAX_CONTEXT_WORDS,
         f"Context is too large: {context_word_count} words "
-        f"(max {MAX_CONTEXT_WORDS})"
+        f"(max {MAX_CONTEXT_WORDS})",
     )
 
 
@@ -159,20 +170,22 @@ def verify_rag() -> None:
 
         response = rag.answer(query)
 
-        assert response.answer.strip(), f"Empty answer returned for query: {query}"
-        assert response.sources, f"No sources returned for query: {query}"
+        _require(response.answer.strip(), f"Empty answer returned for query: {query}")
+        _require(response.sources, f"No sources returned for query: {query}")
 
         sources_text = "\n\n".join(item.chunk.content for item in response.sources)
         grounding_ratio, unmatched_count = _verify_grounding(response.answer, sources_text)
 
-        assert grounding_ratio >= MIN_GROUNDING_RATIO, (
+        _require(
+            grounding_ratio >= MIN_GROUNDING_RATIO,
             f"Answer appears weakly grounded for query '{query}'. "
             f"grounding_ratio={grounding_ratio:.2f}, "
-            f"required>={MIN_GROUNDING_RATIO:.2f}"
+            f"required>={MIN_GROUNDING_RATIO:.2f}",
         )
-        assert unmatched_count <= MAX_UNMATCHED_TERMS, (
+        _require(
+            unmatched_count <= MAX_UNMATCHED_TERMS,
             f"Potential hallucination risk for query '{query}'. "
-            f"unmatched_terms={unmatched_count}, max={MAX_UNMATCHED_TERMS}"
+            f"unmatched_terms={unmatched_count}, max={MAX_UNMATCHED_TERMS}",
         )
 
         print(f"  Sources returned : {len(response.sources)}")
@@ -199,17 +212,25 @@ def verify_rag() -> None:
 
     unknown_response = rag.answer(UNKNOWN_QUERY)
 
-    assert unknown_response.sources, "Unknown-topic query returned no sources list"
-    assert UNKNOWN_EXPECTED_PHRASE.lower() in unknown_response.answer.lower(), (
-        "Unknown-topic answer did not include the required honest fallback phrase: "
-        f"'{UNKNOWN_EXPECTED_PHRASE}'"
-    )
-
     print(f"  Sources returned : {len(unknown_response.sources)}")
     print(f"  Answer           : {unknown_response.answer}")
+
+    _require(
+        unknown_response.sources,
+        "Unknown-topic query returned no sources list",
+    )
+    _require(
+        UNKNOWN_EXPECTED_PHRASE.lower() in unknown_response.answer.lower(),
+        "Unknown-topic answer did not include the required honest fallback phrase: "
+        f"'{UNKNOWN_EXPECTED_PHRASE}'",
+    )
 
     print("\n✅ RAG verification passed")
 
 
 if __name__ == "__main__":
-    verify_rag()
+    try:
+        verify_rag()
+    except VerificationFailure as exc:
+        print(f"\n❌ RAG verification failed: {exc}")
+        raise SystemExit(1)

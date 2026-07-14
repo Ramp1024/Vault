@@ -4,7 +4,9 @@
 from pathlib import Path
 import sys
 
-sys.path.append(str(Path.cwd().parent))
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+if str(BACKEND_ROOT) not in sys.path:
+	sys.path.insert(0, str(BACKEND_ROOT))
 
 from app.services.embedding_service import EmbeddingService, get_embedding_service
 from app.connectors.notion.connector import NotionConnector
@@ -22,7 +24,7 @@ def verify_embedding_service():
 	try:
 		service = get_embedding_service()
 		print(f"✅ EmbeddingService created")
-		print(f"   Model: {service.MODEL}")
+		print(f"   Model: {service.model}")
 		print(f"   Ollama URL: {service.base_url}")
 	except Exception as e:
 		print(f"❌ Failed to create service: {e}")
@@ -53,7 +55,7 @@ def verify_embedding_service():
 		print(f"   Sample values: {embedding[:5]}...")
 	except RuntimeError as e:
 		print(f"⚠️  {e}")
-		print("   (Ensure Ollama container is running: docker-compose up -d ollama)")
+		print("   (Ensure Ollama is installed and running locally: ollama serve)")
 
 	# Test 4: Batch chunk embedding (may fail if Ollama not running)
 	print("\n[4] Batch Chunk Embedding")
@@ -69,7 +71,7 @@ def verify_embedding_service():
 			print(f"   Sample first chunk embedding: {embedded_chunks[0].embedding[:5]}...")
 	except RuntimeError as e:
 		print(f"⚠️  {e}")
-		print("   (Ensure Ollama container is running: docker-compose up -d ollama)")
+		print("   (Ensure Ollama is installed and running locally: ollama serve)")
 
 	# Test 5: API Design
 	print("\n[5] API Design")
@@ -86,14 +88,15 @@ def verify_embedding_service():
 	print("SETUP INSTRUCTIONS")
 	print("=" * 80)
 	print("""
-1. Start Ollama container:
-   docker-compose up -d ollama
+1. Start Ollama locally:
+	ollama serve
 
-2. Pull embedding model (inside container or with local ollama):
-   docker exec vault-ollama-1 ollama pull nomic-embed-text
+2. Pull required models:
+	ollama pull nomic-embed-text
+	ollama pull llama3.1:8b
 
 3. Verify model is available:
-   docker exec vault-ollama-1 ollama list
+	ollama list
 
 4. Run this verification again to test embeddings
 """)

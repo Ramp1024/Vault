@@ -61,7 +61,7 @@ qdrant:
 **Before:**
 ```yaml
 environment:
-  OLLAMA_BASE_URL: http://ollama:11434
+  OLLAMA_BASE_URL: <docker-managed ollama endpoint>
   CHROMA_HOST: chroma
   CHROMA_PORT: 8000
 depends_on:
@@ -72,13 +72,14 @@ depends_on:
 **After:**
 ```yaml
 environment:
-  OLLAMA_BASE_URL: http://ollama:11434
+  OLLAMA_BASE_URL: http://localhost:11434
   QDRANT_HOST: qdrant
   QDRANT_PORT: 6333
 depends_on:
-  - ollama
   - qdrant
 ```
+
+Ollama is no longer managed by Docker Compose. Run Ollama natively in WSL before starting the stack.
 
 ## New Directory Structure
 
@@ -104,7 +105,7 @@ backend/
 
 ### Start Services
 ```bash
-docker-compose up -d ollama qdrant
+docker-compose up -d qdrant api ui
 ```
 
 ### Build and Run
@@ -112,14 +113,15 @@ docker-compose up -d ollama qdrant
 docker-compose up --build
 ```
 
-### Pull Embedding Model
+### Pull Required Models
 ```bash
-docker exec vault-ollama-1 ollama pull nomic-embed-text
+ollama pull nomic-embed-text
+ollama pull llama3.1:8b
 ```
 
 ## Services
 
 - **API** (8000): FastAPI backend
-- **Ollama** (11434): LLM and embedding models
+- **Ollama** (11434): External local WSL service
 - **Qdrant** (6333): Vector database
 - **UI** (5173): Frontend (Vite/React)

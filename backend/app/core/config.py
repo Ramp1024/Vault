@@ -6,8 +6,11 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     NOTION_API_KEY: Optional[str] = None
-    OLLAMA_BASE_URL: str = os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
-    OLLAMA_EMBED_MODEL: str = os.environ.get("OLLAMA_EMBED_MODEL", "nomic-embed-text")
+    OLLAMA_BASE_URL: str = os.environ.get(
+        "OLLAMA_BASE_URL", "http://localhost:11434"
+    )
+    EMBEDDING_MODEL: str = os.environ.get("EMBEDDING_MODEL", "nomic-embed-text")
+    GENERATION_MODEL: str = os.environ.get("GENERATION_MODEL", "llama3.1:8b")
     OLLAMA_TIMEOUT_SECONDS: float = float(
         os.environ.get("OLLAMA_TIMEOUT_SECONDS", "90")
     )

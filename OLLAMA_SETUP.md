@@ -2,35 +2,42 @@
 
 ## Prerequisites
 
-Ollama runs in Docker. To pull the embedding model:
+Install Ollama in WSL and ensure the service is running.
 
-### Step 1: Start Docker Containers
 ```bash
-docker-compose up -d ollama
+curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-### Step 2: Pull the Embedding Model
-Once the Ollama container is running, pull the `nomic-embed-text` model:
+### Step 1: Start Ollama
+```bash
+ollama serve
+```
+
+### Step 2: Pull Required Models
+Once Ollama is running, pull the required models:
 
 ```bash
-# Option A: Run directly in container
-docker exec vault-ollama-1 ollama pull nomic-embed-text
-
-# Option B: If ollama CLI is available locally (after installing Ollama)
 ollama pull nomic-embed-text
+ollama pull llama3.1:8b
 ```
 
 ### Step 3: Verify the Model
 ```bash
-docker exec vault-ollama-1 ollama list
+ollama list
 ```
 
-Should show `nomic-embed-text` in the list.
+Should show both `nomic-embed-text` and `llama3.1:8b` in the list.
+
+### Step 4: Configure `OLLAMA_BASE_URL`
+
+Use the default local endpoint unless you have a non-standard setup:
+
+- `http://localhost:11434`
 
 ## Usage
 
 The `EmbeddingService` will:
-- Connect to Ollama at `OLLAMA_BASE_URL` (default: http://localhost:11434)
+- Connect to Ollama at `OLLAMA_BASE_URL`
 - Use the `nomic-embed-text` model for embeddings
 - Provide methods to embed text and chunks
 

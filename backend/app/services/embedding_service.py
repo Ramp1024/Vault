@@ -1,10 +1,9 @@
 """Embedding service for text and document chunks using Ollama."""
 
-import httpx
-
 from app.core.config import settings
 from app.models.chunk import Chunk
 from app.models.embedded_chunk import EmbeddedChunk
+from app.services.ollama import get_ollama_client
 
 
 class EmbeddingService:
@@ -17,14 +16,10 @@ class EmbeddingService:
     The embedding model is configured via the settings layer.
     """
 
-    MODEL = settings.OLLAMA_EMBED_MODEL
-
     def __init__(self):
+        self.model = settings.EMBEDDING_MODEL
         self.base_url = settings.OLLAMA_BASE_URL
-        self.client = httpx.Client(
-            base_url=self.base_url,
-            timeout=settings.OLLAMA_TIMEOUT_SECONDS,
-        )
+        self.client = get_ollama_client()
 
     def embed(self, text: str) -> list[float]:
         """Embed a single text string.
@@ -39,22 +34,19 @@ class EmbeddingService:
                 RuntimeError: If the request to Ollama fails or the response is invalid
         """
         try:
-            response = self.client.post(
-                "/api/embed",
-                json={
-                    "model": self.MODEL,
-                    "input": text,
-                },
-            )
-            response.raise_for_status()
-            data = response.json()
-            embeddings = data.get("embeddings", [])
-
-            if embeddings:
-                return embeddings[0]
+            try:
+                data = self.client.embed(model=self.model, input=text)
+                embeddings = data.get("embeddings", [])
+                if embeddings:
+                    return embeddings[0]
+            except Exception:
+                data = self.client.embeddings(model=self.model, prompt=text)
+                embedding = data.get("embedding", [])
+                if embedding:
+                    return embedding
 
             raise RuntimeError("Failed to embed text: Ollama returned no embeddings")
-        except (httpx.HTTPError, ValueError) as e:
+        except Exception as e:
             raise RuntimeError(f"Failed to embed text: {e}")
 
     def embed_chunks(self, chunks: list[Chunk]) -> list[EmbeddedChunk]:
