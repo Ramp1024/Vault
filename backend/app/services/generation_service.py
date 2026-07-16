@@ -14,6 +14,14 @@ class GenerationService:
         response = self.client.generate(model=self.model, prompt=prompt)
         return str(response["response"])
 
+    def stream_generate(self, prompt: str):
+        """Stream generated text chunks from Ollama as they arrive."""
+        stream = self.client.generate(model=self.model, prompt=prompt, stream=True)
+        for chunk in stream:
+            text = str(chunk.get("response", ""))
+            if text:
+                yield text
+
 
 def get_generation_service() -> GenerationService:
     """Factory function to create a generation service instance."""

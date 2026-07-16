@@ -30,9 +30,10 @@ Should show both `nomic-embed-text` and `llama3.1:8b` in the list.
 
 ### Step 4: Configure `OLLAMA_BASE_URL`
 
-Use the default local endpoint unless you have a non-standard setup:
+Choose based on where backend runs:
 
-- `http://localhost:11434`
+- Backend in Docker Compose: `http://host.docker.internal:11434`
+- Backend on host/WSL directly: `http://localhost:11434`
 
 ## Usage
 

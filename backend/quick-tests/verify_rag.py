@@ -25,9 +25,7 @@ KNOWN_QUERIES = [
 ]
 
 UNKNOWN_QUERY = "What is Tree-sitter?"
-UNKNOWN_EXPECTED_PHRASE = (
-    "I couldn't find relevant information in your knowledge base."
-)
+UNKNOWN_EXPECTED_PHRASE = "I couldn't find relevant information in your knowledge base."
 
 MIN_GROUNDING_RATIO = 0.20
 MAX_UNMATCHED_TERMS = 20
@@ -100,6 +98,7 @@ def _ensure_index(qdrant, embedding_service) -> None:
     qdrant.upsert(embedded_chunks)
 
 
+##Lexical Grounding applied to answer vs sources. Returns ratio of answer terms found in sources and count of unmatched terms.
 def _verify_grounding(answer: str, sources_text: str) -> tuple[float, int]:
     answer_terms = _normalize_tokens(answer)
     source_terms = _normalize_tokens(sources_text)
@@ -117,7 +116,9 @@ def _approx_token_count(text: str) -> int:
     return max(1, len(text) // 4)
 
 
-def _print_prompt_stats(prompt: str, sources_count: int, context_word_count: int) -> None:
+def _print_prompt_stats(
+    prompt: str, sources_count: int, context_word_count: int
+) -> None:
     approx_tokens = _approx_token_count(prompt)
 
     print(f"  Sources used      : {sources_count}")
@@ -132,17 +133,16 @@ def _print_prompt_stats(prompt: str, sources_count: int, context_word_count: int
     )
     _require(
         context_word_count <= MAX_CONTEXT_WORDS,
-        f"Context is too large: {context_word_count} words "
-        f"(max {MAX_CONTEXT_WORDS})",
+        f"Context is too large: {context_word_count} words (max {MAX_CONTEXT_WORDS})",
     )
 
 
 def verify_rag() -> None:
     from app.processors.prompt_builder import PromptBuilder
+    from app.services.chat_service import ChatService
     from app.services.embedding_service import EmbeddingService
     from app.services.qdrant import get_qdrant_client
     from app.services.qdrant_service import QdrantService
-    from app.services.rag_service import RAGService
 
     print("=" * 90)
     print("VAULT - RAG VERIFICATION")
@@ -151,7 +151,7 @@ def verify_rag() -> None:
     embedding_service = EmbeddingService()
     qdrant = QdrantService(client=get_qdrant_client())
     prompt_builder = PromptBuilder()
-    rag = RAGService(
+    chat_service = ChatService(
         embedding_service=embedding_service,
         qdrant_service=qdrant,
         prompt_builder=prompt_builder,
@@ -162,19 +162,21 @@ def verify_rag() -> None:
     for query in KNOWN_QUERIES:
         print(f"\nQuery: {query}")
         query_embedding = embedding_service.embed(query)
-        sources = qdrant.search(query_embedding, limit=rag.RETRIEVAL_LIMIT)
+        sources = qdrant.search(query_embedding, limit=chat_service.RETRIEVAL_LIMIT)
         prompt = prompt_builder.build(query, sources)
         context_word_count = sum(len(item.chunk.content.split()) for item in sources)
 
         _print_prompt_stats(prompt, len(sources), context_word_count)
 
-        response = rag.answer(query)
+        response = chat_service.answer(query)
 
         _require(response.answer.strip(), f"Empty answer returned for query: {query}")
         _require(response.sources, f"No sources returned for query: {query}")
 
         sources_text = "\n\n".join(item.chunk.content for item in response.sources)
-        grounding_ratio, unmatched_count = _verify_grounding(response.answer, sources_text)
+        grounding_ratio, unmatched_count = _verify_grounding(
+            response.answer, sources_text
+        )
 
         _require(
             grounding_ratio >= MIN_GROUNDING_RATIO,
@@ -197,7 +199,7 @@ def verify_rag() -> None:
     unknown_query_embedding = embedding_service.embed(UNKNOWN_QUERY)
     unknown_sources = qdrant.search(
         unknown_query_embedding,
-        limit=rag.RETRIEVAL_LIMIT,
+        limit=chat_service.RETRIEVAL_LIMIT,
     )
     unknown_prompt = prompt_builder.build(UNKNOWN_QUERY, unknown_sources)
     unknown_context_word_count = sum(
@@ -210,7 +212,7 @@ def verify_rag() -> None:
         unknown_context_word_count,
     )
 
-    unknown_response = rag.answer(UNKNOWN_QUERY)
+    unknown_response = chat_service.answer(UNKNOWN_QUERY)
 
     print(f"  Sources returned : {len(unknown_response.sources)}")
     print(f"  Answer           : {unknown_response.answer}")

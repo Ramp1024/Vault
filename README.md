@@ -26,7 +26,10 @@ ollama pull llama3.1:8b
 
 ## Ollama Base URL
 
-The backend uses `OLLAMA_BASE_URL`, defaulting to `http://localhost:11434`.
+When running the backend in Docker Compose, `api` must reach Ollama on the host.
+Use `http://host.docker.internal:11434` (already set as the compose default).
+
+When running backend directly on the host/WSL (without Docker), use `http://localhost:11434`.
 
 Optional model overrides:
 

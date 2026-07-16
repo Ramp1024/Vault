@@ -21,13 +21,22 @@ class PromptBuilder:
         context = self._format_context(results)
 
         return (
-            "You are Vault, a retrieval-grounded assistant.\n\n"
-            "Use ONLY the supplied context to answer the question.\n"
-            "If the answer is not present in the context, explicitly say you don't know.\n\n"
-            "Context:\n\n"
+            "You are Vault, a helpful assistant answering from the user's "
+            "knowledge base.\n\n"
+            "Answer the user's question directly using only the supplied context.\n"
+            "Synthesize related facts into a natural response instead of describing "
+            "or enumerating the context passages.\n"
+            "Do not mention chunks, chunk numbers, document labels, supplied context, "
+            "retrieval, or the knowledge base in the answer.\n"
+            "Do not add an offer to clarify, expand, or answer more questions.\n"
+            "Use concise prose or bullets according to what best fits the question.\n"
+            "If the context does not contain enough information to answer, respond "
+            "exactly: I couldn't find relevant information in your knowledge base.\n\n"
+            "Internal context (never refer to these labels in the answer):\n\n"
             f"{context}\n\n"
-            "Question:\n\n"
-            f"{normalized_query}\n"
+            "User question:\n\n"
+            f"{normalized_query}\n\n"
+            "Answer:\n"
         )
 
     def _format_context(self, results: list[SearchResult]) -> str:
