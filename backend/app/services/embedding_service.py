@@ -11,7 +11,7 @@ class EmbeddingService:
 
     This service provides a simple, focused interface for embedding:
     - Individual text strings
-    - EmbeddedChunk objects for vector-store ingestion
+    - EmbeddedChunk objects for vector-store fetch_documentsion
 
     The embedding model is configured via the settings layer.
     """

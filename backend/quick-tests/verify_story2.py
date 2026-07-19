@@ -85,7 +85,7 @@ def verify_story2():
 
     connector = NotionConnector()
 
-    documents = connector.ingest()
+    documents = connector.fetch_documents()
 
     print(f"Documents Loaded: {len(documents)}")
 

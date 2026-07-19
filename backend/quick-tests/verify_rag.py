@@ -92,7 +92,7 @@ def _ensure_index(qdrant, embedding_service) -> None:
         return
 
     print("Indexing chunks because collection is empty...")
-    documents = NotionConnector().ingest()
+    documents = NotionConnector().fetch_documents()
     chunks = Chunker().chunk_documents(documents)
     embedded_chunks = embedding_service.embed_chunks(chunks)
     qdrant.upsert(embedded_chunks)

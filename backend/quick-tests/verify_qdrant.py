@@ -31,7 +31,7 @@ def verify_milestone2():
     qdrant = QdrantService(client=get_qdrant_client())
 
     print("Loading documents...")
-    documents = connector.ingest()
+    documents = connector.fetch_documents()
 
     print("Chunking...")
     chunks = chunker.chunk_documents(documents)

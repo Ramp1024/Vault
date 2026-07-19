@@ -34,7 +34,7 @@ def verify_embedding_service():
 	print("\n[2] Loading and Chunking Documents")
 	try:
 		connector = NotionConnector()
-		documents = connector.ingest()
+		documents = connector.fetch_documents()
 		print(f"✅ Loaded {len(documents)} documents")
 
 		chunker = Chunker()

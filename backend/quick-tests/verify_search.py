@@ -33,7 +33,7 @@ def _ensure_index(qdrant: QdrantService, embedding_service: EmbeddingService) ->
         return
 
     print("Indexing chunks for search verification...")
-    documents = NotionConnector().ingest()
+    documents = NotionConnector().fetch_documents()
     chunks = Chunker().chunk_documents(documents)
     embedded_chunks = embedding_service.embed_chunks(chunks)
     qdrant.upsert(embedded_chunks)

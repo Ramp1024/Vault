@@ -18,7 +18,7 @@ def verify_chunker():
 	# Load documents
 	print("\n[1] Loading Documents")
 	connector = NotionConnector()
-	documents = connector.ingest()
+	documents = connector.fetch_documents()
 	print(f"✅ Loaded {len(documents)} documents")
 
 	# Chunk documents

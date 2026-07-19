@@ -24,3 +24,5 @@
     -> Use re-ranking model to rank relevant chunks
 
 -> Conversation memory
+
+-> CRON job to run automated fetch_documentsions

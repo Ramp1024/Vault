@@ -29,7 +29,7 @@ def verify_story3():
     # --------------------------------------------------
 
     connector = NotionConnector()
-    documents = connector.ingest()
+    documents = connector.fetch_documents()
 
     assert len(documents) > 0, "No documents loaded."
 

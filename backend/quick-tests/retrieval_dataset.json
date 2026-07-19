@@ -60,8 +60,8 @@
     "top_k": 3
   },
   {
-    "query": "notion ingestion pipeline",
-    "expected_titles": ["Knowledge Ingestion Pipeline"],
+    "query": "notion fetch_documentsion pipeline",
+    "expected_titles": ["Knowledge fetch_documentsion Pipeline"],
     "top_k": 3
   },
   {

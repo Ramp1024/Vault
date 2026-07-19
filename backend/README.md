@@ -32,6 +32,15 @@ Run the API in development mode:
 uv run uvicorn app.main:app --reload
 ```
 
+Synchronize Notion documents into Qdrant explicitly:
+
+```bash
+uv run python -m app.cli.sync
+```
+
+The command exits with `0` after a successful sync, `1` when synchronization
+fails, and `130` when cancelled with Ctrl+C. Failures are logged to the console.
+
 Call the health endpoint:
 
 ```bash
