@@ -5,7 +5,7 @@ from app.models.document import Document
 
 
 class NotionConnector(DocumentConnector):
-    """Orchestrates Notion fetch_documentsion into parsed documents."""
+    """Orchestrates Notion page retrieval into parsed documents."""
 
     def __init__(
         self, client: NotionClient | None = None, parser: NotionParser | None = None
@@ -15,7 +15,6 @@ class NotionConnector(DocumentConnector):
 
     def fetch_documents(self) -> list[Document]:
         documents: list[Document] = []
-
         data_sources = self.client.discover_data_sources()
         for data_source in data_sources:
             pages = self.client.get_pages(data_source.id)

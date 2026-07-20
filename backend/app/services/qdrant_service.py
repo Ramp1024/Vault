@@ -6,7 +6,9 @@ from qdrant_client.http.models import (
     Distance,
     FieldCondition,
     Filter,
+    FilterSelector,
     MatchValue,
+    PointStruct,
     VectorParams,
 )
 
@@ -23,6 +25,15 @@ class QdrantService:
     def _chunk_filter(self, chunk_id: str) -> Filter:
         return Filter(
             must=[FieldCondition(key="chunk_id", match=MatchValue(value=chunk_id))]
+        )
+
+    def _document_filter(self, document_id: str) -> Filter:
+        return Filter(
+            must=[
+                FieldCondition(
+                    key="document_id", match=MatchValue(value=document_id)
+                )
+            ]
         )
 
     def _point_id_for_chunk(self, chunk_id: str) -> str:
@@ -103,6 +114,39 @@ class QdrantService:
             with_vectors=False,
         )
         return bool(points)
+
+    def get_document_metadata(self, document_id: str) -> dict[str, Any] | None:
+        """Return metadata from one indexed chunk for a document."""
+        if not self.collection_exists():
+            return None
+
+        points, _ = self.client.scroll(
+            collection_name=settings.QDRANT_COLLECTION_NAME,
+            scroll_filter=self._document_filter(document_id),
+            limit=1,
+            with_payload=True,
+            with_vectors=False,
+        )
+        if not points:
+            return None
+
+        return self._chunk_from_payload(dict(points[0].payload or {})).metadata
+
+    def delete_document(self, document_id: str) -> None:
+        """Delete every vector associated with a document."""
+        if not self.collection_exists():
+            return
+
+        try:
+            self.client.delete(
+                collection_name=settings.QDRANT_COLLECTION_NAME,
+                points_selector=FilterSelector(
+                    filter=self._document_filter(document_id)
+                ),
+                wait=True,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to delete document from Qdrant: {e}")
 
     def health_check(self) -> bool:
         """
@@ -197,10 +241,10 @@ class QdrantService:
             for i in range(0, total, effective_batch_size):
                 batch = embedded_chunks[i : i + effective_batch_size]
                 points = [
-                    {
-                        "id": self._point_id_for_chunk(item.chunk.id),
-                        "vector": item.embedding,
-                        "payload": {
+                    PointStruct(
+                        id=self._point_id_for_chunk(item.chunk.id),
+                        vector=item.embedding,
+                        payload={
                             "chunk_id": item.chunk.id,
                             "document_id": item.chunk.document_id,
                             "document_title": item.chunk.document_title,
@@ -208,7 +252,7 @@ class QdrantService:
                             "content": item.chunk.content,
                             **item.chunk.metadata,
                         },
-                    }
+                    )
                     for item in batch
                 ]
 

@@ -17,6 +17,9 @@ class NotionParser:
         title = self._extract_page_title(page)
         body = self._extract_blocks_text(blocks)
         properties = page.get("properties", {})
+        last_edited_time = page.get("last_edited_time", "")
+        if not isinstance(last_edited_time, str):
+            last_edited_time = ""
 
         return Document(
             id=page_id,
@@ -26,6 +29,7 @@ class NotionParser:
                 "source": "notion",
                 "data_source_id": data_source.id,
                 "data_source_name": data_source.name,
+                "last_edited_time": last_edited_time,
                 "url": page.get("url"),
                 "properties": self._format_properties(properties),
             },

@@ -38,7 +38,35 @@ class SyncService:
         documents = self.connector.fetch_documents()
         self.logger.info("Fetched %d documents", len(documents))
 
-        chunks = self.chunker.chunk_documents(documents)
+        documents_to_index = []
+        collection_exists = self.qdrant_service.collection_exists()
+
+        for document in documents:
+            last_edited_time = document.metadata.get("last_edited_time")
+            indexed_metadata = (
+                self.qdrant_service.get_document_metadata(document.id)
+                if collection_exists
+                else None
+            )
+            if indexed_metadata is None:
+                documents_to_index.append(document)
+                continue
+
+            if (
+                isinstance(last_edited_time, str)
+                and last_edited_time
+                and indexed_metadata.get("last_edited_time")
+                == last_edited_time
+            ):
+                continue
+
+            self.qdrant_service.delete_document(document.id)
+            documents_to_index.append(document)
+
+        documents_skipped = len(documents) - len(documents_to_index)
+        self.logger.info("Skipped %d unchanged documents", documents_skipped)
+
+        chunks = self.chunker.chunk_documents(documents_to_index)
         self.logger.info("Generated %d chunks", len(chunks))
 
         embedded_chunks = self.embedding_service.embed_chunks(chunks)
@@ -49,11 +77,12 @@ class SyncService:
 
         duration = self.clock() - started_at
         result = SyncResult(
-            documents_processed=len(documents),
+            documents_processed=len(documents_to_index),
             chunks_created=len(chunks),
             embeddings_generated=len(embedded_chunks),
             vectors_upserted=vectors_upserted,
             duration=duration,
+            documents_skipped=documents_skipped,
         )
         self.logger.info("Sync completed in %.1f seconds", duration)
         return result

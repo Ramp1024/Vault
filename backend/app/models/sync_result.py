@@ -8,3 +8,4 @@ class SyncResult:
     embeddings_generated: int
     vectors_upserted: int
     duration: float
+    documents_skipped: int = 0

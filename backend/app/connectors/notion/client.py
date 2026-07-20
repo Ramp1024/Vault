@@ -84,8 +84,26 @@ class NotionClient:
             return []
 
         try:
-            response = self.client.data_sources.query(data_source_id=data_source_id)
-            return response.get("results", [])
+            pages: list[dict[str, Any]] = []
+            start_cursor: str | None = None
+
+            while True:
+                response = self.client.data_sources.query(
+                    data_source_id=data_source_id,
+                    page_size=100,
+                    start_cursor=start_cursor,
+                )
+                pages.extend(response.get("results", []))
+
+                if not response.get("has_more", False):
+                    break
+
+                next_cursor = response.get("next_cursor")
+                if not isinstance(next_cursor, str) or not next_cursor:
+                    break
+                start_cursor = next_cursor
+
+            return pages
         except APIResponseError:
             return []
 

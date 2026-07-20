@@ -19,7 +19,12 @@ def verify_sync_service() -> None:
     sync_logger = Mock()
     clock = Mock(side_effect=[100.0, 118.2])
 
-    connector.fetch_documents.return_value = ["document"]
+    document = Mock(
+        id="document-id",
+        metadata={"last_edited_time": "2026-07-19T02:30:00Z"},
+    )
+    connector.fetch_documents.return_value = [document]
+    qdrant_service.collection_exists.return_value = False
     chunker.chunk_documents.return_value = ["chunk"]
     embedding_service.embed_chunks.return_value = ["embedded chunk"]
     qdrant_service.upsert_batch.return_value = 1
@@ -43,12 +48,13 @@ def verify_sync_service() -> None:
     )
     assert isclose(result.duration, 18.2)
     connector.fetch_documents.assert_called_once_with()
-    chunker.chunk_documents.assert_called_once_with(["document"])
+    chunker.chunk_documents.assert_called_once_with([document])
     embedding_service.embed_chunks.assert_called_once_with(["chunk"])
     qdrant_service.upsert_batch.assert_called_once_with(["embedded chunk"])
     assert sync_logger.info.call_args_list == [
         call("Starting sync..."),
         call("Fetched %d documents", 1),
+        call("Skipped %d unchanged documents", 0),
         call("Generated %d chunks", 1),
         call("Embedded %d chunks", 1),
         call("Upserted %d vectors", 1),
