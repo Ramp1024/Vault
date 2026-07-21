@@ -32,6 +32,7 @@ class NotionClient:
         self._client = (
             Client(auth=settings.NOTION_API_KEY) if settings.NOTION_API_KEY else None
         )
+        self._block_children_cache: dict[str, list[dict[str, Any]]] = {}
 
     @property
     def client(self) -> Client | None:
@@ -60,18 +61,31 @@ class NotionClient:
             return []
 
         try:
-            response = self.client.search(
-                page_size=100,
-                filter={"property": "object", "value": "data_source"},
-            )
-            results = response.get("results", [])
             data_sources: list[NotionDataSource] = []
+            start_cursor: str | None = None
 
-            for result in results:
-                data_source_id = result.get("id")
-                title = self._extract_title(result)
-                if data_source_id:
-                    data_sources.append(NotionDataSource(id=data_source_id, name=title))
+            while True:
+                response = self.client.search(
+                    page_size=100,
+                    start_cursor=start_cursor,
+                    filter={"property": "object", "value": "data_source"},
+                )
+
+                for result in response.get("results", []):
+                    data_source_id = result.get("id")
+                    title = self._extract_title(result)
+                    if data_source_id:
+                        data_sources.append(
+                            NotionDataSource(id=data_source_id, name=title)
+                        )
+
+                if not response.get("has_more", False):
+                    break
+
+                next_cursor = response.get("next_cursor")
+                if not isinstance(next_cursor, str) or not next_cursor:
+                    break
+                start_cursor = next_cursor
 
             return data_sources
         except APIResponseError:
@@ -107,6 +121,76 @@ class NotionClient:
         except APIResponseError:
             return []
 
+    def get_page(self, page_id: str) -> dict[str, Any] | None:
+        """Return one page by ID."""
+        if self.client is None:
+            return None
+
+        try:
+            return self.client.pages.retrieve(page_id=page_id)
+        except APIResponseError:
+            return None
+
+    def get_block_children(self, block_id: str) -> list[dict[str, Any]]:
+        """Return all direct children of a block using cursor pagination."""
+        if self.client is None:
+            return []
+        if block_id in self._block_children_cache:
+            return self._block_children_cache[block_id]
+
+        try:
+            children: list[dict[str, Any]] = []
+            start_cursor: str | None = None
+
+            while True:
+                response = self.client.blocks.children.list(
+                    block_id=block_id,
+                    page_size=100,
+                    start_cursor=start_cursor,
+                )
+                children.extend(response.get("results", []))
+
+                if not response.get("has_more", False):
+                    break
+
+                next_cursor = response.get("next_cursor")
+                if not isinstance(next_cursor, str) or not next_cursor:
+                    break
+                start_cursor = next_cursor
+
+            self._block_children_cache[block_id] = children
+            return children
+        except APIResponseError:
+            return []
+
+    def clear_block_cache(self) -> None:
+        """Clear block responses cached during the current connector run."""
+        self._block_children_cache.clear()
+
+    def get_child_page_ids(self, page_id: str) -> list[str]:
+        """Discover child-page references nested anywhere in a page's blocks."""
+        child_page_ids: list[str] = []
+        pending_block_ids = [page_id]
+        visited_block_ids: set[str] = set()
+
+        while pending_block_ids:
+            block_id = pending_block_ids.pop()
+            if block_id in visited_block_ids:
+                continue
+            visited_block_ids.add(block_id)
+
+            for block in self.get_block_children(block_id):
+                child_block_id = block.get("id")
+                if not isinstance(child_block_id, str):
+                    continue
+
+                if block.get("type") == "child_page":
+                    child_page_ids.append(child_block_id)
+                elif block.get("has_children"):
+                    pending_block_ids.append(child_block_id)
+
+        return child_page_ids
+
     def get_page_blocks(self, page_id: str) -> list[dict[str, Any]]:
         """Return all blocks for a page, recursively fetching child blocks and table rows.
         
@@ -117,78 +201,36 @@ class NotionClient:
         4. Flattens the structure so child blocks are included in the main list
         5. Child pages are NOT traversed - they are separate documents
         """
-        if self.client is None:
-            return []
-
-        try:
-            blocks = self.client.blocks.children.list(block_id=page_id)
-            results = blocks.get("results", [])
-            all_blocks: list[dict[str, Any]] = []
-
-            for block in results:
-                block_type = block.get("type")
-                
-                # Skip child_page blocks - they are separate documents
-                if block_type == "child_page":
-                    continue
-                
-                all_blocks.append(block)
-                
-                # If block has children, recursively fetch them
-                if block.get("has_children"):
-                    block_id = block.get("id")
-                    
-                    if block_type == "table":
-                        # For tables, extract row content
-                        child_blocks = self._get_blocks_recursive(block_id)
-                        table_rows = self._extract_table_rows(child_blocks)
-                        # Add table rows as child data
-                        if table_rows:
-                            block["table_rows"] = table_rows
-                    else:
-                        # For other blocks with children, recursively fetch
-                        child_blocks = self._get_blocks_recursive(block_id)
-                        if child_blocks:
-                            block["children"] = child_blocks
-                            all_blocks.extend(child_blocks)
-
-            return all_blocks
-        except APIResponseError:
-            return []
+        return self._get_blocks_recursive(page_id)
 
     def _get_blocks_recursive(self, block_id: str) -> list[dict[str, Any]]:
         """Recursively fetch all child blocks for a given block ID.
         
         Note: child_page blocks are NOT traversed as they are separate documents.
         """
-        if self.client is None:
-            return []
+        all_blocks: list[dict[str, Any]] = []
 
-        try:
-            response = self.client.blocks.children.list(block_id=block_id)
-            results = response.get("results", [])
-            all_blocks: list[dict[str, Any]] = []
+        for block in self.get_block_children(block_id):
+            block_type = block.get("type")
+            if block_type == "child_page":
+                continue
 
-            for block in results:
-                block_type = block.get("type")
-                
-                # Skip child_page blocks - they are separate documents
-                if block_type == "child_page":
-                    continue
-                
-                all_blocks.append(block)
-                
-                # Continue recursion if this block also has children
-                if block.get("has_children"):
-                    child_block_id = block.get("id")
-                    child_blocks = self._get_blocks_recursive(child_block_id)
-                    if child_blocks:
-                        block["children"] = child_blocks
-                        all_blocks.extend(child_blocks)
+            all_blocks.append(block)
 
-            return all_blocks
-        except APIResponseError:
-            return []
+            child_block_id = block.get("id")
+            if not block.get("has_children") or not isinstance(child_block_id, str):
+                continue
+
+            child_blocks = self._get_blocks_recursive(child_block_id)
+            if block_type == "table":
+                table_rows = self._extract_table_rows(child_blocks)
+                if table_rows:
+                    block["table_rows"] = table_rows
+            elif child_blocks:
+                block["children"] = child_blocks
+                all_blocks.extend(child_blocks)
+
+        return all_blocks
 
     def _extract_table_rows(self, blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Extract table row content from a list of blocks.
