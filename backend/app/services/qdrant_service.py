@@ -177,17 +177,27 @@ class QdrantService:
         self,
         query_embedding: list[float],
         limit: int = 5,
+        query_filter: Filter | None = None,
     ) -> list[SearchResult]:
-        """Search for semantically similar chunks by query embedding."""
-        if not query_embedding:
-            return []
+        """Search for chunks by vector similarity and/or a payload filter.
+
+        When ``query_embedding`` is empty, retrieval falls back to a pure
+        payload-filter scan. When no filter is supplied with an empty embedding,
+        there is nothing to match and the result is empty.
+        """
         if limit <= 0:
             raise ValueError("limit must be greater than 0")
+
+        if not query_embedding:
+            if query_filter is None:
+                return []
+            return self._filter_only_search(query_filter, limit)
 
         try:
             response = self.client.query_points(
                 collection_name=settings.QDRANT_COLLECTION_NAME,
                 query=query_embedding,
+                query_filter=query_filter,
                 limit=limit,
                 with_payload=True,
                 with_vectors=False,
@@ -199,6 +209,29 @@ class QdrantService:
                     score=float(point.score),
                 )
                 for point in response.points
+            ]
+        except Exception as e:
+            raise RuntimeError(f"Failed to search Qdrant: {e}")
+
+    def _filter_only_search(
+        self, query_filter: Filter, limit: int
+    ) -> list[SearchResult]:
+        """Retrieve chunks by payload filter alone, without vector similarity."""
+        try:
+            points, _ = self.client.scroll(
+                collection_name=settings.QDRANT_COLLECTION_NAME,
+                scroll_filter=query_filter,
+                limit=limit,
+                with_payload=True,
+                with_vectors=False,
+            )
+
+            return [
+                SearchResult(
+                    chunk=self._chunk_from_payload(dict(point.payload or {})),
+                    score=0.0,
+                )
+                for point in points
             ]
         except Exception as e:
             raise RuntimeError(f"Failed to search Qdrant: {e}")

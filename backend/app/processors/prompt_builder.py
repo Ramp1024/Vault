@@ -47,15 +47,32 @@ class PromptBuilder:
         sections: list[str] = []
         for index, result in enumerate(results, start=1):
             chunk = result.chunk
-            sections.append(
-                "\n".join(
-                    [
-                        f"[Chunk {index}]",
-                        f"Document: {chunk.document_title}",
-                        f"Chunk Index: {chunk.chunk_index}",
-                        chunk.content,
-                    ]
-                )
-            )
+            lines = [
+                f"[Chunk {index}]",
+                f"Document: {chunk.document_title}",
+                f"Chunk Index: {chunk.chunk_index}",
+            ]
+
+            properties = self._format_properties(chunk.metadata.get("properties"))
+            if properties:
+                lines.append(properties)
+
+            lines.append(chunk.content)
+            sections.append("\n".join(lines))
 
         return "\n\n".join(sections)
+
+    def _format_properties(self, properties: object) -> str:
+        """Render a chunk's structured properties as readable context lines."""
+        if not isinstance(properties, dict) or not properties:
+            return ""
+
+        lines: list[str] = ["Properties:"]
+        for name, value in properties.items():
+            if isinstance(value, (list, tuple)):
+                rendered = ", ".join(str(item) for item in value)
+            else:
+                rendered = str(value)
+            lines.append(f"  {name}: {rendered}")
+
+        return "\n".join(lines)

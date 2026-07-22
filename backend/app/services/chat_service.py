@@ -6,10 +6,12 @@ from typing import Iterator
 from app.models.rag_response import RAGResponse
 from app.models.search_result import SearchResult
 from app.processors.prompt_builder import PromptBuilder
+from app.processors.query_analyzer import QueryAnalyzer, RuleBasedQueryAnalyzer
 from app.services.embedding_service import EmbeddingService
 from app.services.generation_service import GenerationService
 from app.services.qdrant import get_qdrant_client
 from app.services.qdrant_service import QdrantService
+from app.services.retriever import Retriever
 
 
 @dataclass(frozen=True)
@@ -30,18 +32,24 @@ class ChatService:
         qdrant_service: QdrantService | None = None,
         prompt_builder: PromptBuilder | None = None,
         generation_service: GenerationService | None = None,
+        query_analyzer: QueryAnalyzer | None = None,
+        retriever: Retriever | None = None,
     ):
         self.embedding_service = embedding_service or EmbeddingService()
         self.qdrant_service = qdrant_service or QdrantService(get_qdrant_client())
         self.prompt_builder = prompt_builder or PromptBuilder()
         self.generation_service = generation_service or GenerationService()
+        self.query_analyzer = query_analyzer or RuleBasedQueryAnalyzer(
+            default_top_k=self.RETRIEVAL_LIMIT
+        )
+        self.retriever = retriever or Retriever(
+            embedding_service=self.embedding_service,
+            qdrant_service=self.qdrant_service,
+        )
 
     def retrieve_sources(self, query: str) -> list[SearchResult]:
-        query_embedding = self.embedding_service.embed(query)
-        return self.qdrant_service.search(
-            query_embedding=query_embedding,
-            limit=self.RETRIEVAL_LIMIT,
-        )
+        request = self.query_analyzer.analyze(query)
+        return self.retriever.search(request)
 
     def build_prompt(self, query: str, sources: list[SearchResult]) -> str:
         return self.prompt_builder.build(query=query, results=sources)

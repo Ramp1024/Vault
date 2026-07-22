@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     )
     EMBEDDING_MODEL: str = os.environ.get("EMBEDDING_MODEL", "nomic-embed-text")
     GENERATION_MODEL: str = os.environ.get("GENERATION_MODEL", "llama3.1:8b")
+    GENERATION_TEMPERATURE: float = float(
+        os.environ.get("GENERATION_TEMPERATURE", "0.2")
+    )
     OLLAMA_TIMEOUT_SECONDS: float = float(
         os.environ.get("OLLAMA_TIMEOUT_SECONDS", "90")
     )

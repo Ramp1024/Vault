@@ -1,6 +1,7 @@
 from typing import Any
 
 from app.connectors.notion.client import NotionDataSource
+from app.core.text import to_camel_case
 from app.models.document import Document
 
 
@@ -31,7 +32,7 @@ class NotionParser:
                 "data_source_name": data_source.name,
                 "last_edited_time": last_edited_time,
                 "url": page.get("url"),
-                "properties": self._format_properties(properties),
+                "properties": self._extract_properties(properties),
             },
         )
 
@@ -124,66 +125,70 @@ class NotionParser:
 
         return "".join(parts).strip()
 
-    def _format_properties(self, properties: dict[str, Any]) -> str:
-        """Extract and format Notion page properties into a readable string."""
-        if not isinstance(properties, dict) or not properties:
-            return ""
+    def _extract_properties(self, properties: dict[str, Any]) -> dict[str, Any]:
+        """Extract Notion page properties into a typed field/value mapping.
 
-        formatted_props: list[str] = []
+        Keys are normalized to camelCase (e.g. ``"Leetcode Topic"`` ->
+        ``"leetcodeTopic"``) for consistency across connectors; values are
+        normalized to plain Python types (str, int/float, bool, list[str]) so
+        they can be stored as individual payload fields and used for metadata
+        filtering. The page title property is skipped since it is captured
+        separately.
+        """
+        if not isinstance(properties, dict) or not properties:
+            return {}
+
+        extracted: dict[str, Any] = {}
 
         for prop_name, prop_data in properties.items():
             if not isinstance(prop_data, dict):
                 continue
 
             prop_type = prop_data.get("type")
+            key = to_camel_case(prop_name)
+            if not key:
+                continue
 
-            # Extract value based on property type
             if prop_type == "checkbox":
-                value = prop_data.get("checkbox", False)
-                formatted_props.append(f"{prop_name}: {value}")
+                extracted[key] = bool(prop_data.get("checkbox", False))
             elif prop_type == "select":
                 select_obj = prop_data.get("select")
-                if select_obj and isinstance(select_obj, dict):
-                    formatted_props.append(f"{prop_name}: {select_obj.get('name', '')}")
+                if isinstance(select_obj, dict):
+                    name = select_obj.get("name")
+                    if name:
+                        extracted[key] = name
             elif prop_type == "multi_select":
                 multi_select = prop_data.get("multi_select", [])
                 if isinstance(multi_select, list):
-                    tags = ", ".join(
-                        [
-                            item.get("name", "")
-                            for item in multi_select
-                            if isinstance(item, dict)
-                        ]
-                    )
+                    tags = [
+                        item.get("name", "")
+                        for item in multi_select
+                        if isinstance(item, dict) and item.get("name")
+                    ]
                     if tags:
-                        formatted_props.append(f"{prop_name}: {tags}")
+                        extracted[key] = tags
             elif prop_type == "date":
                 date_obj = prop_data.get("date")
-                if date_obj and isinstance(date_obj, dict):
-                    start_date = date_obj.get("start", "")
-                    end_date = date_obj.get("end")
-                    if end_date:
-                        formatted_props.append(
-                            f"{prop_name}: {start_date} → {end_date}"
-                        )
-                    else:
-                        formatted_props.append(f"{prop_name}: {start_date}")
+                if isinstance(date_obj, dict):
+                    start_date = date_obj.get("start")
+                    if start_date:
+                        extracted[key] = start_date
             elif prop_type == "rich_text":
                 rich_text = prop_data.get("rich_text", [])
                 if rich_text:
                     text = self._join_rich_text(rich_text)
                     if text:
-                        formatted_props.append(f"{prop_name}: {text}")
+                        extracted[key] = text
             elif prop_type == "number":
                 number_val = prop_data.get("number")
                 if number_val is not None:
-                    formatted_props.append(f"{prop_name}: {number_val}")
+                    extracted[key] = number_val
             elif prop_type == "url":
                 url_val = prop_data.get("url")
                 if url_val:
-                    formatted_props.append(f"{prop_name}: {url_val}")
+                    extracted[key] = url_val
 
-        return " | ".join(formatted_props)
+        return extracted
 
     def _format_table(self, table_rows: list[dict[str, Any]]) -> list[str]:
         """Format table rows into markdown pipe table format.

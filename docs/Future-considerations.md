@@ -26,3 +26,8 @@
 -> Conversation memory
 
 -> CRON job to run automated fetch_documentsions
+
+-> Implement a small CLI
+    -> vault init - setups the app
+    -> vault sync - indexes notion
+    -> vault chat - starts API and UI
