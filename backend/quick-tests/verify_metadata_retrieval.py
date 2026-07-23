@@ -2,7 +2,8 @@
 
 Covers the query-understanding + retrieval pipeline:
 
-    QueryAnalyzer -> SearchRequest -> Retriever -> QdrantFilterBuilder -> Qdrant
+    QueryAnalyzer -> SearchRequest -> SearchEngine -> VectorSearchStrategy
+        -> QdrantFilterBuilder -> Qdrant
 
 Required cases:
     1. Pure semantic search (no filters).
@@ -37,11 +38,17 @@ from app.connectors.notion.parser import NotionParser
 from app.core.text import to_camel_case
 from app.models.filter import Filter, Operator
 from app.models.search_request import SearchRequest
+from app.models.search_result import SearchResult
 from app.processors.metadata_registry import MetadataRegistry
 from app.processors.query_analyzer import RuleBasedQueryAnalyzer
+from app.search import (
+    IdentityFusionStrategy,
+    NoOpReranker,
+    SearchEngine,
+    VectorSearchStrategy,
+)
 from app.services.qdrant_filter_builder import QdrantFilterBuilder
 from app.services.qdrant_service import QdrantService
-from app.services.retriever import Retriever
 
 
 def _fake_point(chunk_id: str, score: float = 0.9, **extra):
@@ -325,18 +332,18 @@ def verify_search_no_embedding_no_filter() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Retriever
+# Search pipeline (VectorSearchStrategy + SearchEngine)
 # ---------------------------------------------------------------------------
 
 
-def verify_retriever_combined() -> None:
+def verify_vector_strategy_combined() -> None:
     embedding_service = Mock()
     embedding_service.embed.return_value = [0.4, 0.5, 0.6]
     qdrant_service = Mock()
     qdrant_service.search.return_value = ["result"]
     filter_builder = QdrantFilterBuilder()
 
-    retriever = Retriever(
+    strategy = VectorSearchStrategy(
         embedding_service=embedding_service,
         qdrant_service=qdrant_service,
         filter_builder=filter_builder,
@@ -347,7 +354,7 @@ def verify_retriever_combined() -> None:
         filters=[Filter(field="category", operator=Operator.EQUALS, value="journal")],
         top_k=3,
     )
-    assert retriever.search(request) == ["result"]
+    assert strategy.search(request) == ["result"]
 
     embedding_service.embed.assert_called_once_with("deployment notes")
     _, kwargs = qdrant_service.search.call_args
@@ -356,15 +363,15 @@ def verify_retriever_combined() -> None:
     assert kwargs["query_filter"] == QdrantFilter(
         must=[FieldCondition(key="properties.category", match=MatchValue(value="journal"))]
     )
-    print("  [12] retriever embeds semantic + forwards built filter + top_k")
+    print("  [12] vector strategy embeds semantic + forwards built filter + top_k")
 
 
-def verify_retriever_metadata_only() -> None:
+def verify_vector_strategy_metadata_only() -> None:
     embedding_service = Mock()
     qdrant_service = Mock()
     qdrant_service.search.return_value = []
 
-    retriever = Retriever(
+    strategy = VectorSearchStrategy(
         embedding_service=embedding_service,
         qdrant_service=qdrant_service,
         filter_builder=QdrantFilterBuilder(),
@@ -375,7 +382,7 @@ def verify_retriever_metadata_only() -> None:
         filters=[Filter(field="date", operator=Operator.EQUALS, value="2026-07-20")],
         top_k=5,
     )
-    retriever.search(request)
+    strategy.search(request)
 
     embedding_service.embed.assert_not_called()
     _, kwargs = qdrant_service.search.call_args
@@ -384,6 +391,68 @@ def verify_retriever_metadata_only() -> None:
         must=[FieldCondition(key="properties.date", match=MatchValue(value="2026-07-20"))]
     )
     print("  [13] metadata-only request skips embedding")
+
+
+def verify_engine_single_strategy_passthrough() -> None:
+    request = SearchRequest(semantic_query="x", filters=[], top_k=5)
+    analyzer = Mock()
+    analyzer.analyze.return_value = request
+    r1 = SearchResult(chunk=Mock(), score=0.9)
+    strategy = Mock()
+    strategy.search.return_value = [r1]
+
+    engine = SearchEngine(query_analyzer=analyzer, strategies=[strategy])
+    assert engine.search("raw query") == [r1]
+    analyzer.analyze.assert_called_once_with("raw query")
+    strategy.search.assert_called_once_with(request)
+    print("  [E1] engine analyzes query once and returns results unchanged")
+
+
+def verify_engine_fuses_and_reranks() -> None:
+    request = SearchRequest(semantic_query="x", filters=[], top_k=5)
+    analyzer = Mock()
+    analyzer.analyze.return_value = request
+    a, b = SearchResult(chunk=Mock(), score=0.9), SearchResult(chunk=Mock(), score=0.8)
+    s1, s2 = Mock(), Mock()
+    s1.search.return_value = [a]
+    s2.search.return_value = [b]
+
+    reranker = Mock()
+    reranker.rerank.return_value = [b, a]
+
+    engine = SearchEngine(
+        query_analyzer=analyzer,
+        strategies=[s1, s2],
+        fusion_strategy=IdentityFusionStrategy(),
+        reranker=reranker,
+    )
+    out = engine.search("q")
+
+    # Query understanding happens exactly once, shared across strategies.
+    analyzer.analyze.assert_called_once_with("q")
+    s1.search.assert_called_once_with(request)
+    s2.search.assert_called_once_with(request)
+    # Identity fusion concatenates per-strategy lists in order, then reranker runs.
+    reranker.rerank.assert_called_once_with(request, [a, b])
+    assert out == [b, a]
+    print("  [E2] engine fuses multi-strategy results then reranks (one analysis)")
+
+
+def verify_engine_requires_strategy() -> None:
+    try:
+        SearchEngine(query_analyzer=Mock(), strategies=[])
+    except ValueError:
+        print("  [E3] engine requires at least one strategy")
+        return
+    raise AssertionError("SearchEngine should reject an empty strategy list")
+
+
+def verify_noop_reranker_identity() -> None:
+    request = SearchRequest(semantic_query="x", filters=[], top_k=5)
+    results = [SearchResult(chunk=Mock(), score=0.5)]
+    assert NoOpReranker().rerank(request, results) is results
+    assert IdentityFusionStrategy().fuse([results, []]) == results
+    print("  [E4] no-op reranker and identity fusion leave results unchanged")
 
 
 def verify_metadata_retrieval() -> None:
@@ -417,9 +486,13 @@ def verify_metadata_retrieval() -> None:
     verify_filter_only_search()
     verify_search_no_embedding_no_filter()
 
-    print("\nRetriever:")
-    verify_retriever_combined()
-    verify_retriever_metadata_only()
+    print("\nSearch pipeline:")
+    verify_vector_strategy_combined()
+    verify_vector_strategy_metadata_only()
+    verify_engine_single_strategy_passthrough()
+    verify_engine_fuses_and_reranks()
+    verify_engine_requires_strategy()
+    verify_noop_reranker_identity()
 
     print("\n\u2705 Metadata-aware retrieval verified")
 

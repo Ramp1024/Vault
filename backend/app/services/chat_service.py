@@ -11,11 +11,11 @@ from app.processors.metadata_registry import (
 )
 from app.processors.prompt_builder import PromptBuilder
 from app.processors.query_analyzer import QueryAnalyzer, RuleBasedQueryAnalyzer
+from app.search import SearchEngine, VectorSearchStrategy
 from app.services.embedding_service import EmbeddingService
 from app.services.generation_service import GenerationService
 from app.services.qdrant import get_qdrant_client
 from app.services.qdrant_service import QdrantService
-from app.services.retriever import Retriever
 
 
 @dataclass(frozen=True)
@@ -37,7 +37,7 @@ class ChatService:
         prompt_builder: PromptBuilder | None = None,
         generation_service: GenerationService | None = None,
         query_analyzer: QueryAnalyzer | None = None,
-        retriever: Retriever | None = None,
+        search_engine: SearchEngine | None = None,
     ):
         self.embedding_service = embedding_service or EmbeddingService()
         self.qdrant_service = qdrant_service or QdrantService(get_qdrant_client())
@@ -47,9 +47,14 @@ class ChatService:
             registry=self._build_registry(),
             default_top_k=self.RETRIEVAL_LIMIT,
         )
-        self.retriever = retriever or Retriever(
-            embedding_service=self.embedding_service,
-            qdrant_service=self.qdrant_service,
+        self.search_engine = search_engine or SearchEngine(
+            query_analyzer=self.query_analyzer,
+            strategies=[
+                VectorSearchStrategy(
+                    embedding_service=self.embedding_service,
+                    qdrant_service=self.qdrant_service,
+                )
+            ],
         )
 
     def _build_registry(self) -> MetadataRegistry:
@@ -69,8 +74,7 @@ class ChatService:
         return MetadataRegistry.from_indexed_fields(fields, multi_fields)
 
     def retrieve_sources(self, query: str) -> list[SearchResult]:
-        request = self.query_analyzer.analyze(query)
-        return self.retriever.search(request)
+        return self.search_engine.search(query)
 
     def build_prompt(self, query: str, sources: list[SearchResult]) -> str:
         return self.prompt_builder.build(query=query, results=sources)
