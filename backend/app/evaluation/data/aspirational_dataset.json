@@ -1,0 +1,79 @@
+[
+  {
+    "id": "gap-value-graphs",
+    "query": "which days did I solve graph problems on leetcode",
+    "category": "aspirational-value-match",
+    "expected_to_pass_with": "value-level metadata matching (map 'graph problems' -> leetcodeTopic=Graphs) or LLMQueryAnalyzer",
+    "rationale": "These daily notes carry leetcodeTopic=Graphs in metadata, but their chunk content is only the weekday title, so vector search cannot match. The answer lives entirely in the payload. Verified: 0/5 retrieved today.",
+    "expected_documents": [
+      "390f37cd-5024-8147-a38a-de26dfb1fd04",
+      "396f37cd-5024-81b8-b574-dc773f64bc0b",
+      "397f37cd-5024-8175-8fba-e36a0e89ab15",
+      "389f37cd-5024-818c-9e47-fcdceb91cc7d",
+      "38bf37cd-5024-8113-9282-ebe8982e6428"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-8147-a38a-de26dfb1fd04_0",
+      "396f37cd-5024-81b8-b574-dc773f64bc0b_0",
+      "397f37cd-5024-8175-8fba-e36a0e89ab15_0",
+      "389f37cd-5024-818c-9e47-fcdceb91cc7d_0",
+      "38bf37cd-5024-8113-9282-ebe8982e6428_0"
+    ]
+  },
+  {
+    "id": "gap-value-backtracking",
+    "query": "backtracking practice problems",
+    "category": "aspirational-value-match",
+    "expected_to_pass_with": "value-level metadata matching (map 'backtracking' -> leetcodeTopic=Backtracking)",
+    "rationale": "Both notes have leetcodeTopic=Backtracking in metadata only; content is just the weekday. Verified: 0/2 retrieved today.",
+    "expected_documents": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8",
+      "384f37cd-5024-816f-beb6-de894a757922"
+    ],
+    "expected_chunks": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8_0",
+      "384f37cd-5024-816f-beb6-de894a757922_0"
+    ]
+  },
+  {
+    "id": "gap-temporal-week",
+    "query": "what did I work on during the week of July 13",
+    "category": "aspirational-temporal",
+    "expected_to_pass_with": "date-range filter operator + temporal query analysis (LLMQueryAnalyzer)",
+    "rationale": "Expected daily notes have dates 2026-07-13..2026-07-19 in metadata. The analyzer only supports exact-date equals, and content is title-only, so vector fails. Verified: only 1/6 retrieved today (at rank 8, outside top-5).",
+    "expected_documents": [
+      "399f37cd-5024-81a8-b5e0-d58610001d37",
+      "3a0f37cd-5024-8108-9ee7-c26ced5475e4",
+      "39ff37cd-5024-81a9-b31c-f5d5c963200a",
+      "39ef37cd-5024-8179-9100-c40eafd6f20e",
+      "39df37cd-5024-81ec-ba50-f47da87afed1",
+      "3a2f37cd-5024-81cb-8397-cc358ea2926d"
+    ],
+    "expected_chunks": [
+      "399f37cd-5024-81a8-b5e0-d58610001d37_0",
+      "3a0f37cd-5024-8108-9ee7-c26ced5475e4_0",
+      "39ff37cd-5024-81a9-b31c-f5d5c963200a_0",
+      "39ef37cd-5024-8179-9100-c40eafd6f20e_0",
+      "39df37cd-5024-81ec-ba50-f47da87afed1_0",
+      "3a2f37cd-5024-81cb-8397-cc358ea2926d_0"
+    ]
+  },
+  {
+    "id": "gap-metadata-hackathon",
+    "query": "notes about preparing for the intra team AI hackathon demo",
+    "category": "aspirational-metadata-text",
+    "expected_to_pass_with": "keyword/BM25 search over metadata text, or indexing property values into the searchable content",
+    "rationale": "The 'notes' property of this entry says 'Prepared for Intra team demo of AI Hackathon', but property text is not embedded, so vector search misses it. Verified: not retrieved today.",
+    "expected_documents": ["383f37cd-5024-8166-bb25-d5644c0605f8"],
+    "expected_chunks": ["383f37cd-5024-8166-bb25-d5644c0605f8_0"]
+  },
+  {
+    "id": "gap-metadata-story4",
+    "query": "when did I complete story 4 of the RAG project",
+    "category": "aspirational-metadata-text",
+    "expected_to_pass_with": "keyword/BM25 search over metadata text (personalWin='Complete Story 4') or LLMQueryAnalyzer",
+    "rationale": "The personalWin property is 'Complete Story 4', but it is metadata only and not embedded; content is title-only. Verified: not retrieved today.",
+    "expected_documents": ["39af37cd-5024-81d6-bbd4-d35da3fd460c"],
+    "expected_chunks": ["39af37cd-5024-81d6-bbd4-d35da3fd460c_0"]
+  }
+]

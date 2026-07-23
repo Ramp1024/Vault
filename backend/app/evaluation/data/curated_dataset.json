@@ -1,0 +1,142 @@
+[
+  {
+    "id": "paraphrase-local-privacy",
+    "query": "How does the project keep all data private and avoid using cloud AI services?",
+    "category": "semantic-paraphrase",
+    "rationale": "HLD 'Design Goals > Fully Local' (no cloud, privacy) and PRD 'Vision' (No external AI APIs, no cloud storage). Query uses none of the titles.",
+    "expected_documents": [
+      "38ef37cd-5024-8095-928d-d2f839d65184",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-8095-928d-d2f839d65184_2",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_3"
+    ]
+  },
+  {
+    "id": "paraphrase-why-fastapi",
+    "query": "Why was FastAPI chosen for the backend?",
+    "category": "semantic-paraphrase",
+    "rationale": "HLD 'Design Decisions > Why FastAPI' (Python-first AI ecosystem, REST). Title 'High Level Design' absent from query.",
+    "expected_documents": ["38ef37cd-5024-8095-928d-d2f839d65184"],
+    "expected_chunks": ["38ef37cd-5024-8095-928d-d2f839d65184_11"]
+  },
+  {
+    "id": "paraphrase-why-chromadb",
+    "query": "What made ChromaDB a good fit for the MVP vector store?",
+    "category": "semantic-paraphrase",
+    "rationale": "HLD 'Design Decisions > Why ChromaDB' (lightweight, easy setup, docker support).",
+    "expected_documents": ["38ef37cd-5024-8095-928d-d2f839d65184"],
+    "expected_chunks": ["38ef37cd-5024-8095-928d-d2f839d65184_11"]
+  },
+  {
+    "id": "keyword-materialized-read-model",
+    "query": "materialized read model to avoid complex joins",
+    "category": "keyword-body-term",
+    "rationale": "Conga doc 'KEY FINDINGS' and 'KEY TERMS' explicitly mention a materialized read model / denormalization. Term appears in body, not title.",
+    "expected_documents": ["382f37cd-5024-800a-b22e-eca13d16a73b"],
+    "expected_chunks": ["382f37cd-5024-800a-b22e-eca13d16a73b_0"]
+  },
+  {
+    "id": "keyword-refresh-on-parent-save",
+    "query": "refresh on parent save projection",
+    "category": "keyword-body-term",
+    "rationale": "Exact phrase in Conga doc describing how a lookup name update reflects in referenced objects.",
+    "expected_documents": ["382f37cd-5024-800a-b22e-eca13d16a73b"],
+    "expected_chunks": ["382f37cd-5024-800a-b22e-eca13d16a73b_1"]
+  },
+  {
+    "id": "keyword-tree-shaking",
+    "query": "removing unused exports from the bundle with tree shaking",
+    "category": "keyword-body-term",
+    "rationale": "Webpack doc 'Tree Shaking' section (removes unused exports, sideEffects flag). Body term, not title.",
+    "expected_documents": ["397f37cd-5024-80b7-afcf-cebda96e11a2"],
+    "expected_chunks": ["397f37cd-5024-80b7-afcf-cebda96e11a2_6"]
+  },
+  {
+    "id": "keyword-kahn-indegree",
+    "query": "Kahn's algorithm using an indegree array and a queue",
+    "category": "keyword-body-term",
+    "rationale": "Topological Sort doc describes Kahn's Algorithm with indegree array and queue. Terms in body, title is just 'Topological Sort'.",
+    "expected_documents": ["3a3f37cd-5024-8031-976f-e1d40ba64fc6"],
+    "expected_chunks": ["3a3f37cd-5024-8031-976f-e1d40ba64fc6_0"]
+  },
+  {
+    "id": "keyword-harness-decay",
+    "query": "harness decay and the build to delete philosophy",
+    "category": "keyword-body-term",
+    "rationale": "Harness Engineering doc 'BRUTAL TRUTH ABOUT HARNESSES' covers Harness Decay and the Build to Delete philosophy.",
+    "expected_documents": ["386f37cd-5024-807f-9b60-e666cc9d3a4d"],
+    "expected_chunks": ["386f37cd-5024-807f-9b60-e666cc9d3a4d_1"]
+  },
+  {
+    "id": "keyword-uv-pyproject",
+    "query": "using uv with pyproject.toml and a lockfile for isolated environments",
+    "category": "keyword-body-term",
+    "rationale": "Python Environments doc covers uv, pyproject.toml, uv.lock, venv isolation.",
+    "expected_documents": ["390f37cd-5024-80b1-9cb7-c9daf04d5537"],
+    "expected_chunks": ["390f37cd-5024-80b1-9cb7-c9daf04d5537_0"]
+  },
+  {
+    "id": "concept-directed-graph-cycles",
+    "query": "how do I detect a cycle in a directed graph?",
+    "category": "concept-multi-doc",
+    "rationale": "Both 'DFS Cycle Detection' (recursion stack / back edge) and 'Topological Sort' (Kahn's cycle detection) answer this. Recall across two docs.",
+    "expected_documents": [
+      "3a3f37cd-5024-80e1-bbbd-ee5d72b036a5",
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6"
+    ],
+    "expected_chunks": [
+      "3a3f37cd-5024-80e1-bbbd-ee5d72b036a5_0",
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6_0"
+    ]
+  },
+  {
+    "id": "concept-splitting-for-embedding",
+    "query": "different strategies for splitting documents into smaller pieces before embedding",
+    "category": "concept",
+    "rationale": "'Technical Details on Chunking and other strategies' lists fixed-size, semantic, recursive, adaptive, context-enriched, AI-driven chunking.",
+    "expected_documents": ["395f37cd-5024-801d-aeb6-d10e396ab5ac"],
+    "expected_chunks": ["395f37cd-5024-801d-aeb6-d10e396ab5ac_0"]
+  },
+  {
+    "id": "hybrid-ai-columnar",
+    "query": "standardised columnar in-memory data format shared across languages category: AI Engineering",
+    "category": "hybrid-rank-in-filter",
+    "rationale": "category:AI Engineering matches Harness, Python Environments, Apache Arrow; semantic part must rank Apache Arrow first.",
+    "expected_documents": ["390f37cd-5024-80d8-a0e9-e4a22bfae2f5"],
+    "expected_chunks": ["390f37cd-5024-80d8-a0e9-e4a22bfae2f5_0"]
+  },
+  {
+    "id": "hybrid-ai-venv",
+    "query": "creating isolated virtual environments to avoid dependency conflicts category: AI Engineering",
+    "category": "hybrid-rank-in-filter",
+    "rationale": "Same AI Engineering filter set; semantic part must rank Python Environments first.",
+    "expected_documents": ["390f37cd-5024-80b1-9cb7-c9daf04d5537"],
+    "expected_chunks": ["390f37cd-5024-80b1-9cb7-c9daf04d5537_0"]
+  },
+  {
+    "id": "hybrid-sysdesign-denorm",
+    "query": "avoiding complex joins using denormalization category: System Design",
+    "category": "hybrid-rank-in-filter",
+    "rationale": "category:System Design filter; Conga is the doc about denormalization/materialized reads.",
+    "expected_documents": ["382f37cd-5024-800a-b22e-eca13d16a73b"],
+    "expected_chunks": ["382f37cd-5024-800a-b22e-eca13d16a73b_0"]
+  },
+  {
+    "id": "robust-webpack-vite-a",
+    "query": "difference between webpack and vite",
+    "category": "robustness",
+    "rationale": "Webpack doc has a 'Webpack vs Vite' comparison table. Paired with robust-webpack-vite-b (same intent, different phrasing).",
+    "expected_documents": ["397f37cd-5024-80b7-afcf-cebda96e11a2"],
+    "expected_chunks": ["397f37cd-5024-80b7-afcf-cebda96e11a2_11"]
+  },
+  {
+    "id": "robust-webpack-vite-b",
+    "query": "when should I prefer vite over webpack for a new single page app?",
+    "category": "robustness",
+    "rationale": "Same target as robust-webpack-vite-a; 'Webpack vs Vite' table notes Vite best fit for new SPAs.",
+    "expected_documents": ["397f37cd-5024-80b7-afcf-cebda96e11a2"],
+    "expected_chunks": ["397f37cd-5024-80b7-afcf-cebda96e11a2_11"]
+  }
+]

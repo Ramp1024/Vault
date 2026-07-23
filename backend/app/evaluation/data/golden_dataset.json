@@ -1,0 +1,386 @@
+[
+  {
+    "id": "metadata-category-ai-engineering",
+    "query": "category: AI Engineering",
+    "category": "metadata",
+    "expected_documents": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d",
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537",
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5"
+    ],
+    "expected_chunks": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_0",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_1",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_2",
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537_0",
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5_0"
+    ]
+  },
+  {
+    "id": "metadata-category-front-end-system-design",
+    "query": "category: Front end System Design",
+    "category": "metadata",
+    "expected_documents": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2"
+    ],
+    "expected_chunks": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_0",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_1",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_2",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_3",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_4",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_5",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_6",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_7",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_8",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_9",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_10",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_11",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_12"
+    ]
+  },
+  {
+    "id": "metadata-category-system-design",
+    "query": "category: System Design",
+    "category": "metadata",
+    "expected_documents": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d"
+    ],
+    "expected_chunks": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_1",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_2",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d_0"
+    ]
+  },
+  {
+    "id": "metadata-leetcodetopic-backtracking",
+    "query": "leetcode topic: Backtracking",
+    "category": "metadata",
+    "expected_documents": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8",
+      "384f37cd-5024-816f-beb6-de894a757922"
+    ],
+    "expected_chunks": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8_0",
+      "384f37cd-5024-816f-beb6-de894a757922_0"
+    ]
+  },
+  {
+    "id": "keyword-low-level-design-lld",
+    "query": "Low Level Design (LLD)",
+    "category": "keyword",
+    "expected_documents": [
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_0",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_1",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_2",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_3",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_4",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_5",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_6",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_7",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_8",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_9",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_10",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_11",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_12",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_13",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_14",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_15",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_16",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_17",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_18"
+    ]
+  },
+  {
+    "id": "keyword-high-level-design",
+    "query": "High Level Design",
+    "category": "keyword",
+    "expected_documents": [
+      "38ef37cd-5024-8095-928d-d2f839d65184"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-8095-928d-d2f839d65184_0",
+      "38ef37cd-5024-8095-928d-d2f839d65184_1",
+      "38ef37cd-5024-8095-928d-d2f839d65184_2",
+      "38ef37cd-5024-8095-928d-d2f839d65184_3",
+      "38ef37cd-5024-8095-928d-d2f839d65184_4",
+      "38ef37cd-5024-8095-928d-d2f839d65184_5",
+      "38ef37cd-5024-8095-928d-d2f839d65184_6",
+      "38ef37cd-5024-8095-928d-d2f839d65184_7",
+      "38ef37cd-5024-8095-928d-d2f839d65184_8",
+      "38ef37cd-5024-8095-928d-d2f839d65184_9",
+      "38ef37cd-5024-8095-928d-d2f839d65184_10",
+      "38ef37cd-5024-8095-928d-d2f839d65184_11",
+      "38ef37cd-5024-8095-928d-d2f839d65184_12",
+      "38ef37cd-5024-8095-928d-d2f839d65184_13",
+      "38ef37cd-5024-8095-928d-d2f839d65184_14"
+    ]
+  },
+  {
+    "id": "keyword-webpack",
+    "query": "Webpack",
+    "category": "keyword",
+    "expected_documents": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2"
+    ],
+    "expected_chunks": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_0",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_1",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_2",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_3",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_4",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_5",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_6",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_7",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_8",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_9",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_10",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_11",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_12"
+    ]
+  },
+  {
+    "id": "keyword-product-requirements-document-prd",
+    "query": "Product Requirements Document (PRD)",
+    "category": "keyword",
+    "expected_documents": [
+      "38ef37cd-5024-8007-a4c0-d45385700bd4"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_0",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_1",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_2",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_3",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_4",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_5",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_6",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_7",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_8",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_9",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_10"
+    ]
+  },
+  {
+    "id": "keyword-conga-platform-schema-architecture",
+    "query": "Conga Platform Schema Architecture",
+    "category": "keyword",
+    "expected_documents": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b"
+    ],
+    "expected_chunks": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_1",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_2"
+    ]
+  },
+  {
+    "id": "keyword-harness-engineering",
+    "query": "Harness Engineering",
+    "category": "keyword",
+    "expected_documents": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d"
+    ],
+    "expected_chunks": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_0",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_1",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_2"
+    ]
+  },
+  {
+    "id": "semantic-low-level-design-lld",
+    "query": "What do my notes say about Low Level Design (LLD)?",
+    "category": "semantic",
+    "expected_documents": [
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_0",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_1",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_2",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_3",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_4",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_5",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_6",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_7",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_8",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_9",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_10",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_11",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_12",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_13",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_14",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_15",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_16",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_17",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_18"
+    ]
+  },
+  {
+    "id": "semantic-high-level-design",
+    "query": "What do my notes say about High Level Design?",
+    "category": "semantic",
+    "expected_documents": [
+      "38ef37cd-5024-8095-928d-d2f839d65184"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-8095-928d-d2f839d65184_0",
+      "38ef37cd-5024-8095-928d-d2f839d65184_1",
+      "38ef37cd-5024-8095-928d-d2f839d65184_2",
+      "38ef37cd-5024-8095-928d-d2f839d65184_3",
+      "38ef37cd-5024-8095-928d-d2f839d65184_4",
+      "38ef37cd-5024-8095-928d-d2f839d65184_5",
+      "38ef37cd-5024-8095-928d-d2f839d65184_6",
+      "38ef37cd-5024-8095-928d-d2f839d65184_7",
+      "38ef37cd-5024-8095-928d-d2f839d65184_8",
+      "38ef37cd-5024-8095-928d-d2f839d65184_9",
+      "38ef37cd-5024-8095-928d-d2f839d65184_10",
+      "38ef37cd-5024-8095-928d-d2f839d65184_11",
+      "38ef37cd-5024-8095-928d-d2f839d65184_12",
+      "38ef37cd-5024-8095-928d-d2f839d65184_13",
+      "38ef37cd-5024-8095-928d-d2f839d65184_14"
+    ]
+  },
+  {
+    "id": "semantic-webpack",
+    "query": "What do my notes say about Webpack?",
+    "category": "semantic",
+    "expected_documents": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2"
+    ],
+    "expected_chunks": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_0",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_1",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_2",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_3",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_4",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_5",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_6",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_7",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_8",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_9",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_10",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_11",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_12"
+    ]
+  },
+  {
+    "id": "semantic-product-requirements-document-prd",
+    "query": "What do my notes say about Product Requirements Document (PRD)?",
+    "category": "semantic",
+    "expected_documents": [
+      "38ef37cd-5024-8007-a4c0-d45385700bd4"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_0",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_1",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_2",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_3",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_4",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_5",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_6",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_7",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_8",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_9",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_10"
+    ]
+  },
+  {
+    "id": "semantic-conga-platform-schema-architecture",
+    "query": "What do my notes say about Conga Platform Schema Architecture?",
+    "category": "semantic",
+    "expected_documents": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b"
+    ],
+    "expected_chunks": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_1",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_2"
+    ]
+  },
+  {
+    "id": "semantic-harness-engineering",
+    "query": "What do my notes say about Harness Engineering?",
+    "category": "semantic",
+    "expected_documents": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d"
+    ],
+    "expected_chunks": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_0",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_1",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_2"
+    ]
+  },
+  {
+    "id": "hybrid-category-ai-engineering",
+    "query": "what did I work on category: AI Engineering",
+    "category": "hybrid",
+    "expected_documents": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d",
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537",
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5"
+    ],
+    "expected_chunks": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_0",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_1",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_2",
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537_0",
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5_0"
+    ]
+  },
+  {
+    "id": "hybrid-category-front-end-system-design",
+    "query": "what did I work on category: Front end System Design",
+    "category": "hybrid",
+    "expected_documents": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2"
+    ],
+    "expected_chunks": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_0",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_1",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_2",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_3",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_4",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_5",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_6",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_7",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_8",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_9",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_10",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_11",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_12"
+    ]
+  },
+  {
+    "id": "hybrid-category-system-design",
+    "query": "what did I work on category: System Design",
+    "category": "hybrid",
+    "expected_documents": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d"
+    ],
+    "expected_chunks": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_1",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_2",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d_0"
+    ]
+  },
+  {
+    "id": "hybrid-leetcodetopic-backtracking",
+    "query": "what did I work on leetcode topic: Backtracking",
+    "category": "hybrid",
+    "expected_documents": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8",
+      "384f37cd-5024-816f-beb6-de894a757922"
+    ],
+    "expected_chunks": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8_0",
+      "384f37cd-5024-816f-beb6-de894a757922_0"
+    ]
+  }
+]
