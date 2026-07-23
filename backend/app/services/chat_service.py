@@ -5,6 +5,10 @@ from typing import Iterator
 
 from app.models.rag_response import RAGResponse
 from app.models.search_result import SearchResult
+from app.processors.metadata_registry import (
+    MetadataRegistry,
+    default_metadata_registry,
+)
 from app.processors.prompt_builder import PromptBuilder
 from app.processors.query_analyzer import QueryAnalyzer, RuleBasedQueryAnalyzer
 from app.services.embedding_service import EmbeddingService
@@ -40,12 +44,29 @@ class ChatService:
         self.prompt_builder = prompt_builder or PromptBuilder()
         self.generation_service = generation_service or GenerationService()
         self.query_analyzer = query_analyzer or RuleBasedQueryAnalyzer(
-            default_top_k=self.RETRIEVAL_LIMIT
+            registry=self._build_registry(),
+            default_top_k=self.RETRIEVAL_LIMIT,
         )
         self.retriever = retriever or Retriever(
             embedding_service=self.embedding_service,
             qdrant_service=self.qdrant_service,
         )
+
+    def _build_registry(self) -> MetadataRegistry:
+        """Derive the metadata registry from indexed property names.
+
+        Falls back to the connector default when nothing can be discovered
+        (e.g. an empty or unreachable collection), so recognized filter fields
+        track what is actually indexed instead of a hardcoded list.
+        """
+        try:
+            fields, multi_fields = self.qdrant_service.discover_property_fields()
+        except Exception:
+            fields, multi_fields = [], set()
+
+        if not fields:
+            return default_metadata_registry()
+        return MetadataRegistry.from_indexed_fields(fields, multi_fields)
 
     def retrieve_sources(self, query: str) -> list[SearchResult]:
         request = self.query_analyzer.analyze(query)

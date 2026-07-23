@@ -132,6 +132,47 @@ class QdrantService:
 
         return self._chunk_from_payload(dict(points[0].payload or {})).metadata
 
+    def discover_property_fields(
+        self, sample_limit: int = 256
+    ) -> tuple[list[str], set[str]]:
+        """Discover distinct metadata property field names from indexed chunks.
+
+        Scans a sample of stored points and collects the keys present under each
+        payload's ``properties`` map. This lets the query analyzer derive its
+        recognized fields from what is actually indexed instead of a hardcoded
+        list, so new connector properties become filterable without code changes.
+
+        Returns:
+            A tuple of ``(field_names, multi_valued_fields)`` where the field
+            names are canonical payload keys and ``multi_valued_fields`` is the
+            subset observed to hold list values.
+        """
+        if not self.collection_exists():
+            return [], set()
+
+        try:
+            points, _ = self.client.scroll(
+                collection_name=settings.QDRANT_COLLECTION_NAME,
+                limit=sample_limit,
+                with_payload=True,
+                with_vectors=False,
+            )
+        except Exception:
+            return [], set()
+
+        fields: set[str] = set()
+        multi_fields: set[str] = set()
+        for point in points:
+            properties = (point.payload or {}).get("properties")
+            if not isinstance(properties, dict):
+                continue
+            for name, value in properties.items():
+                fields.add(name)
+                if isinstance(value, list):
+                    multi_fields.add(name)
+
+        return sorted(fields), multi_fields
+
     def delete_document(self, document_id: str) -> None:
         """Delete every vector associated with a document."""
         if not self.collection_exists():

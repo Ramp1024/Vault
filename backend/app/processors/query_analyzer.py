@@ -27,6 +27,25 @@ class QueryAnalyzer(ABC):
 _SEPARATOR = r"\s*(?::|=|\bis\b)\s*"
 _VALUE_STRIP_CHARS = ".,;:!?"
 
+# A date-like token: three numeric groups separated by - or /. Either the first
+# group (YYYY-MM-DD) or the last group (DD-MM-YYYY) may be the 4-digit year.
+_DATE_TOKEN = re.compile(r"\b\d{1,4}[-/]\d{1,2}[-/]\d{1,4}\b")
+_ISO_DATE = re.compile(r"^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$")
+_DMY_DATE = re.compile(r"^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$")
+
+
+def _normalize_date(token: str) -> str | None:
+    """Normalize a date token to ISO ``YYYY-MM-DD``; return None if unrecognized."""
+    iso = _ISO_DATE.match(token)
+    if iso:
+        year, month, day = iso.groups()
+    else:
+        dmy = _DMY_DATE.match(token)
+        if not dmy:
+            return None
+        day, month, year = dmy.groups()
+    return f"{int(year):04d}-{int(month):02d}-{int(day):02d}"
+
 
 def _alias_regex(surface: str) -> str:
     """Build a whitespace-flexible regex fragment for a (possibly multi-word) surface."""
@@ -97,10 +116,25 @@ class RuleBasedQueryAnalyzer(QueryAnalyzer):
                 if index + 1 < len(heads)
                 else len(query)
             )
-            raw_value = query[value_start:value_end].strip()
-            value = _dequote(raw_value).strip(_VALUE_STRIP_CHARS).strip()
+            span = query[value_start:value_end]
 
             canonical = self.registry.resolve(head.group("field"))
+            value = ""
+
+            if canonical and self.registry.kind_of(canonical) == "date":
+                # Only capture a date-shaped token; leave any trailing prose
+                # (e.g. "on the leetcode topic") as semantic text instead of
+                # swallowing it into the value.
+                match = _DATE_TOKEN.search(span)
+                if match:
+                    value = _normalize_date(match.group()) or ""
+                    remainder = (span[: match.start()] + " " + span[match.end() :]).strip()
+                    if remainder:
+                        semantic_parts.append(f" {remainder} ")
+            else:
+                raw_value = span.strip()
+                value = _dequote(raw_value).strip(_VALUE_STRIP_CHARS).strip()
+
             if canonical and value:
                 operator = (
                     Operator.CONTAINS

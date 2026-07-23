@@ -84,6 +84,28 @@ def verify_registry() -> None:
     print("  [R] registry resolves aliases and multi flags")
 
 
+def verify_registry_from_indexed_fields() -> None:
+    # Canonical camelCase payload keys, de-camelCased into surfaces internally.
+    registry = MetadataRegistry.from_indexed_fields(
+        ["aiProgress", "leetcodeTopic", "date", "notes"], multi_fields=[]
+    )
+    # Canonical names stay aligned with the indexed payload keys.
+    assert registry.resolve("ai progress") == "aiProgress"
+    assert registry.resolve("aiProgress") == "aiProgress"
+    assert registry.resolve("leetcode topic") == "leetcodeTopic"
+    assert registry.resolve("notes") == "notes"
+    # A field name containing "date" is auto-typed as a date field.
+    assert registry.kind_of("date") == "date"
+    assert registry.kind_of("notes") == "text"
+
+    analyzer = RuleBasedQueryAnalyzer(registry=registry)
+    request = analyzer.analyze("what about ai progress: linear algebra")
+    assert request.filters == [
+        Filter(field="aiProgress", operator=Operator.EQUALS, value="linear algebra")
+    ]
+    print("  [D] registry derived from indexed field names recognizes new fields")
+
+
 # ---------------------------------------------------------------------------
 # QueryAnalyzer
 # ---------------------------------------------------------------------------
@@ -155,6 +177,27 @@ def verify_analyzer_semantic_only() -> None:
     assert request.semantic_query == "docker compose networking"
     assert request.filters == []
     print("  [7] semantic only + empty filters")
+
+
+def verify_analyzer_date_typed_extraction() -> None:
+    analyzer = RuleBasedQueryAnalyzer()
+
+    # DD-MM-YYYY is normalized to ISO.
+    request = analyzer.analyze("what did I do on date: 21-07-2026")
+    assert request.filters == [
+        Filter(field="date", operator=Operator.EQUALS, value="2026-07-21")
+    ]
+
+    # Only the date token is captured; trailing prose stays semantic.
+    request = analyzer.analyze(
+        "what have i written about date: 2026-07-21 on the leetcode topic"
+    )
+    assert request.filters == [
+        Filter(field="date", operator=Operator.EQUALS, value="2026-07-21")
+    ]
+    assert "2026-07-21" not in request.semantic_query
+    assert "leetcode topic" in request.semantic_query
+    print("  [8] date field extracts/normalizes token, leaves prose semantic")
 
 
 # ---------------------------------------------------------------------------
@@ -351,6 +394,7 @@ def verify_metadata_retrieval() -> None:
     print("\nUtil + Registry:")
     verify_camel_case()
     verify_registry()
+    verify_registry_from_indexed_fields()
 
     print("\nQueryAnalyzer:")
     verify_analyzer_pure_semantic()
@@ -360,6 +404,7 @@ def verify_metadata_retrieval() -> None:
     verify_analyzer_unknown_field()
     verify_analyzer_filters_only()
     verify_analyzer_semantic_only()
+    verify_analyzer_date_typed_extraction()
 
     print("\nNotionParser:")
     verify_parser_emits_camelcase_properties()
