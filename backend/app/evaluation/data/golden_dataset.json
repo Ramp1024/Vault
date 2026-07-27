@@ -382,5 +382,87 @@
       "383f37cd-5024-8166-bb25-d5644c0605f8_0",
       "384f37cd-5024-816f-beb6-de894a757922_0"
     ]
+  },
+  {
+    "id": "lexical-indegree",
+    "query": "indegree",
+    "category": "lexical",
+    "expected_documents": [
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6"
+    ],
+    "expected_chunks": [
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6_0"
+    ]
+  },
+  {
+    "id": "lexical-autonumber",
+    "query": "autonumber",
+    "category": "lexical",
+    "expected_documents": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b"
+    ],
+    "expected_chunks": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_1",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_2"
+    ]
+  },
+  {
+    "id": "lexical-brouillon",
+    "query": "brouillon",
+    "category": "lexical",
+    "expected_documents": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b"
+    ],
+    "expected_chunks": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_1",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_2"
+    ]
+  },
+  {
+    "id": "lexical-conda",
+    "query": "conda",
+    "category": "lexical",
+    "expected_documents": [
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537_0"
+    ]
+  },
+  {
+    "id": "lexical-grep",
+    "query": "grep",
+    "category": "lexical",
+    "expected_documents": [
+      "395f37cd-5024-805f-97e5-fc3bee2607ec"
+    ],
+    "expected_chunks": [
+      "395f37cd-5024-805f-97e5-fc3bee2607ec_0"
+    ]
+  },
+  {
+    "id": "lexical-rotten-oranges",
+    "query": "rotten oranges",
+    "category": "lexical",
+    "expected_documents": [
+      "396f37cd-5024-802f-b610-f4e8d9c91a31"
+    ],
+    "expected_chunks": [
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_0"
+    ]
+  },
+  {
+    "id": "lexical-hallucinated",
+    "query": "hallucinated",
+    "category": "lexical",
+    "expected_documents": [
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7_0",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7_1"
+    ]
   }
 ]

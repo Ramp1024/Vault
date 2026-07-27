@@ -115,6 +115,32 @@ class QdrantService:
         )
         return bool(points)
 
+    def fetch_all_chunks(self, batch_size: int = 256) -> list[Chunk]:
+        """Return every indexed chunk, reconstructed as domain ``Chunk`` objects.
+
+        Scrolls the whole collection so lexical (BM25) indexing can reuse the
+        exact chunks already stored for vector search, without a separate
+        document model. Returns an empty list when the collection does not exist.
+        """
+        if not self.collection_exists():
+            return []
+
+        chunks: list[Chunk] = []
+        offset: Any = None
+        while True:
+            points, offset = self.client.scroll(
+                collection_name=settings.QDRANT_COLLECTION_NAME,
+                limit=batch_size,
+                offset=offset,
+                with_payload=True,
+                with_vectors=False,
+            )
+            for point in points:
+                chunks.append(self._chunk_from_payload(dict(point.payload or {})))
+            if offset is None:
+                break
+        return chunks
+
     def get_document_metadata(self, document_id: str) -> dict[str, Any] | None:
         """Return metadata from one indexed chunk for a document."""
         if not self.collection_exists():

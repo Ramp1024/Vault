@@ -5,6 +5,7 @@ from time import perf_counter
 from app.connectors.base import DocumentConnector
 from app.models.sync_result import SyncResult
 from app.processors.chunker import Chunker
+from app.services.bm25_indexer import BM25Indexer
 from app.services.embedding_service import EmbeddingService
 from app.services.qdrant_service import QdrantService
 
@@ -23,6 +24,7 @@ class SyncService:
         qdrant_service: QdrantService,
         sync_logger: logging.Logger | None = None,
         clock: Callable[[], float] = perf_counter,
+        bm25_indexer: BM25Indexer | None = None,
     ) -> None:
         self.connector = connector
         self.chunker = chunker
@@ -30,6 +32,7 @@ class SyncService:
         self.qdrant_service = qdrant_service
         self.logger = sync_logger if sync_logger is not None else logger
         self.clock = clock
+        self.bm25_indexer = bm25_indexer
 
     def sync(self) -> SyncResult:
         started_at = self.clock()
@@ -74,6 +77,12 @@ class SyncService:
 
         vectors_upserted = self.qdrant_service.upsert_batch(embedded_chunks)
         self.logger.info("Upserted %d vectors", vectors_upserted)
+
+        if self.bm25_indexer is not None:
+            # Rebuild the lexical index from the full vector store so it always
+            # references the same logical chunks as the vector index.
+            bm25_indexed = self.bm25_indexer.rebuild()
+            self.logger.info("Rebuilt BM25 index over %d chunks", bm25_indexed)
 
         duration = self.clock() - started_at
         result = SyncResult(

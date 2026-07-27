@@ -21,6 +21,9 @@ htmlcov/
 venv/
 env/
 
+# BM25 lexical index artifact (rebuilt from Qdrant chunks)
+backend/config/bm25_index.pkl
+
 # Node
 node_modules/
 dist/

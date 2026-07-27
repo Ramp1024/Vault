@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -19,11 +20,21 @@ class SupportsSearch:
 
 
 @dataclass(frozen=True)
+class CategoryMetrics:
+    """Aggregate metrics for a single query category (plus its case count)."""
+
+    category: str
+    count: int
+    metrics: dict[str, float]
+
+
+@dataclass(frozen=True)
 class EvaluationReport:
     """The result of an evaluation run: per-query outcomes plus aggregate metrics."""
 
     evaluations: tuple[QueryEvaluation, ...]
     metrics: dict[str, float]
+    category_metrics: tuple[CategoryMetrics, ...] = ()
 
 
 class RetrievalEvaluator:
@@ -48,7 +59,28 @@ class RetrievalEvaluator:
         metric_scores = {
             metric.name: metric.compute(evaluations) for metric in self.metrics
         }
-        return EvaluationReport(evaluations=evaluations, metrics=metric_scores)
+        return EvaluationReport(
+            evaluations=evaluations,
+            metrics=metric_scores,
+            category_metrics=self._category_metrics(evaluations),
+        )
+
+    def _category_metrics(
+        self, evaluations: Sequence[QueryEvaluation]
+    ) -> tuple[CategoryMetrics, ...]:
+        """Compute the same metric suite independently for each query category."""
+        grouped: dict[str, list[QueryEvaluation]] = defaultdict(list)
+        for evaluation in evaluations:
+            grouped[evaluation.case.category or "uncategorized"].append(evaluation)
+
+        return tuple(
+            CategoryMetrics(
+                category=category,
+                count=len(group),
+                metrics={metric.name: metric.compute(group) for metric in self.metrics},
+            )
+            for category, group in sorted(grouped.items())
+        )
 
     def _evaluate_case(self, case) -> QueryEvaluation:
         results = self._search_engine.search(case.query)

@@ -31,3 +31,27 @@
     -> vault init - setups the app
     -> vault sync - indexes notion
     -> vault chat - starts API and UI
+
+Next phases
+
+✅ Modular Search Engine
+
+✅ Evaluation Dataset
+
+⬜ BM25 Search
+
+⬜ Hybrid Retrieval
+
+⬜ Reciprocal Rank Fusion
+
+⬜ LLM Query Analysis
+
+⬜ Cross-Encoder Reranker
+
+⬜ Answer Generation
+
+⬜ Source Citations
+
+⬜ Multi-Source Connectors
+
+⬜ Production Features

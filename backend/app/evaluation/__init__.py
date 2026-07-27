@@ -16,8 +16,13 @@ from app.evaluation.metrics import (
     RetrievalMetric,
     default_metrics,
 )
-from app.evaluation.report import format_report
-from app.evaluation.runner import EvaluationReport, RetrievalEvaluator
+from app.evaluation.report import (
+    format_category_comparison,
+    format_overall_comparison,
+    format_query_diagnostics,
+    format_report,
+)
+from app.evaluation.runner import CategoryMetrics, EvaluationReport, RetrievalEvaluator
 
 __all__ = [
     "EvaluationCase",
@@ -28,6 +33,10 @@ __all__ = [
     "MeanReciprocalRank",
     "default_metrics",
     "RetrievalEvaluator",
+    "CategoryMetrics",
     "EvaluationReport",
     "format_report",
+    "format_category_comparison",
+    "format_overall_comparison",
+    "format_query_diagnostics",
 ]

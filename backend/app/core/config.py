@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     QDRANT_UPSERT_BATCH_SIZE: int = int(
         os.environ.get("QDRANT_UPSERT_BATCH_SIZE", "100")
     )
+    BM25_INDEX_PATH: str = os.environ.get(
+        "BM25_INDEX_PATH",
+        str(Path(__file__).resolve().parents[2] / "config" / "bm25_index.pkl"),
+    )
 
     class Config:
         env_file = str(Path(__file__).resolve().parents[2] / ".env")

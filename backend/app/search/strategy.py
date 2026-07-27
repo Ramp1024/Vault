@@ -4,7 +4,10 @@ from abc import ABC, abstractmethod
 
 from app.models.search_request import SearchRequest
 from app.models.search_result import SearchResult
+from app.services.bm25_index import BM25Index, RankBM25Index
+from app.services.bm25_query_builder import BM25QueryBuilder
 from app.services.embedding_service import EmbeddingService
+from app.services.metadata_filter_matcher import MetadataFilterMatcher
 from app.services.qdrant import get_qdrant_client
 from app.services.qdrant_filter_builder import QdrantFilterBuilder
 from app.services.qdrant_service import QdrantService
@@ -57,3 +60,53 @@ class VectorSearchStrategy(SearchStrategy):
             limit=request.top_k,
             query_filter=query_filter,
         )
+
+
+class BM25SearchStrategy(SearchStrategy):
+    """Lexical (BM25) retrieval over the persisted BM25 index.
+
+    Owns everything specific to BM25: translating the request into a term query
+    (via ``BM25QueryBuilder``), executing the lexical search against the injected
+    ``BM25Index`` abstraction, and applying metadata filters after retrieval
+    (BM25 has no native filtering) so behavior matches vector retrieval. All BM25
+    knowledge lives here and in its collaborators, keeping ``SearchEngine``
+    unaware of BM25.
+
+    The persisted index is loaded lazily on first use so the process does not
+    rebuild it on startup; an already-built index can also be injected directly.
+    """
+
+    def __init__(
+        self,
+        index: BM25Index | None = None,
+        query_builder: BM25QueryBuilder | None = None,
+        filter_matcher: MetadataFilterMatcher | None = None,
+    ) -> None:
+        self.index = index or RankBM25Index()
+        self.query_builder = query_builder or BM25QueryBuilder()
+        self.filter_matcher = filter_matcher or MetadataFilterMatcher()
+
+    def search(self, request: SearchRequest) -> list[SearchResult]:
+        self._ensure_index_ready()
+
+        query_tokens = self.query_builder.build(request)
+        if not query_tokens:
+            return []
+
+        # Retrieve the full ranked candidate set so post-retrieval metadata
+        # filtering cannot discard results that belong in the final top_k.
+        candidates = self.index.search(query_tokens, limit=None)
+
+        if request.filters:
+            candidates = [
+                result
+                for result in candidates
+                if self.filter_matcher.matches(result.chunk, request.filters)
+            ]
+
+        return candidates[: request.top_k]
+
+    def _ensure_index_ready(self) -> None:
+        """Load the persisted index on first use unless one is already in memory."""
+        if self.index.size == 0 and self.index.exists():
+            self.index.load()
