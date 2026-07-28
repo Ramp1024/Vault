@@ -8,9 +8,10 @@ already stored in Qdrant so every mode sees the same logical chunks.
 
 Reports overall metrics per mode, a per-category breakdown, and Hybrid-vs-single
 deltas. Pass ``--diagnostics`` to also print a per-query, per-mode markdown
-report for manual inspection.
+report for manual inspection. Pass ``--markdown`` to render the comparison
+tables as GitHub-flavored markdown.
 
-Run:  python -m app.evaluation.run_comparison [dataset.json] [--diagnostics]
+Run:  python -m app.evaluation.run_comparison [dataset.json] [--diagnostics] [--markdown]
 """
 
 from __future__ import annotations
@@ -57,7 +58,10 @@ def _build_analyzer(qdrant: QdrantService) -> RuleBasedQueryAnalyzer:
 
 
 def main(
-    dataset_path: Path = DEFAULT_DATASET_PATH, *, diagnostics: bool = False
+    dataset_path: Path = DEFAULT_DATASET_PATH,
+    *,
+    diagnostics: bool = False,
+    markdown: bool = False,
 ) -> None:
     dataset = EvaluationDataset.from_file(dataset_path)
 
@@ -102,10 +106,10 @@ def main(
     print(f"Queries: {len(dataset)}\n")
 
     print("Overall metrics and Hybrid deltas:")
-    print(format_overall_comparison(reports, target="Hybrid"))
+    print(format_overall_comparison(reports, target="Hybrid", markdown=markdown))
     print()
     print("Per-category breakdown:")
-    print(format_category_comparison(reports))
+    print(format_category_comparison(reports, markdown=markdown))
     print("=" * 90)
 
     if diagnostics:
@@ -116,6 +120,7 @@ def main(
 if __name__ == "__main__":
     args = sys.argv[1:]
     want_diagnostics = "--diagnostics" in args
+    want_markdown = "--markdown" in args
     positional = [arg for arg in args if not arg.startswith("--")]
     path = Path(positional[0]) if positional else DEFAULT_DATASET_PATH
-    main(path, diagnostics=want_diagnostics)
+    main(path, diagnostics=want_diagnostics, markdown=want_markdown)

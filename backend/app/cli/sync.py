@@ -2,6 +2,7 @@ import logging
 
 from app.connectors.notion.connector import NotionConnector
 from app.processors.chunker import Chunker
+from app.services.bm25_indexer import BM25Indexer
 from app.services.embedding_service import EmbeddingService
 from app.services.qdrant import get_qdrant_client
 from app.services.qdrant_service import QdrantService
@@ -15,11 +16,15 @@ def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     try:
+        qdrant_service = QdrantService(client=get_qdrant_client())
         sync_service = SyncService(
             connector=NotionConnector(),
             chunker=Chunker(),
             embedding_service=EmbeddingService(),
-            qdrant_service=QdrantService(client=get_qdrant_client()),
+            qdrant_service=qdrant_service,
+            # Rebuild the lexical index after each sync so hybrid retrieval stays
+            # in step with the vector store instead of going stale.
+            bm25_indexer=BM25Indexer(qdrant_service=qdrant_service),
         )
         sync_service.sync()
     except KeyboardInterrupt:

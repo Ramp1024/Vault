@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterator
 
+from app.core.config import settings
 from app.models.rag_response import RAGResponse
 from app.models.search_result import SearchResult
 from app.processors.metadata_registry import (
@@ -11,7 +12,13 @@ from app.processors.metadata_registry import (
 )
 from app.processors.prompt_builder import PromptBuilder
 from app.processors.query_analyzer import QueryAnalyzer, RuleBasedQueryAnalyzer
-from app.search import SearchEngine, VectorSearchStrategy
+from app.search import (
+    BM25SearchStrategy,
+    RetrievalMode,
+    SearchEngine,
+    VectorSearchStrategy,
+    build_search_engine,
+)
 from app.services.embedding_service import EmbeddingService
 from app.services.generation_service import GenerationService
 from app.services.qdrant import get_qdrant_client
@@ -47,15 +54,21 @@ class ChatService:
             registry=self._build_registry(),
             default_top_k=self.RETRIEVAL_LIMIT,
         )
-        self.search_engine = search_engine or SearchEngine(
-            query_analyzer=self.query_analyzer,
-            strategies=[
-                VectorSearchStrategy(
-                    embedding_service=self.embedding_service,
-                    qdrant_service=self.qdrant_service,
-                )
-            ],
+        self.search_engine = search_engine or build_search_engine(
+            self._retrieval_mode(),
+            self.query_analyzer,
+            vector_strategy=VectorSearchStrategy(
+                embedding_service=self.embedding_service,
+                qdrant_service=self.qdrant_service,
+            ),
+            bm25_strategy=BM25SearchStrategy(),
+            rrf_k=settings.RRF_K,
         )
+
+    @staticmethod
+    def _retrieval_mode() -> RetrievalMode:
+        """Resolve the configured retrieval mode (defaults to hybrid)."""
+        return RetrievalMode(settings.RETRIEVAL_MODE.strip().lower())
 
     def _build_registry(self) -> MetadataRegistry:
         """Derive the metadata registry from indexed property names.
@@ -74,7 +87,10 @@ class ChatService:
         return MetadataRegistry.from_indexed_fields(fields, multi_fields)
 
     def retrieve_sources(self, query: str) -> list[SearchResult]:
-        return self.search_engine.search(query)
+        # Hybrid fusion can surface more than RETRIEVAL_LIMIT chunks (each
+        # strategy contributes candidates); cap to the configured limit so the
+        # prompt receives a consistent number of sources regardless of mode.
+        return self.search_engine.search(query)[: self.RETRIEVAL_LIMIT]
 
     def build_prompt(self, query: str, sources: list[SearchResult]) -> str:
         return self.prompt_builder.build(query=query, results=sources)

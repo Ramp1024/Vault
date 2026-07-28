@@ -4,10 +4,19 @@ import { ChatWindow } from '../../components/ChatWindow/ChatWindow'
 
 export type ChatRole = 'user' | 'assistant'
 
+export type ChatSource = {
+    chunk_id: string
+    document_id: string
+    title: string
+    score: number
+    snippet: string
+}
+
 export type ChatMessage = {
     id: string
     role: ChatRole
     content: string
+    sources?: ChatSource[]
 }
 
 const createMessage = (role: ChatRole, content: string): ChatMessage => ({
@@ -58,6 +67,63 @@ export function ChatPage() {
                 // TextDecoder - Built in class for converting a stream of bytes into a string
                 const decoder = new TextDecoder()
 
+                // The stream begins with a single JSON header line describing the
+                // retrieved sources, followed by '\n', then the answer text.
+                let headerParsed = false
+                let headerBuffer = ''
+
+                const applyContent = (text: string) => {
+                    if (!text) {
+                        return
+                    }
+                    setMessages((current) =>
+                        current.map((entry) =>
+                            entry.id === assistantMessage.id
+                                ? { ...entry, content: entry.content + text }
+                                : entry,
+                        ),
+                    )
+                }
+
+                const applySources = (sources: ChatSource[]) => {
+                    setMessages((current) =>
+                        current.map((entry) =>
+                            entry.id === assistantMessage.id ? { ...entry, sources } : entry,
+                        ),
+                    )
+                }
+
+                const handlePiece = (piece: string) => {
+                    if (!piece) {
+                        return
+                    }
+                    if (headerParsed) {
+                        applyContent(piece)
+                        return
+                    }
+
+                    headerBuffer += piece
+                    const newlineIndex = headerBuffer.indexOf('\n')
+                    if (newlineIndex === -1) {
+                        return
+                    }
+
+                    const headerText = headerBuffer.slice(0, newlineIndex)
+                    const rest = headerBuffer.slice(newlineIndex + 1)
+                    headerParsed = true
+
+                    try {
+                        const parsed = JSON.parse(headerText) as { sources?: ChatSource[] }
+                        if (parsed.sources) {
+                            applySources(parsed.sources)
+                        }
+                    } catch {
+                        // If the header can't be parsed, keep the text so nothing is lost.
+                        applyContent(headerText)
+                    }
+                    applyContent(rest)
+                }
+
                 try {
                     while (true) {
                         const { value, done } = await reader.read()
@@ -65,29 +131,14 @@ export function ChatPage() {
                             break
                         }
 
-                        const chunk = decoder.decode(value, { stream: true })
-                        if (!chunk) {
-                            continue
-                        }
-
-                        setMessages((current) =>
-                            current.map((entry) =>
-                                entry.id === assistantMessage.id
-                                    ? { ...entry, content: entry.content + chunk }
-                                    : entry,
-                            ),
-                        )
+                        handlePiece(decoder.decode(value, { stream: true }))
                     }
 
-                    const finalChunk = decoder.decode()
-                    if (finalChunk) {
-                        setMessages((current) =>
-                            current.map((entry) =>
-                                entry.id === assistantMessage.id
-                                    ? { ...entry, content: entry.content + finalChunk }
-                                    : entry,
-                            ),
-                        )
+                    handlePiece(decoder.decode())
+
+                    // Guard: if no header newline ever arrived, don't lose the text.
+                    if (!headerParsed && headerBuffer) {
+                        applyContent(headerBuffer)
                     }
                 } finally {
                     reader.releaseLock()

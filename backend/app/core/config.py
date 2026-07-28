@@ -27,6 +27,11 @@ class Settings(BaseSettings):
         "BM25_INDEX_PATH",
         str(Path(__file__).resolve().parents[2] / "config" / "bm25_index.pkl"),
     )
+    # Retrieval pipeline configuration. RETRIEVAL_MODE selects which strategies
+    # the chat pipeline runs: "vector", "bm25", or "hybrid" (Vector + BM25 fused
+    # with Reciprocal Rank Fusion). RRF_K is the RRF rank-damping constant.
+    RETRIEVAL_MODE: str = os.environ.get("RETRIEVAL_MODE", "hybrid")
+    RRF_K: int = int(os.environ.get("RRF_K", "60"))
 
     class Config:
         env_file = str(Path(__file__).resolve().parents[2] / ".env")

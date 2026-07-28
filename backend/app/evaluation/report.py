@@ -31,14 +31,39 @@ def _fmt_table(headers: list[str], rows: list[list[str]]) -> str:
     return "\n".join([render(headers), divider, *[render(r) for r in rows]])
 
 
-def format_category_comparison(reports: Mapping[str, EvaluationReport]) -> str:
+def _fmt_markdown_table(headers: list[str], rows: list[list[str]]) -> str:
+    """Render a GitHub-flavored markdown table (first column left, rest right)."""
+
+    def render(cells: list[str]) -> str:
+        return "| " + " | ".join(cells) + " |"
+
+    alignment = [":---" if i == 0 else "---:" for i in range(len(headers))]
+    return "\n".join(
+        [render(headers), render(alignment), *[render(r) for r in rows]]
+    )
+
+
+def _render_table(
+    headers: list[str], rows: list[list[str]], *, markdown: bool
+) -> str:
+    return (
+        _fmt_markdown_table(headers, rows)
+        if markdown
+        else _fmt_table(headers, rows)
+    )
+
+
+def format_category_comparison(
+    reports: Mapping[str, EvaluationReport], *, markdown: bool = False
+) -> str:
     """Render a per-category metric comparison table across named strategies.
 
     ``reports`` maps a strategy label (e.g. ``"Vector"``) to its evaluation
     report. Rows are query categories (plus an OVERALL row); columns are one per
     (metric, strategy) pair, so a single table shows how each strategy performs
     on each category — the view that reveals where BM25, vector, and future
-    hybrid strategies complement one another.
+    hybrid strategies complement one another. Set ``markdown`` for a
+    GitHub-flavored markdown table instead of the aligned plain-text one.
     """
     if not reports:
         return "(no reports)"
@@ -82,17 +107,21 @@ def format_category_comparison(reports: Mapping[str, EvaluationReport]) -> str:
             overall.append(f"{reports[label].metrics[metric]:.3f}")
     rows.append(overall)
 
-    return _fmt_table(headers, rows)
+    return _render_table(headers, rows, markdown=markdown)
 
 
 def format_overall_comparison(
-    reports: Mapping[str, EvaluationReport], *, target: str | None = None
+    reports: Mapping[str, EvaluationReport],
+    *,
+    target: str | None = None,
+    markdown: bool = False,
 ) -> str:
     """Render overall metrics per mode plus deltas of one mode against the rest.
 
     ``target`` (default: the last mode in ``reports``) is the mode whose deltas
     are shown against every other mode, e.g. Hybrid minus Vector and Hybrid minus
-    BM25, so the benefit (or cost) of fusion is explicit.
+    BM25, so the benefit (or cost) of fusion is explicit. Set ``markdown`` for a
+    GitHub-flavored markdown table instead of the aligned plain-text one.
     """
     if not reports:
         return "(no reports)"
@@ -112,7 +141,7 @@ def format_overall_comparison(
             row.append(f"{delta:+.3f}")
         rows.append(row)
 
-    return _fmt_table(headers, rows)
+    return _render_table(headers, rows, markdown=markdown)
 
 
 def format_query_diagnostics(

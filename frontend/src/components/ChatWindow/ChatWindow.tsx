@@ -30,7 +30,12 @@ export function ChatWindow({ messages, isStreaming }: ChatWindowProps) {
   return (
     <section className="chat-window">
       {messages.map((message) => (
-        <MessageBubble key={message.id} role={message.role} content={message.content} />
+        <MessageBubble
+          key={message.id}
+          role={message.role}
+          content={message.content}
+          sources={message.sources}
+        />
       ))}
       {showTyping ? <TypingIndicator /> : null}
       <div ref={endRef} aria-hidden="true" />
