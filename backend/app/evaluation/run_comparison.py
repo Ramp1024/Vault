@@ -1,15 +1,20 @@
-"""Benchmark Vector, BM25, and Hybrid (RRF) retrieval on the golden dataset.
+"""Benchmark Vector, BM25, Hybrid (RRF), and Hybrid + Cross-Encoder retrieval.
 
-Runs the same golden dataset through three ``SearchEngine`` configurations built
-by :func:`app.search.build_search_engine` — Vector only, BM25 only, and Hybrid
-(Vector + BM25 fused with Reciprocal Rank Fusion) — purely through the public
-``SearchEngine.search(query)`` API. The BM25 index is (re)built from the chunks
-already stored in Qdrant so every mode sees the same logical chunks.
+Runs the golden dataset through four retrieval pipelines built from the same
+shared collaborators:
 
-Reports overall metrics per mode, a per-category breakdown, and Hybrid-vs-single
-deltas. Pass ``--diagnostics`` to also print a per-query, per-mode markdown
-report for manual inspection. Pass ``--markdown`` to render the comparison
-tables as GitHub-flavored markdown.
+    Vector | BM25 | Hybrid (RRF) | Hybrid + Cross-Encoder Reranker
+
+Each pipeline is executed once through an :class:`InstrumentedPipeline`, which
+mirrors ``SearchEngine.search`` while timing every stage (query analysis, vector
+retrieval, BM25 retrieval, fusion, cross-encoder), so the report covers both
+quality (Recall@5/@10, MRR) and latency without changing the frozen
+``SearchEngine`` API.
+
+Reports overall metrics, a per-category breakdown, a headline quality-vs-latency
+table, and a per-stage latency breakdown. Pass ``--diagnostics`` to also print a
+per-query reranking movement report (how the cross-encoder reordered candidates).
+Pass ``--markdown`` to render the tables as GitHub-flavored markdown.
 
 Run:  python -m app.evaluation.run_comparison [dataset.json] [--diagnostics] [--markdown]
 """
@@ -19,20 +24,25 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from app.core.config import settings
 from app.evaluation.dataset import EvaluationDataset
 from app.evaluation.paths import DEFAULT_DATASET_PATH
+from app.evaluation.pipeline import InstrumentedPipeline, run_pipeline
 from app.evaluation.report import (
     format_category_comparison,
+    format_latency_breakdown,
     format_overall_comparison,
+    format_performance_table,
     format_query_diagnostics,
+    format_rerank_diagnostics,
 )
-from app.evaluation.runner import RetrievalEvaluator
 from app.processors.metadata_registry import (
     MetadataRegistry,
     default_metadata_registry,
 )
 from app.processors.query_analyzer import RuleBasedQueryAnalyzer
-from app.search import RetrievalMode, build_search_engine
+from app.search.fusion import IdentityFusionStrategy, ReciprocalRankFusion
+from app.search.reranker import CrossEncoderReranker
 from app.search.strategy import BM25SearchStrategy, VectorSearchStrategy
 from app.services.bm25_index import RankBM25Index
 from app.services.bm25_indexer import BM25Indexer
@@ -40,8 +50,26 @@ from app.services.embedding_service import EmbeddingService
 from app.services.qdrant import get_qdrant_client
 from app.services.qdrant_service import QdrantService
 
-# Deep enough to score Recall@10 and reveal relevant docs ranked past top-5.
-RETRIEVAL_DEPTH = 10
+# Retrieve a candidate pool deep enough for the cross-encoder to rerank; the same
+# depth is used by every pipeline so the comparison is fair (the reranker only
+# reorders the pool the hybrid stage already produced).
+RETRIEVAL_DEPTH = settings.RERANK_CANDIDATE_POOL
+
+
+class _ResultsView:
+    """Adapts a pipeline run's captured results to the ``search(query)`` shape.
+
+    Lets the multi-pipeline diagnostics reuse already-computed results instead of
+    re-running retrieval (which would re-invoke the cross-encoder).
+    """
+
+    def __init__(self, dataset: EvaluationDataset, run) -> None:
+        self._by_query = {
+            case.query: run.results_by_case.get(case.id, []) for case in dataset.cases
+        }
+
+    def search(self, query: str):
+        return self._by_query.get(query, [])
 
 
 def _build_analyzer(qdrant: QdrantService) -> RuleBasedQueryAnalyzer:
@@ -68,45 +96,70 @@ def main(
     qdrant = QdrantService(get_qdrant_client())
     analyzer = _build_analyzer(qdrant)
 
-    # Rebuild the BM25 index from the exact chunks stored in Qdrant so every mode
-    # is evaluated over the same logical chunks.
+    # Rebuild the BM25 index from the exact chunks stored in Qdrant so every
+    # pipeline is evaluated over the same logical chunks.
     index = RankBM25Index()
     indexed = BM25Indexer(qdrant_service=qdrant, index=index).rebuild()
-    print(f"BM25 index built over {indexed} chunks\n")
+    print(f"BM25 index built over {indexed} chunks")
 
-    # Share the expensive collaborators across all modes.
+    # Share the expensive collaborators across all pipelines.
     vector_strategy = VectorSearchStrategy(
         embedding_service=EmbeddingService(), qdrant_service=qdrant
     )
     bm25_strategy = BM25SearchStrategy(index=index)
 
-    engines = {
-        "Vector": build_search_engine(
-            RetrievalMode.VECTOR, analyzer, vector_strategy=vector_strategy
+    # For the benchmark the reranker returns the full reordered pool (top_n=None)
+    # so Recall@10 remains measurable on the reranked results.
+    reranker = CrossEncoderReranker(
+        settings.RERANK_MODEL, candidate_pool=RETRIEVAL_DEPTH, top_n=None
+    )
+
+    pipelines = {
+        "Vector": InstrumentedPipeline(
+            analyzer, [("Vector", vector_strategy)], IdentityFusionStrategy()
         ),
-        "BM25": build_search_engine(
-            RetrievalMode.BM25, analyzer, bm25_strategy=bm25_strategy
+        "BM25": InstrumentedPipeline(
+            analyzer, [("BM25", bm25_strategy)], IdentityFusionStrategy()
         ),
-        "Hybrid": build_search_engine(
-            RetrievalMode.HYBRID,
+        "Hybrid": InstrumentedPipeline(
             analyzer,
-            vector_strategy=vector_strategy,
-            bm25_strategy=bm25_strategy,
+            [("Vector", vector_strategy), ("BM25", bm25_strategy)],
+            ReciprocalRankFusion(k=settings.RRF_K),
+        ),
+        "Hybrid + Reranker": InstrumentedPipeline(
+            analyzer,
+            [("Vector", vector_strategy), ("BM25", bm25_strategy)],
+            ReciprocalRankFusion(k=settings.RRF_K),
+            reranker=reranker,
         ),
     }
 
-    reports = {
-        name: RetrievalEvaluator(search_engine=engine).evaluate(dataset)
-        for name, engine in engines.items()
+    print(f"Reranker model: {settings.RERANK_MODEL} (loading on first rerank)\n")
+
+    runs = {
+        name: run_pipeline(name, pipeline, dataset)
+        for name, pipeline in pipelines.items()
     }
+    reports = {name: run.report for name, run in runs.items()}
+    ordered_runs = list(runs.values())
 
     print("=" * 90)
-    print("RETRIEVAL MODE COMPARISON  (Vector | BM25 | Hybrid RRF)")
+    print("RETRIEVAL PIPELINE COMPARISON  (Vector | BM25 | Hybrid | Hybrid + Reranker)")
     print("=" * 90)
     print(f"Queries: {len(dataset)}\n")
 
-    print("Overall metrics and Hybrid deltas:")
-    print(format_overall_comparison(reports, target="Hybrid", markdown=markdown))
+    print("Quality vs latency:")
+    print(format_performance_table(ordered_runs, markdown=markdown))
+    print()
+    print("Per-stage latency (ms):")
+    print(format_latency_breakdown(ordered_runs, markdown=markdown))
+    print()
+    print("Overall metrics and reranker deltas:")
+    print(
+        format_overall_comparison(
+            reports, target="Hybrid + Reranker", markdown=markdown
+        )
+    )
     print()
     print("Per-category breakdown:")
     print(format_category_comparison(reports, markdown=markdown))
@@ -114,7 +167,14 @@ def main(
 
     if diagnostics:
         print()
-        print(format_query_diagnostics(dataset, engines))
+        print(
+            format_rerank_diagnostics(
+                dataset, runs["Hybrid"], runs["Hybrid + Reranker"]
+            )
+        )
+        print()
+        engines_view = {name: _ResultsView(dataset, run) for name, run in runs.items()}
+        print(format_query_diagnostics(dataset, engines_view))
 
 
 if __name__ == "__main__":

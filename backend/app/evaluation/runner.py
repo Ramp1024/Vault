@@ -56,41 +56,60 @@ class RetrievalEvaluator:
 
     def evaluate(self, dataset: EvaluationDataset) -> EvaluationReport:
         evaluations = tuple(self._evaluate_case(case) for case in dataset.cases)
-        metric_scores = {
-            metric.name: metric.compute(evaluations) for metric in self.metrics
-        }
-        return EvaluationReport(
-            evaluations=evaluations,
-            metrics=metric_scores,
-            category_metrics=self._category_metrics(evaluations),
-        )
-
-    def _category_metrics(
-        self, evaluations: Sequence[QueryEvaluation]
-    ) -> tuple[CategoryMetrics, ...]:
-        """Compute the same metric suite independently for each query category."""
-        grouped: dict[str, list[QueryEvaluation]] = defaultdict(list)
-        for evaluation in evaluations:
-            grouped[evaluation.case.category or "uncategorized"].append(evaluation)
-
-        return tuple(
-            CategoryMetrics(
-                category=category,
-                count=len(group),
-                metrics={metric.name: metric.compute(group) for metric in self.metrics},
-            )
-            for category, group in sorted(grouped.items())
-        )
+        return build_report(evaluations, self.metrics)
 
     def _evaluate_case(self, case) -> QueryEvaluation:
         results = self._search_engine.search(case.query)
-        retrieved_documents = _dedupe(result.chunk.document_id for result in results)
-        retrieved_chunks = tuple(result.chunk.id for result in results)
-        return QueryEvaluation(
-            case=case,
-            retrieved_documents=retrieved_documents,
-            retrieved_chunks=retrieved_chunks,
+        return evaluation_from_results(case, results)
+
+
+def evaluation_from_results(case, results) -> QueryEvaluation:
+    """Build a ``QueryEvaluation`` from a case and its ranked search results.
+
+    Document-level metrics operate on de-duplicated ``document_id``s; the raw
+    chunk order is retained for chunk-level reporting. Shared by the engine-based
+    evaluator and the instrumented benchmark pipeline so both score identically.
+    """
+    retrieved_documents = _dedupe(result.chunk.document_id for result in results)
+    retrieved_chunks = tuple(result.chunk.id for result in results)
+    return QueryEvaluation(
+        case=case,
+        retrieved_documents=retrieved_documents,
+        retrieved_chunks=retrieved_chunks,
+    )
+
+
+def build_report(
+    evaluations: Sequence[QueryEvaluation],
+    metrics: Sequence[RetrievalMetric],
+) -> EvaluationReport:
+    """Aggregate per-query evaluations into overall and per-category metrics."""
+    evaluations = tuple(evaluations)
+    metric_scores = {metric.name: metric.compute(evaluations) for metric in metrics}
+    return EvaluationReport(
+        evaluations=evaluations,
+        metrics=metric_scores,
+        category_metrics=_category_metrics(evaluations, metrics),
+    )
+
+
+def _category_metrics(
+    evaluations: Sequence[QueryEvaluation],
+    metrics: Sequence[RetrievalMetric],
+) -> tuple[CategoryMetrics, ...]:
+    """Compute the same metric suite independently for each query category."""
+    grouped: dict[str, list[QueryEvaluation]] = defaultdict(list)
+    for evaluation in evaluations:
+        grouped[evaluation.case.category or "uncategorized"].append(evaluation)
+
+    return tuple(
+        CategoryMetrics(
+            category=category,
+            count=len(group),
+            metrics={metric.name: metric.compute(group) for metric in metrics},
         )
+        for category, group in sorted(grouped.items())
+    )
 
 
 def _dedupe(values) -> tuple[str, ...]:

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 
 from app.evaluation.dataset import EvaluationDataset
 from app.evaluation.metrics import QueryEvaluation
+from app.evaluation.pipeline import PipelineRun, aggregate_timings
 from app.evaluation.runner import EvaluationReport
 
 _SEP = "=" * 90
@@ -179,6 +180,133 @@ def format_query_diagnostics(
                     f"    {rank}. [{marker}] {result.chunk.document_title} "
                     f":: {result.chunk.id} (score={result.score:.4f})"
                 )
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def format_performance_table(
+    runs: Sequence[PipelineRun], *, primary_k: int = 5, markdown: bool = False
+) -> str:
+    """Render the headline quality-vs-latency table (Part 9).
+
+    One row per pipeline (Vector / BM25 / Hybrid / Hybrid + Reranker) with
+    Recall@``primary_k``, MRR, and average total query latency in milliseconds.
+    """
+    if not runs:
+        return "(no runs)"
+
+    recall_key = f"Recall@{primary_k}"
+    headers = ["Pipeline", _abbrev_metric(recall_key), "MRR", "Avg Latency (ms)"]
+    rows: list[list[str]] = []
+    for run in runs:
+        latency = aggregate_timings(run)
+        recall = run.report.metrics.get(recall_key, 0.0)
+        mrr = run.report.metrics.get("MRR", 0.0)
+        rows.append([run.name, f"{recall:.3f}", f"{mrr:.3f}", f"{latency['total']:.1f}"])
+
+    return _render_table(headers, rows, markdown=markdown)
+
+
+def format_latency_breakdown(
+    runs: Sequence[PipelineRun], *, markdown: bool = False
+) -> str:
+    """Render a per-stage latency breakdown (ms) for each pipeline (Part 9).
+
+    Columns: Query Analysis, one per retrieval strategy (Vector, BM25), Fusion,
+    Cross Encoder, and Total. Stages a pipeline does not run show ``-``.
+    """
+    if not runs:
+        return "(no runs)"
+
+    strategy_names: list[str] = []
+    for run in runs:
+        for name in run.strategy_names:
+            if name not in strategy_names:
+                strategy_names.append(name)
+
+    headers = ["Pipeline", "Analysis", *strategy_names, "Fusion", "CrossEnc", "Total"]
+    rows: list[list[str]] = []
+    for run in runs:
+        latency = aggregate_timings(run)
+        row = [run.name, f"{latency['analysis']:.1f}"]
+        for name in strategy_names:
+            row.append(f"{latency[name]:.1f}" if name in latency else "-")
+        row.append(f"{latency['fusion']:.1f}")
+        row.append(f"{latency['rerank']:.1f}")
+        row.append(f"{latency['total']:.1f}")
+        rows.append(row)
+
+    return _render_table(headers, rows, markdown=markdown)
+
+
+def _first_relevant_rank(results: Sequence, expected_docs: set[str]) -> int | None:
+    for rank, result in enumerate(results, start=1):
+        if result.chunk.document_id in expected_docs:
+            return rank
+    return None
+
+
+def _movement(before_rank: int | None, after_rank: int) -> str:
+    if before_rank is None:
+        return "new"
+    delta = before_rank - after_rank
+    if delta > 0:
+        return f"up {delta}"
+    if delta < 0:
+        return f"down {-delta}"
+    return "same"
+
+
+def format_rerank_diagnostics(
+    dataset: EvaluationDataset,
+    before: PipelineRun,
+    after: PipelineRun,
+    *,
+    top_n: int = 5,
+) -> str:
+    """Show how the cross-encoder reordered candidates per query (Part 8).
+
+    For every case it lists the post-rerank top ``top_n`` chunks, annotating each
+    with its movement relative to the pre-rerank (Hybrid) ranking (up/down/same/
+    new) and marking chunks that belong to an expected document. It also reports
+    where the first correct chunk sat before vs after reranking, so upward or
+    downward movement of the relevant result is explicit.
+    """
+    lines: list[str] = ["# Reranking Diagnostics", ""]
+    lines.append(f"Comparing **{before.name}** (before) vs **{after.name}** (after).")
+    lines.append("")
+
+    for case in dataset.cases:
+        expected_docs = set(case.expected_documents)
+        before_results = before.results_by_case.get(case.id, [])
+        after_results = after.results_by_case.get(case.id, [])
+        before_ranks = {r.chunk.id: i for i, r in enumerate(before_results, start=1)}
+
+        correct_before = _first_relevant_rank(before_results, expected_docs)
+        correct_after = _first_relevant_rank(after_results, expected_docs)
+
+        category = f" ({case.category})" if case.category else ""
+        lines.append(f"## {case.id}{category}")
+        lines.append(f"- **query:** {case.query}")
+        lines.append(
+            "- **correct chunk rank:** "
+            f"before={correct_before if correct_before is not None else 'none'}, "
+            f"after={correct_after if correct_after is not None else 'none'} "
+            f"({_movement(correct_before, correct_after) if correct_after is not None else 'not retrieved'})"
+        )
+        lines.append(f"- **{after.name}** top {top_n}:")
+        if not after_results:
+            lines.append("    - (no results)")
+            lines.append("")
+            continue
+        for rank, result in enumerate(after_results[:top_n], start=1):
+            marker = "HIT " if result.chunk.document_id in expected_docs else "miss"
+            move = _movement(before_ranks.get(result.chunk.id), rank)
+            lines.append(
+                f"    {rank}. [{marker}] ({move}) {result.chunk.document_title} "
+                f":: {result.chunk.id} (score={result.score:.4f})"
+            )
         lines.append("")
 
     return "\n".join(lines)

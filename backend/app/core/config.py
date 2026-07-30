@@ -32,6 +32,21 @@ class Settings(BaseSettings):
     # with Reciprocal Rank Fusion). RRF_K is the RRF rank-damping constant.
     RETRIEVAL_MODE: str = os.environ.get("RETRIEVAL_MODE", "hybrid")
     RRF_K: int = int(os.environ.get("RRF_K", "60"))
+    # Cross-encoder reranking. When RERANK_ENABLED is true the chat pipeline
+    # retrieves RERANK_CANDIDATE_POOL candidates, reranks them with RERANK_MODEL
+    # (a Sentence-Transformers cross-encoder), and keeps the top results. The
+    # model is model-agnostic configuration only — changing it requires no code.
+    RERANK_ENABLED: bool = os.environ.get("RERANK_ENABLED", "false").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    RERANK_MODEL: str = os.environ.get(
+        "RERANK_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    )
+    RERANK_CANDIDATE_POOL: int = int(os.environ.get("RERANK_CANDIDATE_POOL", "25"))
+    RERANK_TOP_N: int = int(os.environ.get("RERANK_TOP_N", "5"))
 
     class Config:
         env_file = str(Path(__file__).resolve().parents[2] / ".env")

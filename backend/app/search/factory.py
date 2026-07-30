@@ -5,6 +5,7 @@ from enum import Enum
 from app.processors.query_analyzer import QueryAnalyzer
 from app.search.engine import SearchEngine
 from app.search.fusion import IdentityFusionStrategy, ReciprocalRankFusion
+from app.search.reranker import Reranker
 from app.search.strategy import (
     BM25SearchStrategy,
     SearchStrategy,
@@ -29,6 +30,7 @@ def build_search_engine(
     vector_strategy: VectorSearchStrategy | None = None,
     bm25_strategy: BM25SearchStrategy | None = None,
     rrf_k: int = DEFAULT_RRF_K,
+    reranker: Reranker | None = None,
 ) -> SearchEngine:
     """Assemble a ``SearchEngine`` for the requested retrieval mode.
 
@@ -42,6 +44,10 @@ def build_search_engine(
     combines both strategies with Reciprocal Rank Fusion. Adding a future
     strategy to hybrid requires only extending the strategy list here — the
     fusion algorithm stays the same.
+
+    An optional ``reranker`` (e.g. a cross-encoder) is attached as the final
+    pipeline stage. Strategies and fusion remain unaware of it: the reranker only
+    reorders whatever fused results it receives.
     """
     if mode == RetrievalMode.VECTOR:
         strategies: list[SearchStrategy] = [vector_strategy or VectorSearchStrategy()]
@@ -62,4 +68,5 @@ def build_search_engine(
         query_analyzer=query_analyzer,
         strategies=strategies,
         fusion_strategy=fusion,
+        reranker=reranker,
     )

@@ -16,13 +16,29 @@ from app.evaluation.metrics import (
     RetrievalMetric,
     default_metrics,
 )
+from app.evaluation.pipeline import (
+    InstrumentedPipeline,
+    PipelineRun,
+    StageTiming,
+    aggregate_timings,
+    run_pipeline,
+)
 from app.evaluation.report import (
     format_category_comparison,
+    format_latency_breakdown,
     format_overall_comparison,
+    format_performance_table,
     format_query_diagnostics,
+    format_rerank_diagnostics,
     format_report,
 )
-from app.evaluation.runner import CategoryMetrics, EvaluationReport, RetrievalEvaluator
+from app.evaluation.runner import (
+    CategoryMetrics,
+    EvaluationReport,
+    RetrievalEvaluator,
+    build_report,
+    evaluation_from_results,
+)
 
 __all__ = [
     "EvaluationCase",
@@ -35,8 +51,18 @@ __all__ = [
     "RetrievalEvaluator",
     "CategoryMetrics",
     "EvaluationReport",
+    "build_report",
+    "evaluation_from_results",
+    "InstrumentedPipeline",
+    "PipelineRun",
+    "StageTiming",
+    "run_pipeline",
+    "aggregate_timings",
     "format_report",
     "format_category_comparison",
     "format_overall_comparison",
     "format_query_diagnostics",
+    "format_performance_table",
+    "format_latency_breakdown",
+    "format_rerank_diagnostics",
 ]

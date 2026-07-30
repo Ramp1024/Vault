@@ -14,6 +14,8 @@ from app.processors.prompt_builder import PromptBuilder
 from app.processors.query_analyzer import QueryAnalyzer, RuleBasedQueryAnalyzer
 from app.search import (
     BM25SearchStrategy,
+    CrossEncoderReranker,
+    Reranker,
     RetrievalMode,
     SearchEngine,
     VectorSearchStrategy,
@@ -50,9 +52,17 @@ class ChatService:
         self.qdrant_service = qdrant_service or QdrantService(get_qdrant_client())
         self.prompt_builder = prompt_builder or PromptBuilder()
         self.generation_service = generation_service or GenerationService()
+        reranker = self._build_reranker()
+        # When reranking is enabled we must retrieve a larger candidate pool for
+        # the cross-encoder to reorder; otherwise retrieve just the final count.
+        retrieval_depth = (
+            settings.RERANK_CANDIDATE_POOL
+            if reranker is not None
+            else self.RETRIEVAL_LIMIT
+        )
         self.query_analyzer = query_analyzer or RuleBasedQueryAnalyzer(
             registry=self._build_registry(),
-            default_top_k=self.RETRIEVAL_LIMIT,
+            default_top_k=retrieval_depth,
         )
         self.search_engine = search_engine or build_search_engine(
             self._retrieval_mode(),
@@ -63,6 +73,23 @@ class ChatService:
             ),
             bm25_strategy=BM25SearchStrategy(),
             rrf_k=settings.RRF_K,
+            reranker=reranker,
+        )
+
+    @staticmethod
+    def _build_reranker() -> Reranker | None:
+        """Build the cross-encoder reranker when enabled, else ``None``.
+
+        Returning ``None`` keeps the pipeline reranker-free (the model is never
+        loaded), so the heavy cross-encoder stack is only touched when
+        ``RERANK_ENABLED`` is set.
+        """
+        if not settings.RERANK_ENABLED:
+            return None
+        return CrossEncoderReranker(
+            settings.RERANK_MODEL,
+            candidate_pool=settings.RERANK_CANDIDATE_POOL,
+            top_n=settings.RERANK_TOP_N,
         )
 
     @staticmethod

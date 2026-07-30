@@ -5,7 +5,7 @@ from app.search.fusion import (
     ReciprocalRankFusion,
     ResultFusionStrategy,
 )
-from app.search.reranker import NoOpReranker, Reranker
+from app.search.reranker import CrossEncoderReranker, NoOpReranker, Reranker
 from app.search.strategy import BM25SearchStrategy, SearchStrategy, VectorSearchStrategy
 
 __all__ = [
@@ -20,4 +20,5 @@ __all__ = [
     "ReciprocalRankFusion",
     "Reranker",
     "NoOpReranker",
+    "CrossEncoderReranker",
 ]
