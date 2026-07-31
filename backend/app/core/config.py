@@ -47,6 +47,25 @@ class Settings(BaseSettings):
     )
     RERANK_CANDIDATE_POOL: int = int(os.environ.get("RERANK_CANDIDATE_POOL", "25"))
     RERANK_TOP_N: int = int(os.environ.get("RERANK_TOP_N", "5"))
+    # Answer generation layer. The LLM is reached only through a backend-agnostic
+    # abstraction: LLM_BACKEND selects the implementation ("ollama" or "mock"),
+    # and the model, temperature, and token cap tune generation. CONTEXT_TOKEN_BUDGET
+    # bounds how much retrieved context the ContextBuilder assembles, and
+    # PROMPT_TEMPLATE selects a swappable prompt template. All are configurable via
+    # environment variables without code changes. LLM_MODEL/LLM_TEMPERATURE default
+    # to the existing generation settings so behavior is unchanged out of the box.
+    LLM_BACKEND: str = os.environ.get("LLM_BACKEND", "ollama")
+    LLM_MODEL: str = os.environ.get(
+        "LLM_MODEL", os.environ.get("GENERATION_MODEL", "llama3.1:8b")
+    )
+    LLM_TEMPERATURE: float = float(
+        os.environ.get(
+            "LLM_TEMPERATURE", os.environ.get("GENERATION_TEMPERATURE", "0.2")
+        )
+    )
+    LLM_MAX_TOKENS: int = int(os.environ.get("LLM_MAX_TOKENS", "0"))
+    CONTEXT_TOKEN_BUDGET: int = int(os.environ.get("CONTEXT_TOKEN_BUDGET", "2000"))
+    PROMPT_TEMPLATE: str = os.environ.get("PROMPT_TEMPLATE", "grounded")
 
     class Config:
         env_file = str(Path(__file__).resolve().parents[2] / ".env")

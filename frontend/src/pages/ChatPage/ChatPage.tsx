@@ -5,6 +5,7 @@ import { ChatWindow } from '../../components/ChatWindow/ChatWindow'
 export type ChatRole = 'user' | 'assistant'
 
 export type ChatSource = {
+    reference_id?: number
     chunk_id: string
     document_id: string
     title: string
@@ -12,11 +13,19 @@ export type ChatSource = {
     snippet: string
 }
 
+export type ChatCitation = {
+    reference_id: number
+    document_id: string
+    chunk_id: string
+    title: string
+}
+
 export type ChatMessage = {
     id: string
     role: ChatRole
     content: string
     sources?: ChatSource[]
+    citations?: ChatCitation[]
 }
 
 const createMessage = (role: ChatRole, content: string): ChatMessage => ({
@@ -68,9 +77,15 @@ export function ChatPage() {
                 const decoder = new TextDecoder()
 
                 // The stream begins with a single JSON header line describing the
-                // retrieved sources, followed by '\n', then the answer text.
+                // retrieved sources, followed by '\n', then the raw answer text,
+                // and finally a NUL-delimited JSON metadata frame carrying the
+                // backend-validated citations. The rendered answer is exactly the
+                // text between the header newline and the NUL delimiter.
+                const FINAL_FRAME_DELIMITER = '\u0000'
                 let headerParsed = false
                 let headerBuffer = ''
+                let inFinalFrame = false
+                let finalBuffer = ''
 
                 const applyContent = (text: string) => {
                     if (!text) {
@@ -93,12 +108,37 @@ export function ChatPage() {
                     )
                 }
 
+                const applyCitations = (citations: ChatCitation[]) => {
+                    setMessages((current) =>
+                        current.map((entry) =>
+                            entry.id === assistantMessage.id ? { ...entry, citations } : entry,
+                        ),
+                    )
+                }
+
+                // Route answer-body text to the message, splitting off the trailing
+                // metadata frame once the NUL delimiter appears.
+                const handleBody = (text: string) => {
+                    if (inFinalFrame) {
+                        finalBuffer += text
+                        return
+                    }
+                    const delimiterIndex = text.indexOf(FINAL_FRAME_DELIMITER)
+                    if (delimiterIndex === -1) {
+                        applyContent(text)
+                        return
+                    }
+                    applyContent(text.slice(0, delimiterIndex))
+                    inFinalFrame = true
+                    finalBuffer += text.slice(delimiterIndex + 1)
+                }
+
                 const handlePiece = (piece: string) => {
                     if (!piece) {
                         return
                     }
                     if (headerParsed) {
-                        applyContent(piece)
+                        handleBody(piece)
                         return
                     }
 
@@ -121,7 +161,27 @@ export function ChatPage() {
                         // If the header can't be parsed, keep the text so nothing is lost.
                         applyContent(headerText)
                     }
-                    applyContent(rest)
+                    handleBody(rest)
+                }
+
+                // Parse the accumulated metadata frame once the stream ends. The
+                // answer text is already rendered, so a malformed frame is
+                // non-fatal — validated citations are simply omitted.
+                const flushFinalFrame = () => {
+                    if (!finalBuffer) {
+                        return
+                    }
+                    try {
+                        const parsed = JSON.parse(finalBuffer.trim()) as {
+                            type?: string
+                            citations?: ChatCitation[]
+                        }
+                        if (parsed.citations) {
+                            applyCitations(parsed.citations)
+                        }
+                    } catch {
+                        // Ignore malformed trailing metadata.
+                    }
                 }
 
                 try {
@@ -140,6 +200,8 @@ export function ChatPage() {
                     if (!headerParsed && headerBuffer) {
                         applyContent(headerBuffer)
                     }
+
+                    flushFinalFrame()
                 } finally {
                     reader.releaseLock()
                 }

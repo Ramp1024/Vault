@@ -34,24 +34,20 @@
 
 Next phases
 
-✅ Modular Search Engine
+➡️ Context Builder
 
-✅ Evaluation Dataset
+➡️ Answer Generation
 
-⬜ BM25 Search
+➡️ Source Citations
 
-⬜ Hybrid Retrieval
+➡️ Conversational Benchmark
 
-⬜ Reciprocal Rank Fusion
+➡️ LLM Query Enhancement
 
-⬜ LLM Query Analysis
+➡️ Streaming Responses
 
-⬜ Cross-Encoder Reranker
+➡️ Multi-Connector Support (GitHub, Markdown, PDFs)
 
-⬜ Answer Generation
+➡️ Incremental Re-indexing & Background Sync
 
-⬜ Source Citations
-
-⬜ Multi-Source Connectors
-
-⬜ Production Features
+➡️ Production API & UI polish

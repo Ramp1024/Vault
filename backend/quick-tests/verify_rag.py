@@ -138,8 +138,7 @@ def _print_prompt_stats(
 
 
 def verify_rag() -> None:
-    from app.processors.prompt_builder import PromptBuilder
-    from app.services.chat_service import ChatService
+    from app.services.answer_service import AnswerService
     from app.services.embedding_service import EmbeddingService
     from app.services.qdrant import get_qdrant_client
     from app.services.qdrant_service import QdrantService
@@ -150,32 +149,33 @@ def verify_rag() -> None:
 
     embedding_service = EmbeddingService()
     qdrant = QdrantService(client=get_qdrant_client())
-    prompt_builder = PromptBuilder()
-    chat_service = ChatService(
+    service = AnswerService(
         embedding_service=embedding_service,
         qdrant_service=qdrant,
-        prompt_builder=prompt_builder,
     )
 
     _ensure_index(qdrant, embedding_service)
 
     for query in KNOWN_QUERIES:
         print(f"\nQuery: {query}")
-        query_embedding = embedding_service.embed(query)
-        sources = qdrant.search(query_embedding, limit=chat_service.RETRIEVAL_LIMIT)
-        prompt = prompt_builder.build(query, sources)
-        context_word_count = sum(len(item.chunk.content.split()) for item in sources)
+        prepared = service.prepare(query)
+        context = prepared.context
+        context_word_count = sum(
+            len(item.chunk.content.split()) for item in context.chunks
+        )
 
-        _print_prompt_stats(prompt, len(sources), context_word_count)
+        _print_prompt_stats(
+            prepared.prompt.to_text(), len(context.chunks), context_word_count
+        )
 
-        response = chat_service.answer(query)
+        answer = service.generate(prepared.prompt, context)
 
-        _require(response.answer.strip(), f"Empty answer returned for query: {query}")
-        _require(response.sources, f"No sources returned for query: {query}")
+        _require(answer.answer.strip(), f"Empty answer returned for query: {query}")
+        _require(context.chunks, f"No sources returned for query: {query}")
 
-        sources_text = "\n\n".join(item.chunk.content for item in response.sources)
+        sources_text = "\n\n".join(item.chunk.content for item in context.chunks)
         grounding_ratio, unmatched_count = _verify_grounding(
-            response.answer, sources_text
+            answer.answer, sources_text
         )
 
         _require(
@@ -190,39 +190,32 @@ def verify_rag() -> None:
             f"unmatched_terms={unmatched_count}, max={MAX_UNMATCHED_TERMS}",
         )
 
-        print(f"  Sources returned : {len(response.sources)}")
+        print(f"  Sources returned : {len(context.chunks)}")
+        print(f"  Citations mapped : {len(answer.citations)}")
         print(f"  Grounding ratio  : {grounding_ratio:.2f}")
         print(f"  Unmatched terms  : {unmatched_count}")
-        print(f"  Answer preview   : {response.answer[:200].replace(chr(10), ' ')}")
+        print(f"  Answer preview   : {answer.answer[:200].replace(chr(10), ' ')}")
 
     print(f"\nUnknown query: {UNKNOWN_QUERY}")
-    unknown_query_embedding = embedding_service.embed(UNKNOWN_QUERY)
-    unknown_sources = qdrant.search(
-        unknown_query_embedding,
-        limit=chat_service.RETRIEVAL_LIMIT,
-    )
-    unknown_prompt = prompt_builder.build(UNKNOWN_QUERY, unknown_sources)
+    prepared_unknown = service.prepare(UNKNOWN_QUERY)
+    unknown_context = prepared_unknown.context
     unknown_context_word_count = sum(
-        len(item.chunk.content.split()) for item in unknown_sources
+        len(item.chunk.content.split()) for item in unknown_context.chunks
     )
 
     _print_prompt_stats(
-        unknown_prompt,
-        len(unknown_sources),
+        prepared_unknown.prompt.to_text(),
+        len(unknown_context.chunks),
         unknown_context_word_count,
     )
 
-    unknown_response = chat_service.answer(UNKNOWN_QUERY)
+    unknown_answer = service.generate(prepared_unknown.prompt, unknown_context)
 
-    print(f"  Sources returned : {len(unknown_response.sources)}")
-    print(f"  Answer           : {unknown_response.answer}")
+    print(f"  Sources returned : {len(unknown_context.chunks)}")
+    print(f"  Answer           : {unknown_answer.answer}")
 
     _require(
-        unknown_response.sources,
-        "Unknown-topic query returned no sources list",
-    )
-    _require(
-        UNKNOWN_EXPECTED_PHRASE.lower() in unknown_response.answer.lower(),
+        UNKNOWN_EXPECTED_PHRASE.lower() in unknown_answer.answer.lower(),
         "Unknown-topic answer did not include the required honest fallback phrase: "
         f"'{UNKNOWN_EXPECTED_PHRASE}'",
     )

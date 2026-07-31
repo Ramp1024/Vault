@@ -35,6 +35,7 @@ export function ChatWindow({ messages, isStreaming }: ChatWindowProps) {
           role={message.role}
           content={message.content}
           sources={message.sources}
+          citations={message.citations}
         />
       ))}
       {showTyping ? <TypingIndicator /> : null}
