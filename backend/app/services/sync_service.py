@@ -3,11 +3,13 @@ from collections.abc import Callable
 from time import perf_counter
 
 from app.connectors.base import DocumentConnector
+from app.models.metadata_schema import MetadataSchema
 from app.models.sync_result import SyncResult
 from app.processors.chunker import Chunker
 from app.services.bm25_indexer import BM25Indexer
 from app.services.embedding_service import EmbeddingService
 from app.services.metadata_schema_store import MetadataSchemaStore
+from app.services.payload_index_manager import PayloadIndexManager
 from app.services.qdrant_service import QdrantService
 
 
@@ -27,6 +29,7 @@ class SyncService:
         clock: Callable[[], float] = perf_counter,
         bm25_indexer: BM25Indexer | None = None,
         schema_store: MetadataSchemaStore | None = None,
+        index_manager: PayloadIndexManager | None = None,
     ) -> None:
         self.connector = connector
         self.chunker = chunker
@@ -38,6 +41,11 @@ class SyncService:
         self.schema_store = (
             schema_store if schema_store is not None else MetadataSchemaStore()
         )
+        self.index_manager = (
+            index_manager
+            if index_manager is not None
+            else PayloadIndexManager(qdrant_service.client)
+        )
 
     def sync(self) -> SyncResult:
         started_at = self.clock()
@@ -46,7 +54,7 @@ class SyncService:
         documents = self.connector.fetch_documents()
         self.logger.info("Fetched %d documents", len(documents))
 
-        self._persist_schema(documents)
+        schema = self._persist_schema(documents)
 
         documents_to_index = []
         collection_exists = self.qdrant_service.collection_exists()
@@ -85,6 +93,8 @@ class SyncService:
         vectors_upserted = self.qdrant_service.upsert_batch(embedded_chunks)
         self.logger.info("Upserted %d vectors", vectors_upserted)
 
+        self._provision_indexes(schema)
+
         if self.bm25_indexer is not None:
             # Rebuild the lexical index from the full vector store so it always
             # references the same logical chunks as the vector index.
@@ -103,13 +113,16 @@ class SyncService:
         self.logger.info("Sync completed in %.1f seconds", duration)
         return result
 
-    def _persist_schema(self, documents: list) -> None:
+    def _persist_schema(self, documents: list) -> MetadataSchema | None:
         """Discover and persist the filterable metadata schema for this sync.
 
         The connector infers its schema from the freshly fetched documents (no
         extra fetch), and the result is written to the schema store so the
         schema-aware intent analyzer can load it at query time. Discovery never
         blocks a sync: any failure is logged and ignored.
+
+        Returns the discovered schema so downstream steps (payload index
+        provisioning) can reuse it, or ``None`` if discovery failed.
         """
         try:
             schema = self.connector.describe_schema(documents)
@@ -117,5 +130,23 @@ class SyncService:
             self.logger.info(
                 "Persisted metadata schema with %d fields", len(schema.fields)
             )
+            return schema
         except Exception:
             self.logger.warning("Failed to persist metadata schema", exc_info=True)
+            return None
+
+    def _provision_indexes(self, schema: MetadataSchema | None) -> None:
+        """Provision Qdrant payload indexes from the discovered schema.
+
+        Runs after upsert (the collection is guaranteed to exist) and is
+        idempotent, so repeated syncs never duplicate work. Failures are logged
+        and never block a sync.
+        """
+        if not schema:
+            return
+        try:
+            created = self.index_manager.ensure_indexes(schema)
+            if created:
+                self.logger.info("Provisioned %d payload index(es)", created)
+        except Exception:
+            self.logger.warning("Failed to provision payload indexes", exc_info=True)
