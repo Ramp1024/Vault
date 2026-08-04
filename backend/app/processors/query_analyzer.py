@@ -154,3 +154,74 @@ class RuleBasedQueryAnalyzer(QueryAnalyzer):
             filters=filters,
             top_k=self.default_top_k,
         )
+
+
+class CompositeQueryAnalyzer(QueryAnalyzer):
+    """Merge deterministic rule-based parsing with LLM intent understanding.
+
+    The rule-based analyzer owns explicit, unambiguous signal (``field: value``
+    syntax, explicit dates, obvious operators); the LLM analyzer owns semantic
+    understanding (conversational phrasing, implicit metadata inference, query
+    rewriting). Their outputs are merged into the single ``SearchRequest`` the
+    retrieval engine consumes — the engine stays completely unaware that two
+    analyzers, an LLM, or a schema were ever involved.
+
+    Rule-based results take precedence on conflict: a filter the rule parser set
+    for a field is never overridden by the LLM, and when the user used explicit
+    filter syntax the deterministic semantic query is kept. The LLM analyzer is
+    also treated as best-effort — if it raises, the rule-based result is used
+    unchanged, so composition can never make retrieval less reliable.
+    """
+
+    def __init__(
+        self,
+        rule_based: QueryAnalyzer,
+        llm_based: QueryAnalyzer,
+    ) -> None:
+        self.rule_based = rule_based
+        self.llm_based = llm_based
+
+    def analyze(self, query: str) -> SearchRequest:
+        rule_request = self.rule_based.analyze(query)
+
+        try:
+            llm_request = self.llm_based.analyze(query)
+        except Exception:  # pragma: no cover - defensive around the LLM stage
+            return rule_request
+
+        filters = self._merge_filters(rule_request.filters, llm_request.filters)
+        semantic_query = self._merge_semantic_query(rule_request, llm_request)
+        return SearchRequest(
+            semantic_query=semantic_query,
+            filters=filters,
+            top_k=rule_request.top_k,
+        )
+
+    @staticmethod
+    def _merge_filters(
+        rule_filters: list[Filter], llm_filters: list[Filter]
+    ) -> list[Filter]:
+        """Union both filter sets, keeping rule-based filters on field conflicts."""
+        merged: list[Filter] = list(rule_filters)
+        claimed = {f.field for f in rule_filters}
+        for candidate in llm_filters:
+            if candidate.field in claimed:
+                continue
+            claimed.add(candidate.field)
+            merged.append(candidate)
+        return merged
+
+    @staticmethod
+    def _merge_semantic_query(
+        rule_request: SearchRequest, llm_request: SearchRequest
+    ) -> str:
+        """Choose the semantic query, preferring determinism for explicit syntax.
+
+        When the rule parser recognized explicit filter syntax, its cleaned
+        semantic text is authoritative. Otherwise the LLM's rewritten/enriched
+        query is preferred, falling back to the rule-based text if the LLM
+        produced none.
+        """
+        if rule_request.filters:
+            return rule_request.semantic_query or llm_request.semantic_query
+        return llm_request.semantic_query or rule_request.semantic_query

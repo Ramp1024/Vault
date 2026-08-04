@@ -6,13 +6,20 @@ from typing import Any
 class Operator(str, Enum):
     """Comparison operators for metadata filters.
 
-    The set is intentionally open for extension: new operators (e.g. GT, LT,
-    GTE, LTE, IN) can be added here and handled by translators such as the
-    QdrantFilterBuilder without changing the Filter or SearchRequest API.
+    The set is intentionally open for extension: new operators can be added here
+    and handled by translators such as the QdrantFilterBuilder without changing
+    the Filter or SearchRequest API. The range operators (GT/LT/GTE/LTE/BETWEEN)
+    support ordered fields such as dates and numbers, while EQUALS/CONTAINS cover
+    scalar and membership matching.
     """
 
     EQUALS = "equals"
     CONTAINS = "contains"
+    GT = "gt"
+    LT = "lt"
+    GTE = "gte"
+    LTE = "lte"
+    BETWEEN = "between"
 
 
 @dataclass(frozen=True)

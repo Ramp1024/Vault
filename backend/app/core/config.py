@@ -27,6 +27,12 @@ class Settings(BaseSettings):
         "BM25_INDEX_PATH",
         str(Path(__file__).resolve().parents[2] / "config" / "bm25_index.pkl"),
     )
+    # Path to the filterable metadata schema discovered during ingestion. The
+    # schema is the contract consumed by the schema-aware LLM intent analyzer.
+    METADATA_SCHEMA_PATH: str = os.environ.get(
+        "METADATA_SCHEMA_PATH",
+        str(Path(__file__).resolve().parents[2] / "config" / "metadata_schema.json"),
+    )
     # Retrieval pipeline configuration. RETRIEVAL_MODE selects which strategies
     # the chat pipeline runs: "vector", "bm25", or "hybrid" (Vector + BM25 fused
     # with Reciprocal Rank Fusion). RRF_K is the RRF rank-damping constant.
@@ -66,6 +72,19 @@ class Settings(BaseSettings):
     LLM_MAX_TOKENS: int = int(os.environ.get("LLM_MAX_TOKENS", "0"))
     CONTEXT_TOKEN_BUDGET: int = int(os.environ.get("CONTEXT_TOKEN_BUDGET", "2000"))
     PROMPT_TEMPLATE: str = os.environ.get("PROMPT_TEMPLATE", "grounded")
+
+    # Schema-aware LLM intent analysis. When enabled the chat pipeline wraps the
+    # deterministic rule-based analyzer in a CompositeQueryAnalyzer that also
+    # consults an LLM to rewrite conversational queries and infer metadata
+    # filters from the discovered MetadataSchema. Disabled by default so behavior
+    # is unchanged out of the box; the LLM only acts as a query compiler and the
+    # retrieval engine is untouched.
+    INTENT_ANALYZER_ENABLED: bool = os.environ.get(
+        "INTENT_ANALYZER_ENABLED", "false"
+    ).strip().lower() in {"1", "true", "yes", "on"}
+    # Token cap for the intent analyzer's structured JSON response. The output is
+    # a small search request, so a tight cap keeps generation fast and bounded.
+    INTENT_LLM_MAX_TOKENS: int = int(os.environ.get("INTENT_LLM_MAX_TOKENS", "512"))
 
     class Config:
         env_file = str(Path(__file__).resolve().parents[2] / ".env")

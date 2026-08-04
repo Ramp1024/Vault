@@ -1,0 +1,80 @@
+{
+  "fields": [
+    {
+      "name": "aiProgress",
+      "type": "string",
+      "operators": [
+        "=",
+        "contains"
+      ]
+    },
+    {
+      "name": "category",
+      "type": "string",
+      "operators": [
+        "=",
+        "contains"
+      ]
+    },
+    {
+      "name": "date",
+      "type": "date",
+      "operators": [
+        "=",
+        "<",
+        ">",
+        "<=",
+        ">=",
+        "between"
+      ]
+    },
+    {
+      "name": "leetcode",
+      "type": "string",
+      "operators": [
+        "=",
+        "contains"
+      ]
+    },
+    {
+      "name": "leetcodeTopic",
+      "type": "string",
+      "operators": [
+        "=",
+        "contains"
+      ]
+    },
+    {
+      "name": "notes",
+      "type": "string",
+      "operators": [
+        "=",
+        "contains"
+      ]
+    },
+    {
+      "name": "personalWin",
+      "type": "string",
+      "operators": [
+        "=",
+        "contains"
+      ]
+    },
+    {
+      "name": "quickJournal",
+      "type": "string",
+      "operators": [
+        "=",
+        "contains"
+      ]
+    },
+    {
+      "name": "workWin",
+      "type": "string",
+      "operators": [
+        "=",
+        "contains"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "conv-graphs-leetcode",
+    "query": "Show me the days I practiced graph problems on leetcode",
+    "category": "conversational-intent",
+    "expected_documents": [
+      "390f37cd-5024-8147-a38a-de26dfb1fd04",
+      "396f37cd-5024-81b8-b574-dc773f64bc0b",
+      "397f37cd-5024-8175-8fba-e36a0e89ab15",
+      "389f37cd-5024-818c-9e47-fcdceb91cc7d",
+      "38bf37cd-5024-8113-9282-ebe8982e6428"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-8147-a38a-de26dfb1fd04_0",
+      "396f37cd-5024-81b8-b574-dc773f64bc0b_0",
+      "397f37cd-5024-8175-8fba-e36a0e89ab15_0",
+      "389f37cd-5024-818c-9e47-fcdceb91cc7d_0",
+      "38bf37cd-5024-8113-9282-ebe8982e6428_0"
+    ]
+  },
+  {
+    "id": "conv-backtracking",
+    "query": "What was that backtracking practice I did on leetcode?",
+    "category": "conversational-intent",
+    "expected_documents": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8",
+      "384f37cd-5024-816f-beb6-de894a757922"
+    ],
+    "expected_chunks": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8_0",
+      "384f37cd-5024-816f-beb6-de894a757922_0"
+    ]
+  },
+  {
+    "id": "conv-temporal-week",
+    "query": "What did I work on during the week of July 13?",
+    "category": "conversational-intent",
+    "expected_documents": [
+      "399f37cd-5024-81a8-b5e0-d58610001d37",
+      "3a0f37cd-5024-8108-9ee7-c26ced5475e4",
+      "39ff37cd-5024-81a9-b31c-f5d5c963200a",
+      "39ef37cd-5024-8179-9100-c40eafd6f20e",
+      "39df37cd-5024-81ec-ba50-f47da87afed1",
+      "3a2f37cd-5024-81cb-8397-cc358ea2926d"
+    ],
+    "expected_chunks": [
+      "399f37cd-5024-81a8-b5e0-d58610001d37_0",
+      "3a0f37cd-5024-8108-9ee7-c26ced5475e4_0",
+      "39ff37cd-5024-81a9-b31c-f5d5c963200a_0",
+      "39ef37cd-5024-8179-9100-c40eafd6f20e_0",
+      "39df37cd-5024-81ec-ba50-f47da87afed1_0",
+      "3a2f37cd-5024-81cb-8397-cc358ea2926d_0"
+    ]
+  },
+  {
+    "id": "conv-story4",
+    "query": "When did I finish story 4 of the RAG project?",
+    "category": "conversational-intent",
+    "expected_documents": ["39af37cd-5024-81d6-bbd4-d35da3fd460c"],
+    "expected_chunks": ["39af37cd-5024-81d6-bbd4-d35da3fd460c_0"]
+  }
+]

@@ -15,7 +15,15 @@ from app.processors.metadata_registry import (
     default_metadata_registry,
 )
 from app.processors.prompt_template import PromptTemplate, build_prompt_template
-from app.processors.query_analyzer import QueryAnalyzer, RuleBasedQueryAnalyzer
+from app.processors.query_analyzer import (
+    CompositeQueryAnalyzer,
+    QueryAnalyzer,
+    RuleBasedQueryAnalyzer,
+)
+from app.processors.schema_discovery import schema_from_indexed_fields
+from app.processors.llm_intent_analyzer import LLMIntentAnalyzer
+from app.models.metadata_schema import MetadataSchema
+from app.services.metadata_schema_store import MetadataSchemaStore
 from app.search import (
     BM25SearchStrategy,
     CrossEncoderReranker,
@@ -27,7 +35,7 @@ from app.search import (
 )
 from app.services.answer_generator import AnswerGenerator
 from app.services.embedding_service import EmbeddingService
-from app.services.llm import build_llm
+from app.services.llm import build_intent_llm, build_llm
 from app.services.qdrant import get_qdrant_client
 from app.services.qdrant_service import QdrantService
 
@@ -98,9 +106,8 @@ class AnswerService:
             if reranker is not None
             else self.RETRIEVAL_LIMIT
         )
-        self.query_analyzer = query_analyzer or RuleBasedQueryAnalyzer(
-            registry=self._build_registry(),
-            default_top_k=retrieval_depth,
+        self.query_analyzer = query_analyzer or self._build_query_analyzer(
+            retrieval_depth
         )
         self.search_engine = search_engine or build_search_engine(
             self._retrieval_mode(),
@@ -150,6 +157,45 @@ class AnswerService:
         if not fields:
             return default_metadata_registry()
         return MetadataRegistry.from_indexed_fields(fields, multi_fields)
+
+    def _build_query_analyzer(self, retrieval_depth: int) -> QueryAnalyzer:
+        """Build the query analyzer, optionally composing rule-based + LLM intent.
+
+        The deterministic rule-based analyzer is always present. When
+        ``INTENT_ANALYZER_ENABLED`` is set and a metadata schema is available, it
+        is wrapped in a :class:`CompositeQueryAnalyzer` that also consults the
+        schema-aware LLM intent analyzer. The retrieval engine remains unaware of
+        which analyzer produced the ``SearchRequest``.
+        """
+        rule_based = RuleBasedQueryAnalyzer(
+            registry=self._build_registry(),
+            default_top_k=retrieval_depth,
+        )
+
+        if not settings.INTENT_ANALYZER_ENABLED:
+            return rule_based
+
+        schema = self._load_metadata_schema()
+        if not schema:
+            return rule_based
+
+        llm_analyzer = LLMIntentAnalyzer(
+            build_intent_llm(),
+            schema,
+            default_top_k=retrieval_depth,
+        )
+        return CompositeQueryAnalyzer(rule_based=rule_based, llm_based=llm_analyzer)
+
+    def _load_metadata_schema(self) -> MetadataSchema:
+        """Load the persisted schema, falling back to indexed field discovery."""
+        schema = MetadataSchemaStore().load()
+        if schema:
+            return schema
+        try:
+            fields, multi_fields = self.qdrant_service.discover_property_fields()
+        except Exception:
+            fields, multi_fields = [], set()
+        return schema_from_indexed_fields(fields, multi_fields)
 
     def retrieve(self, query: str) -> list[SearchResult]:
         """Run retrieval and cap to the configured number of sources."""

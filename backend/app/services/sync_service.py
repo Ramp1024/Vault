@@ -7,6 +7,7 @@ from app.models.sync_result import SyncResult
 from app.processors.chunker import Chunker
 from app.services.bm25_indexer import BM25Indexer
 from app.services.embedding_service import EmbeddingService
+from app.services.metadata_schema_store import MetadataSchemaStore
 from app.services.qdrant_service import QdrantService
 
 
@@ -25,6 +26,7 @@ class SyncService:
         sync_logger: logging.Logger | None = None,
         clock: Callable[[], float] = perf_counter,
         bm25_indexer: BM25Indexer | None = None,
+        schema_store: MetadataSchemaStore | None = None,
     ) -> None:
         self.connector = connector
         self.chunker = chunker
@@ -33,6 +35,9 @@ class SyncService:
         self.logger = sync_logger if sync_logger is not None else logger
         self.clock = clock
         self.bm25_indexer = bm25_indexer
+        self.schema_store = (
+            schema_store if schema_store is not None else MetadataSchemaStore()
+        )
 
     def sync(self) -> SyncResult:
         started_at = self.clock()
@@ -40,6 +45,8 @@ class SyncService:
 
         documents = self.connector.fetch_documents()
         self.logger.info("Fetched %d documents", len(documents))
+
+        self._persist_schema(documents)
 
         documents_to_index = []
         collection_exists = self.qdrant_service.collection_exists()
@@ -95,3 +102,20 @@ class SyncService:
         )
         self.logger.info("Sync completed in %.1f seconds", duration)
         return result
+
+    def _persist_schema(self, documents: list) -> None:
+        """Discover and persist the filterable metadata schema for this sync.
+
+        The connector infers its schema from the freshly fetched documents (no
+        extra fetch), and the result is written to the schema store so the
+        schema-aware intent analyzer can load it at query time. Discovery never
+        blocks a sync: any failure is logged and ignored.
+        """
+        try:
+            schema = self.connector.describe_schema(documents)
+            self.schema_store.save(schema)
+            self.logger.info(
+                "Persisted metadata schema with %d fields", len(schema.fields)
+            )
+        except Exception:
+            self.logger.warning("Failed to persist metadata schema", exc_info=True)
