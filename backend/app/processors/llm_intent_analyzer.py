@@ -65,7 +65,7 @@ class LLMIntentAnalyzer(QueryAnalyzer):
             return self._fallback(normalized)
 
         semantic_query = self._semantic_query(parsed, normalized)
-        filters = self.validator.validate(parsed.get("filters"))
+        filters = self.validator.validate(parsed.get("filters"), query=normalized)
         return SearchRequest(
             semantic_query=semantic_query,
             filters=filters,

@@ -22,9 +22,13 @@ _SYSTEM = (
     "3. Every value must match the field's type: booleans are true/false, dates "
     "are ISO 'YYYY-MM-DD' strings, numbers are numeric, strings are text.\n"
     "4. Resolve every date to an absolute ISO 'YYYY-MM-DD' value using the "
-    "current date provided below as the reference point. Infer the year when it "
-    "is omitted (e.g. 'Jul 20' -> the closest 20 July on or before the current "
-    "date) and resolve relative expressions such as 'last week' or 'yesterday'.\n"
+    "current date provided below as the reference point. When the user omits "
+    "the year (e.g. 'Jul 20', 'March 3'), you MUST use the year from the "
+    "current date, choosing the previous year only if that day has not yet "
+    "occurred this year. NEVER invent or default to an earlier year (such as "
+    "2023) and never use a year unless the user explicitly states one. Resolve "
+    "relative expressions such as 'last week' or 'yesterday' from the current "
+    "date the same way.\n"
     "5. For dates, choose the operator by scope: a SINGLE specific day uses '=' "
     "with that day's date; only use 'between' for an explicit span of days (a "
     "week, a month, a date range), providing value as a two-element array "
@@ -58,9 +62,13 @@ def build_intent_prompt(
     to an absolute reference, defaulting to the current date.
     """
     reference_date = (today or date.today()).isoformat()
+    reference = today or date.today()
     schema_json = json.dumps(schema.to_dict(), indent=2, ensure_ascii=False)
     user = (
-        f"Current date (reference for resolving dates): {reference_date}\n\n"
+        f"Current date (reference for resolving dates): {reference_date}\n"
+        f"Current year: {reference.year}. Any date whose year the user does not "
+        "state must use this year (or the previous year only if that day is "
+        "still in the future).\n\n"
         "Available metadata schema (the only fields and operators you may use):\n"
         f"{schema_json}\n\n"
         f"{_OUTPUT_CONTRACT}\n\n"

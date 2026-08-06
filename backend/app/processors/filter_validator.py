@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import date
 from typing import Any
 
@@ -33,6 +34,11 @@ _OPERATOR_TOKENS: dict[str, Operator] = {
     "eq": Operator.EQUALS,
 }
 
+# A four-digit year the user typed explicitly (e.g. "July 2023"). When present
+# we trust the model's year; when absent, any year it emits is a guess and is
+# normalized against the reference date.
+_EXPLICIT_YEAR = re.compile(r"\b(?:19|20)\d{2}\b")
+
 
 class FilterValidator:
     """Validate LLM-proposed filters against a :class:`MetadataSchema`.
@@ -47,18 +53,36 @@ class FilterValidator:
     def __init__(self, schema: MetadataSchema) -> None:
         self.schema = schema
 
-    def validate(self, raw_filters: Any) -> list[Filter]:
-        """Return the subset of ``raw_filters`` that is valid for the schema."""
+    def validate(
+        self,
+        raw_filters: Any,
+        *,
+        query: str | None = None,
+        today: date | None = None,
+    ) -> list[Filter]:
+        """Return the subset of ``raw_filters`` that is valid for the schema.
+
+        When ``query`` is supplied and contains no explicit four-digit year, any
+        year the model attached to a date value is treated as a guess and
+        normalized to the most recent occurrence on/before ``today`` (defaulting
+        to the current date). This corrects a common local-model failure where a
+        year-less phrase like "Jul 27" is resolved to a stale training-era year.
+        An explicit year in the user's text is always trusted.
+        """
         if not isinstance(raw_filters, list):
             return []
+        reference = today or date.today()
+        normalize_year = query is not None and not _EXPLICIT_YEAR.search(query)
         valid: list[Filter] = []
         for raw in raw_filters:
-            candidate = self._validate_one(raw)
+            candidate = self._validate_one(raw, reference, normalize_year)
             if candidate is not None:
                 valid.append(candidate)
         return valid
 
-    def _validate_one(self, raw: Any) -> Filter | None:
+    def _validate_one(
+        self, raw: Any, reference: date, normalize_year: bool
+    ) -> Filter | None:
         if not isinstance(raw, dict):
             return None
 
@@ -79,14 +103,21 @@ class FilterValidator:
         if operator is None:
             return None
 
-        value = self._coerce_value(field, operator, raw.get("value"))
+        value = self._coerce_value(
+            field, operator, raw.get("value"), reference, normalize_year
+        )
         if value is None:
             return None
 
         return Filter(field=field.name, operator=operator, value=value)
 
     def _coerce_value(
-        self, field: MetadataField, operator: Operator, value: Any
+        self,
+        field: MetadataField,
+        operator: Operator,
+        value: Any,
+        reference: date,
+        normalize_year: bool,
     ) -> Any:
         if value is None:
             return None
@@ -94,22 +125,27 @@ class FilterValidator:
         if operator is Operator.BETWEEN:
             if not isinstance(value, (list, tuple)) or len(value) != 2:
                 return None
-            low = self._coerce_scalar(field, value[0])
-            high = self._coerce_scalar(field, value[1])
+            low = self._coerce_scalar(field, value[0], reference, normalize_year)
+            high = self._coerce_scalar(field, value[1], reference, normalize_year)
             if low is None or high is None:
                 return None
             return [low, high]
 
         # A multi-valued equality/contains may arrive as a list of options.
         if isinstance(value, (list, tuple)):
-            coerced = [self._coerce_scalar(field, item) for item in value]
+            coerced = [
+                self._coerce_scalar(field, item, reference, normalize_year)
+                for item in value
+            ]
             coerced = [item for item in coerced if item is not None]
             return coerced or None
 
-        return self._coerce_scalar(field, value)
+        return self._coerce_scalar(field, value, reference, normalize_year)
 
     @staticmethod
-    def _coerce_scalar(field: MetadataField, value: Any) -> Any:
+    def _coerce_scalar(
+        field: MetadataField, value: Any, reference: date, normalize_year: bool
+    ) -> Any:
         """Coerce a scalar to the field's type, or None if it does not fit."""
         if value is None:
             return None
@@ -119,7 +155,7 @@ class FilterValidator:
         if field.type is FieldType.NUMBER:
             return _coerce_number(value)
         if field.type is FieldType.DATE:
-            return _coerce_date(value)
+            return _coerce_date(value, reference, normalize_year)
         # STRING
         text = str(value).strip()
         return text or None
@@ -151,11 +187,36 @@ def _coerce_number(value: Any) -> float | int | None:
         return None
 
 
-def _coerce_date(value: Any) -> str | None:
+def _coerce_date(value: Any, reference: date, normalize_year: bool) -> str | None:
     if not isinstance(value, str):
         return None
     token = value.strip()
     try:
-        return date.fromisoformat(token[:10]).isoformat()
+        parsed = date.fromisoformat(token[:10])
     except ValueError:
         return None
+    if normalize_year:
+        parsed = _clamp_year_to_recent(parsed, reference)
+    return parsed.isoformat()
+
+
+def _clamp_year_to_recent(value: date, reference: date) -> date:
+    """Move ``value`` to the most recent occurrence of its month/day on or
+    before ``reference``.
+
+    Only invoked when the user did not state a year, so the model's year is a
+    guess. Uses the reference year, stepping back one year if that day has not
+    happened yet this year.
+    """
+    candidate = _replace_year(value, reference.year)
+    if candidate > reference:
+        candidate = _replace_year(value, reference.year - 1)
+    return candidate
+
+
+def _replace_year(value: date, year: int) -> date:
+    try:
+        return value.replace(year=year)
+    except ValueError:
+        # Feb 29 on a non-leap year: fall back to Feb 28.
+        return value.replace(year=year, day=28)
