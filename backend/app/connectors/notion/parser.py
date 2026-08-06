@@ -1,12 +1,22 @@
 from typing import Any
 
 from app.connectors.notion.client import NotionDataSource
+from app.connectors.notion.property_roles import build_notion_role_classifier
 from app.core.text import to_camel_case
-from app.models.document import Document
+from app.models.document import SEMANTIC_PROPERTIES_KEY, Document
+from app.models.property_role import PropertyRole
+from app.processors.property_role_classifier import PropertyRoleClassifier
 
 
 class NotionParser:
     """Parse raw Notion API payloads into domain Documents."""
+
+    def __init__(self, role_classifier: PropertyRoleClassifier | None = None) -> None:
+        self.role_classifier = (
+            role_classifier
+            if role_classifier is not None
+            else build_notion_role_classifier()
+        )
 
     def parse_page(
         self,
@@ -22,18 +32,24 @@ class NotionParser:
         if not isinstance(last_edited_time, str):
             last_edited_time = ""
 
+        filterable, semantic = self._classify_properties(properties)
+
+        metadata: dict[str, Any] = {
+            "source": "notion",
+            "data_source_id": data_source.id,
+            "data_source_name": data_source.name,
+            "last_edited_time": last_edited_time,
+            "url": page.get("url"),
+            "properties": filterable,
+        }
+        if semantic:
+            metadata[SEMANTIC_PROPERTIES_KEY] = semantic
+
         return Document(
             id=page_id,
             title=title,
             content=body,
-            metadata={
-                "source": "notion",
-                "data_source_id": data_source.id,
-                "data_source_name": data_source.name,
-                "last_edited_time": last_edited_time,
-                "url": page.get("url"),
-                "properties": self._extract_properties(properties),
-            },
+            metadata=metadata,
         )
 
     def _extract_page_title(self, page: dict[str, Any]) -> str:
@@ -125,70 +141,151 @@ class NotionParser:
 
         return "".join(parts).strip()
 
-    def _extract_properties(self, properties: dict[str, Any]) -> dict[str, Any]:
-        """Extract Notion page properties into a typed field/value mapping.
+    def _classify_properties(
+        self, properties: dict[str, Any]
+    ) -> tuple[dict[str, Any], dict[str, str]]:
+        """Split Notion page properties into filterable and semantic buckets.
 
-        Keys are normalized to camelCase (e.g. ``"Leetcode Topic"`` ->
-        ``"leetcodeTopic"``) for consistency across connectors; values are
-        normalized to plain Python types (str, int/float, bool, list[str]) so
-        they can be stored as individual payload fields and used for metadata
-        filtering. The page title property is skipped since it is captured
-        separately.
+        Each property is first assigned a :class:`PropertyRole` (independently of
+        its datatype) and then routed accordingly:
+
+        - ``FILTERABLE`` properties are extracted into a typed field/value
+          mapping keyed by camelCase name (e.g. ``"Leetcode Topic"`` ->
+          ``"leetcodeTopic"``). These drive metadata schema discovery, payload
+          indexes, and filtering.
+        - ``SEMANTIC`` properties are extracted as plain text keyed by their
+          original name so the chunker can merge them into the page body.
+        - ``IGNORE`` properties are discarded.
+
+        The title property is always skipped here since it is captured
+        separately as the document title.
         """
         if not isinstance(properties, dict) or not properties:
-            return {}
+            return {}, {}
 
-        extracted: dict[str, Any] = {}
+        filterable: dict[str, Any] = {}
+        semantic: dict[str, str] = {}
 
         for prop_name, prop_data in properties.items():
             if not isinstance(prop_data, dict):
                 continue
 
             prop_type = prop_data.get("type")
+            if prop_type == "title":
+                continue
+
             key = to_camel_case(prop_name)
             if not key:
                 continue
 
-            if prop_type == "checkbox":
-                extracted[key] = bool(prop_data.get("checkbox", False))
-            elif prop_type == "select":
-                select_obj = prop_data.get("select")
-                if isinstance(select_obj, dict):
-                    name = select_obj.get("name")
-                    if name:
-                        extracted[key] = name
-            elif prop_type == "multi_select":
-                multi_select = prop_data.get("multi_select", [])
-                if isinstance(multi_select, list):
-                    tags = [
-                        item.get("name", "")
-                        for item in multi_select
-                        if isinstance(item, dict) and item.get("name")
-                    ]
-                    if tags:
-                        extracted[key] = tags
-            elif prop_type == "date":
-                date_obj = prop_data.get("date")
-                if isinstance(date_obj, dict):
-                    start_date = date_obj.get("start")
-                    if start_date:
-                        extracted[key] = start_date
-            elif prop_type == "rich_text":
-                rich_text = prop_data.get("rich_text", [])
-                if rich_text:
-                    text = self._join_rich_text(rich_text)
-                    if text:
-                        extracted[key] = text
-            elif prop_type == "number":
-                number_val = prop_data.get("number")
-                if number_val is not None:
-                    extracted[key] = number_val
-            elif prop_type == "url":
-                url_val = prop_data.get("url")
-                if url_val:
-                    extracted[key] = url_val
+            value = self._extract_value(prop_type, prop_data)
+            role = self.role_classifier.classify(
+                name=prop_name,
+                key=key,
+                native_type=prop_type,
+                value=value,
+            )
 
-        return extracted
+            if role is PropertyRole.IGNORE:
+                continue
+            if value is None:
+                continue
+
+            if role is PropertyRole.FILTERABLE:
+                filterable[key] = value
+            else:  # PropertyRole.SEMANTIC
+                text = self._value_as_text(value)
+                if text:
+                    semantic[prop_name] = text
+
+        return filterable, semantic
+
+    def _extract_value(self, prop_type: Any, prop_data: dict[str, Any]) -> Any:
+        """Normalize a single Notion property into a plain Python value.
+
+        Returns ``None`` when the property has no extractable value (empty or an
+        unsupported type). The native type is preserved by the caller for role
+        classification; this method only normalizes the value.
+        """
+        if prop_type == "checkbox":
+            return bool(prop_data.get("checkbox", False))
+        if prop_type == "select":
+            select_obj = prop_data.get("select")
+            if isinstance(select_obj, dict):
+                name = select_obj.get("name")
+                if name:
+                    return name
+            return None
+        if prop_type == "status":
+            status_obj = prop_data.get("status")
+            if isinstance(status_obj, dict):
+                name = status_obj.get("name")
+                if name:
+                    return name
+            return None
+        if prop_type == "multi_select":
+            multi_select = prop_data.get("multi_select", [])
+            if isinstance(multi_select, list):
+                tags = [
+                    item.get("name", "")
+                    for item in multi_select
+                    if isinstance(item, dict) and item.get("name")
+                ]
+                if tags:
+                    return tags
+            return None
+        if prop_type == "people":
+            people = prop_data.get("people", [])
+            if isinstance(people, list):
+                names = [
+                    person.get("name", "")
+                    for person in people
+                    if isinstance(person, dict) and person.get("name")
+                ]
+                if names:
+                    return names
+            return None
+        if prop_type == "relation":
+            relations = prop_data.get("relation", [])
+            if isinstance(relations, list):
+                ids = [
+                    item.get("id", "")
+                    for item in relations
+                    if isinstance(item, dict) and item.get("id")
+                ]
+                if ids:
+                    return ids
+            return None
+        if prop_type == "date":
+            date_obj = prop_data.get("date")
+            if isinstance(date_obj, dict):
+                start_date = date_obj.get("start")
+                if start_date:
+                    return start_date
+            return None
+        if prop_type == "rich_text":
+            text = self._join_rich_text(prop_data.get("rich_text", []))
+            return text or None
+        if prop_type == "number":
+            return prop_data.get("number")
+        if prop_type == "url":
+            return prop_data.get("url") or None
+        if prop_type == "email":
+            return prop_data.get("email") or None
+        if prop_type == "phone_number":
+            return prop_data.get("phone_number") or None
+        return None
+
+    @staticmethod
+    def _value_as_text(value: Any) -> str:
+        """Render a semantic property value as plain text for embedding."""
+        if isinstance(value, str):
+            return value.strip()
+        if isinstance(value, (list, tuple, set)):
+            return ", ".join(str(item).strip() for item in value if str(item).strip())
+        if value is None:
+            return ""
+        return str(value).strip()
 
     def _format_table(self, table_rows: list[dict[str, Any]]) -> list[str]:
         """Format table rows into markdown pipe table format.

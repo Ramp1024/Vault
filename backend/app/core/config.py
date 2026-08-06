@@ -33,6 +33,14 @@ class Settings(BaseSettings):
         "METADATA_SCHEMA_PATH",
         str(Path(__file__).resolve().parents[2] / "config" / "metadata_schema.json"),
     )
+    # Optional user configuration for role-based property classification. The
+    # file (JSON) may define ``property_roles`` (per-property overrides) and
+    # ``type_roles`` (connector native-type -> role overrides). It is optional:
+    # when absent, connectors fall back to their built-in default role mapping.
+    PROPERTY_ROLES_PATH: str = os.environ.get(
+        "PROPERTY_ROLES_PATH",
+        str(Path(__file__).resolve().parents[2] / "config" / "property_roles.json"),
+    )
     # Retrieval pipeline configuration. RETRIEVAL_MODE selects which strategies
     # the chat pipeline runs: "vector", "bm25", or "hybrid" (Vector + BM25 fused
     # with Reciprocal Rank Fusion). RRF_K is the RRF rank-damping constant.

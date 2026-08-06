@@ -1,4 +1,4 @@
-from app.models.document import Document
+from app.models.document import SEMANTIC_PROPERTIES_KEY, Document
 from app.models.chunk import Chunk
 import re
 
@@ -40,9 +40,62 @@ class Chunker:
 		chunks: list[Chunk] = []
 
 		for document in documents:
-			chunks.extend(self._chunk_document(document))
+			prepared = self._prepare_document(document)
+			chunks.extend(self._chunk_document(prepared))
 
 		return chunks
+
+	def _prepare_document(self, document: Document) -> Document:
+		"""Merge SEMANTIC-role properties into the page body before chunking.
+
+		Properties classified as semantic (e.g. long-form journal or notes
+		fields) are appended to the document content so they become part of the
+		semantic search corpus, and the ``semantic_properties`` metadata entry is
+		removed so it never leaks into the vector store payload as a filterable
+		field. Documents without semantic properties are returned unchanged.
+		"""
+		semantic = document.metadata.get(SEMANTIC_PROPERTIES_KEY)
+		if not isinstance(semantic, dict) or not semantic:
+			return document
+
+		appended = self._format_semantic_properties(semantic)
+		new_metadata = {
+			key: value
+			for key, value in document.metadata.items()
+			if key != SEMANTIC_PROPERTIES_KEY
+		}
+
+		if not appended:
+			return Document(
+				id=document.id,
+				title=document.title,
+				content=document.content,
+				metadata=new_metadata,
+			)
+
+		body = document.content.strip()
+		new_content = f"{body}\n\n{appended}" if body else appended
+
+		return Document(
+			id=document.id,
+			title=document.title,
+			content=new_content,
+			metadata=new_metadata,
+		)
+
+	def _format_semantic_properties(self, semantic: dict) -> str:
+		"""Render semantic properties as labeled markdown sections.
+
+		Each property becomes its own heading section so structure-aware
+		chunking keeps its content together and clearly attributed.
+		"""
+		blocks: list[str] = []
+		for label, text in semantic.items():
+			text_str = str(text).strip()
+			if not text_str:
+				continue
+			blocks.append(f"## {label}\n\n{text_str}")
+		return "\n\n".join(blocks)
 
 	def _chunk_document(self, document: Document) -> list[Chunk]:
 		"""Chunk a single document using adaptive strategy.
