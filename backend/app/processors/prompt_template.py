@@ -43,8 +43,12 @@ class GroundedAnswerTemplate(PromptTemplate):
         "Only cite reference numbers that appear in the provided sources; never "
         "invent citations or facts.\n"
         "Do not add an offer to clarify, expand, or answer more questions.\n"
-        f"If the sources do not contain enough information, respond exactly: "
-        f"{_NO_ANSWER}"
+        "When the question specifies a constraint such as a date, time, or "
+        "category and a source satisfies that constraint, summarize that "
+        "source's content even if its topic wording differs from the question; "
+        "do not refuse just because the exact phrasing is absent.\n"
+        f"Only when no provided source is relevant to the question, respond "
+        f"exactly: {_NO_ANSWER}"
     )
 
     def build(self, query: str, context: AssembledContext) -> Prompt:

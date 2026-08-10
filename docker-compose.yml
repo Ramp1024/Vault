@@ -13,6 +13,13 @@ services:
       GENERATION_MODEL: ${GENERATION_MODEL:-llama3.1:8b}
       QDRANT_HOST: qdrant
       QDRANT_PORT: 6333
+      # Generated retrieval artifacts live on the vault_data volume so they
+      # survive image rebuilds and stay consistent with the persisted Qdrant
+      # vectors. Regenerated on each sync.
+      BM25_INDEX_PATH: /app/data/bm25_index.pkl
+      METADATA_SCHEMA_PATH: /app/data/metadata_schema.json
+    volumes:
+      - vault_data:/app/data
     depends_on:
       qdrant:
         condition: service_healthy
@@ -45,3 +52,4 @@ services:
 
 volumes:
   qdrant_data:
+  vault_data:

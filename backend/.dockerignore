@@ -7,3 +7,13 @@ __pycache__
 .mypy_cache
 .ruff_cache
 .git
+
+# Generated retrieval artifacts. These are produced at runtime by the sync
+# (rebuilt from Qdrant) and persisted on a volume; baking stale copies into the
+# image would overwrite the live index/schema on rebuild.
+config/bm25_index.pkl
+config/metadata_schema.json
+
+# Local secrets / env files (never copied into the image).
+.env
+.env.*
