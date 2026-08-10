@@ -16,6 +16,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "rank-bm25>=0.2.2",
     "sentence-transformers>=3.0.0",
+    "torch>=2.13.0",
 ]
 
 [dependency-groups]
@@ -29,3 +30,14 @@ build-backend = "hatchling.build"
 
 [tool.uv]
 package = false
+
+# Pull torch from PyTorch's CPU-only wheel index on Linux so the image doesn't
+# drag in the multi-GB CUDA/nvidia stack. macOS/Windows resolve torch normally
+# from PyPI (their default wheels are already CPU/MPS builds).
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
