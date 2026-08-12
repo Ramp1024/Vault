@@ -1,14 +1,21 @@
 import { useEffect, useRef } from 'react'
 import type { ChatMessage } from '../../pages/ChatPage/ChatPage'
 import { MessageBubble } from '../MessageBubble/MessageBubble'
-import { TypingIndicator } from '../TypingIndicator/TypingIndicator'
 
 type ChatWindowProps = {
   messages: ChatMessage[]
   isStreaming: boolean
+  onPromptSelect?: (prompt: string) => void
 }
 
-export function ChatWindow({ messages, isStreaming }: ChatWindowProps) {
+const EXAMPLE_PROMPTS = [
+  'Summarize my most recent notes',
+  'What decisions did I capture last week?',
+  'Find open questions across my Vault',
+  'Explain a concept from my knowledge base',
+]
+
+export function ChatWindow({ messages, isStreaming, onPromptSelect }: ChatWindowProps) {
   const endRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -18,27 +25,47 @@ export function ChatWindow({ messages, isStreaming }: ChatWindowProps) {
   if (messages.length === 0) {
     return (
       <section className="chat-window empty">
-        <p>Start by asking a question.</p>
+        <div className="empty-state">
+          <p className="empty-state-eyebrow">Get started</p>
+          <h2>Ask your Vault anything</h2>
+          <p className="empty-state-sub">
+            Answers are grounded in your indexed knowledge base.
+          </p>
+          <ul className="empty-state-prompts">
+            {EXAMPLE_PROMPTS.map((prompt) => (
+              <li key={prompt}>
+                <button
+                  type="button"
+                  className="prompt-row"
+                  onClick={() => onPromptSelect?.(prompt)}
+                >
+                  <span className="prompt-row-text">{prompt}</span>
+                  <span className="prompt-row-arrow" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 12h14M13 6l6 6-6 6"
+                      />
+                    </svg>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
     )
   }
 
-  const lastMessage = messages[messages.length - 1]
-  const showTyping =
-    isStreaming && lastMessage?.role === 'assistant' && !lastMessage.content
-
   return (
     <section className="chat-window">
       {messages.map((message) => (
-        <MessageBubble
-          key={message.id}
-          role={message.role}
-          content={message.content}
-          sources={message.sources}
-          citations={message.citations}
-        />
+        <MessageBubble key={message.id} message={message} />
       ))}
-      {showTyping ? <TypingIndicator /> : null}
       <div ref={endRef} aria-hidden="true" />
     </section>
   )

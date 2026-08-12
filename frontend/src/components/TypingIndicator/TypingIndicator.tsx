@@ -1,7 +1,11 @@
 export function TypingIndicator() {
   return (
-    <div className="message-row assistant" aria-live="polite" aria-label="Assistant is typing">
-      <div className="message-bubble typing-indicator">
+    <div className="msg msg-assistant" aria-live="polite" aria-label="Vault is thinking">
+      <div className="msg-role">
+        <span className="msg-role-dot" aria-hidden="true" />
+        Vault
+      </div>
+      <div className="typing-indicator">
         <span />
         <span />
         <span />

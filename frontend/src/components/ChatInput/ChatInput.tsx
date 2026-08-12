@@ -29,18 +29,42 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   }
 
   return (
-    <form className="chat-input" onSubmit={(event) => void submit(event)}>
+    <form className="composer" onSubmit={(event) => void submit(event)}>
       <textarea
+        className="composer-input"
         value={message}
         onChange={(event) => setMessage(event.target.value)}
         onKeyDown={onKeyDown}
-        placeholder="Ask about your Vault content..."
+        placeholder="Write a message…"
         disabled={disabled}
-        rows={2}
+        rows={1}
       />
-      <button type="submit" disabled={disabled || !message.trim()}>
-        {disabled ? 'Thinking...' : 'Send'}
-      </button>
+      <div className="composer-footer">
+        <span className="composer-hint">
+          <kbd>Enter</kbd> to send · <kbd>Shift</kbd>+<kbd>Enter</kbd> for newline
+        </span>
+        <button
+          type="submit"
+          className="composer-send"
+          disabled={disabled || !message.trim()}
+          aria-label="Send message"
+        >
+          {disabled ? (
+            <span className="composer-spinner" aria-hidden="true" />
+          ) : (
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <path
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 19V5M6 11l6-6 6 6"
+              />
+            </svg>
+          )}
+        </button>
+      </div>
     </form>
   )
 }

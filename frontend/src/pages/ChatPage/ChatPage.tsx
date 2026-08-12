@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { ChatInput } from '../../components/ChatInput/ChatInput'
 import { ChatWindow } from '../../components/ChatWindow/ChatWindow'
+import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle'
+import { useTheme } from '../../hooks/useTheme'
 
 export type ChatRole = 'user' | 'assistant'
 
@@ -20,12 +22,24 @@ export type ChatCitation = {
     title: string
 }
 
+export type TraceStep = {
+    id: string
+    label: string
+    status: 'active' | 'done'
+}
+
+export type ChatPhase = 'loading' | 'streaming' | 'done'
+
 export type ChatMessage = {
     id: string
     role: ChatRole
     content: string
     sources?: ChatSource[]
     citations?: ChatCitation[]
+    phase?: ChatPhase
+    trace?: TraceStep[]
+    startedAt?: number
+    finishedAt?: number
 }
 
 const createMessage = (role: ChatRole, content: string): ChatMessage => ({
@@ -34,9 +48,48 @@ const createMessage = (role: ChatRole, content: string): ChatMessage => ({
     content,
 })
 
+// Build the trace shown once retrieval finishes. Grounded in the real stream:
+// the sources header tells us the vault was searched and how many chunks matched.
+const buildRetrievalTrace = (sourceCount: number): TraceStep[] => [
+    { id: 'analyze', label: 'Understanding your question', status: 'done' },
+    { id: 'search', label: 'Searching your Vault', status: 'done' },
+    {
+        id: 'read',
+        label:
+            sourceCount > 0
+                ? `Reviewed ${sourceCount} matched ${sourceCount === 1 ? 'source' : 'sources'}`
+                : 'No matching sources found',
+        status: 'done',
+    },
+    { id: 'compose', label: 'Writing the answer', status: 'active' },
+]
+
+// Mark the composing step active once answer text begins to stream. Falls back to
+// a minimal trace if the sources header never arrived.
+const markComposing = (trace: TraceStep[] | undefined): TraceStep[] => {
+    if (!trace || trace.length === 0) {
+        return [
+            { id: 'analyze', label: 'Understanding your question', status: 'done' },
+            { id: 'compose', label: 'Writing the answer', status: 'active' },
+        ]
+    }
+    if (trace.some((step) => step.id === 'compose')) {
+        return trace
+    }
+    return [
+        ...trace.map((step) => ({ ...step, status: 'done' as const })),
+        { id: 'compose', label: 'Writing the answer', status: 'active' },
+    ]
+}
+
+// Close out the trace: every step is done and the timer is frozen.
+const finalizeTrace = (trace: TraceStep[] | undefined): TraceStep[] | undefined =>
+    trace?.map((step) => ({ ...step, status: 'done' as const }))
+
 export function ChatPage() {
     const [messages, setMessages] = useState<ChatMessage[]>([])
     const [isSending, setIsSending] = useState(false)
+    const { theme, setTheme } = useTheme()
 
     const canSend = useMemo(() => !isSending, [isSending])
 
@@ -48,7 +101,18 @@ export function ChatPage() {
             }
 
             const userMessage = createMessage('user', message)
-            const assistantMessage = createMessage('assistant', '')
+            const assistantMessage: ChatMessage = {
+                ...createMessage('assistant', ''),
+                phase: 'loading',
+                startedAt: Date.now(),
+                trace: [
+                    {
+                        id: 'analyze',
+                        label: 'Understanding your question',
+                        status: 'active',
+                    },
+                ],
+            }
 
             setMessages((current) => [...current, userMessage, assistantMessage])
             setIsSending(true)
@@ -86,34 +150,45 @@ export function ChatPage() {
                 let headerBuffer = ''
                 let inFinalFrame = false
                 let finalBuffer = ''
+                let streamingStarted = false
 
-                const applyContent = (text: string) => {
-                    if (!text) {
-                        return
-                    }
+                const patchAssistant = (
+                    patch: Partial<ChatMessage> | ((entry: ChatMessage) => Partial<ChatMessage>),
+                ) => {
                     setMessages((current) =>
                         current.map((entry) =>
                             entry.id === assistantMessage.id
-                                ? { ...entry, content: entry.content + text }
+                                ? {
+                                      ...entry,
+                                      ...(typeof patch === 'function' ? patch(entry) : patch),
+                                  }
                                 : entry,
                         ),
                     )
                 }
 
+                const applyContent = (text: string) => {
+                    if (!text) {
+                        return
+                    }
+                    if (!streamingStarted) {
+                        streamingStarted = true
+                        patchAssistant((entry) => ({
+                            content: entry.content + text,
+                            phase: 'streaming',
+                            trace: markComposing(entry.trace),
+                        }))
+                        return
+                    }
+                    patchAssistant((entry) => ({ content: entry.content + text }))
+                }
+
                 const applySources = (sources: ChatSource[]) => {
-                    setMessages((current) =>
-                        current.map((entry) =>
-                            entry.id === assistantMessage.id ? { ...entry, sources } : entry,
-                        ),
-                    )
+                    patchAssistant({ sources, trace: buildRetrievalTrace(sources.length) })
                 }
 
                 const applyCitations = (citations: ChatCitation[]) => {
-                    setMessages((current) =>
-                        current.map((entry) =>
-                            entry.id === assistantMessage.id ? { ...entry, citations } : entry,
-                        ),
-                    )
+                    patchAssistant({ citations })
                 }
 
                 // Route answer-body text to the message, splitting off the trailing
@@ -202,6 +277,12 @@ export function ChatPage() {
                     }
 
                     flushFinalFrame()
+
+                    patchAssistant((entry) => ({
+                        phase: 'done',
+                        finishedAt: Date.now(),
+                        trace: finalizeTrace(entry.trace),
+                    }))
                 } finally {
                     reader.releaseLock()
                 }
@@ -214,7 +295,13 @@ export function ChatPage() {
                 setMessages((current) =>
                     current.map((entry) =>
                         entry.id === assistantMessage.id
-                            ? { ...entry, content: messageText }
+                            ? {
+                                  ...entry,
+                                  content: messageText,
+                                  phase: 'done',
+                                  finishedAt: Date.now(),
+                                  trace: undefined,
+                              }
                             : entry,
                     ),
                 )
@@ -228,11 +315,23 @@ export function ChatPage() {
     return (
         <main className="chat-page">
             <header className="chat-header">
-                <h1>Vault Chat</h1>
-                <p>Ask anything from your indexed Vault knowledge base.</p>
+                <div className="chat-brand">
+                    <span className="chat-brand-mark" aria-hidden="true">V</span>
+                    <div className="chat-brand-text">
+                        <h1>
+                            Vault <span className="chat-brand-badge">Chat</span>
+                        </h1>
+                        <p>Answers grounded in your indexed knowledge base.</p>
+                    </div>
+                </div>
+                <ThemeToggle theme={theme} onSelect={setTheme} />
             </header>
 
-            <ChatWindow messages={messages} isStreaming={isSending} />
+            <ChatWindow
+                messages={messages}
+                isStreaming={isSending}
+                onPromptSelect={handleSend}
+            />
 
             <ChatInput onSend={handleSend} disabled={!canSend} />
         </main>
