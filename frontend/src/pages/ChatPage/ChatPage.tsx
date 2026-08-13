@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChatInput } from '../../components/ChatInput/ChatInput'
 import { ChatWindow } from '../../components/ChatWindow/ChatWindow'
 import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle'
@@ -48,6 +48,21 @@ const createMessage = (role: ChatRole, content: string): ChatMessage => ({
     content,
 })
 
+// A fresh assistant placeholder in the loading phase, with the timer started and
+// the first trace step already active.
+const createLoadingAssistant = (): ChatMessage => ({
+    ...createMessage('assistant', ''),
+    phase: 'loading',
+    startedAt: Date.now(),
+    trace: [
+        {
+            id: 'analyze',
+            label: 'Understanding your question',
+            status: 'active',
+        },
+    ],
+})
+
 // Build the trace shown once retrieval finishes. Grounded in the real stream:
 // the sources header tells us the vault was searched and how many chunks matched.
 const buildRetrievalTrace = (sourceCount: number): TraceStep[] => [
@@ -91,30 +106,18 @@ export function ChatPage() {
     const [isSending, setIsSending] = useState(false)
     const { theme, setTheme } = useTheme()
 
+    // Keep a live snapshot of messages so regenerate can read the current thread
+    // without re-creating the streaming callback on every message update.
+    const messagesRef = useRef<ChatMessage[]>([])
+    useEffect(() => {
+        messagesRef.current = messages
+    }, [messages])
+
     const canSend = useMemo(() => !isSending, [isSending])
 
-    const handleSend = useCallback(
-        async (rawMessage: string) => {
-            const message = rawMessage.trim()
-            if (!message || isSending) {
-                return
-            }
-
-            const userMessage = createMessage('user', message)
-            const assistantMessage: ChatMessage = {
-                ...createMessage('assistant', ''),
-                phase: 'loading',
-                startedAt: Date.now(),
-                trace: [
-                    {
-                        id: 'analyze',
-                        label: 'Understanding your question',
-                        status: 'active',
-                    },
-                ],
-            }
-
-            setMessages((current) => [...current, userMessage, assistantMessage])
+    // Stream an answer into an existing assistant placeholder message.
+    const runStream = useCallback(
+        async (message: string, assistantMessage: ChatMessage) => {
             setIsSending(true)
 
             try {
@@ -309,7 +312,48 @@ export function ChatPage() {
                 setIsSending(false)
             }
         },
-        [isSending],
+        [],
+    )
+
+    const handleSend = useCallback(
+        async (rawMessage: string) => {
+            const message = rawMessage.trim()
+            if (!message || isSending) {
+                return
+            }
+
+            const userMessage = createMessage('user', message)
+            const assistantMessage = createLoadingAssistant()
+
+            setMessages((current) => [...current, userMessage, assistantMessage])
+            await runStream(message, assistantMessage)
+        },
+        [isSending, runStream],
+    )
+
+    const handleRegenerate = useCallback(
+        (assistantId: string) => {
+            if (isSending) {
+                return
+            }
+
+            const list = messagesRef.current
+            const index = list.findIndex((entry) => entry.id === assistantId)
+            if (index < 1) {
+                return
+            }
+
+            const userMessage = list[index - 1]
+            if (userMessage.role !== 'user') {
+                return
+            }
+
+            const assistantMessage = createLoadingAssistant()
+            // Drop the old answer (and anything after it) and stream a new one.
+            setMessages([...list.slice(0, index), assistantMessage])
+            void runStream(userMessage.content, assistantMessage)
+        },
+        [isSending, runStream],
     )
 
     return (
@@ -331,6 +375,7 @@ export function ChatPage() {
                 messages={messages}
                 isStreaming={isSending}
                 onPromptSelect={handleSend}
+                onRegenerate={handleRegenerate}
             />
 
             <ChatInput onSend={handleSend} disabled={!canSend} />

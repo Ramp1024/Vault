@@ -6,6 +6,7 @@ type ChatWindowProps = {
   messages: ChatMessage[]
   isStreaming: boolean
   onPromptSelect?: (prompt: string) => void
+  onRegenerate?: (assistantId: string) => void
 }
 
 const EXAMPLE_PROMPTS = [
@@ -15,7 +16,7 @@ const EXAMPLE_PROMPTS = [
   'Explain a concept from my knowledge base',
 ]
 
-export function ChatWindow({ messages, isStreaming, onPromptSelect }: ChatWindowProps) {
+export function ChatWindow({ messages, isStreaming, onPromptSelect, onRegenerate }: ChatWindowProps) {
   const endRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -64,7 +65,7 @@ export function ChatWindow({ messages, isStreaming, onPromptSelect }: ChatWindow
   return (
     <section className="chat-window">
       {messages.map((message) => (
-        <MessageBubble key={message.id} message={message} />
+        <MessageBubble key={message.id} message={message} onRegenerate={onRegenerate} />
       ))}
       <div ref={endRef} aria-hidden="true" />
     </section>

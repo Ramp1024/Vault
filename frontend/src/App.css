@@ -406,6 +406,160 @@ body {
   flex-shrink: 0;
 }
 
+/* Stacked sources with hover reveal */
+.source-stack {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 12px 3px 3px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--field);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.source-stack:hover,
+.source-stack:focus-visible {
+  border-color: var(--border-strong);
+}
+
+.source-stack-icons {
+  display: inline-flex;
+  align-items: center;
+}
+
+.source-token {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: 2px solid var(--field);
+  font-size: 0.64rem;
+  font-weight: 600;
+  margin-left: -8px;
+  transition: transform 0.16s ease, margin 0.16s ease;
+}
+
+.source-token:first-child {
+  margin-left: 0;
+}
+
+.source-token-more {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+}
+
+.source-stack:hover .source-token {
+  margin-left: -4px;
+}
+
+.source-stack:hover .source-token:first-child {
+  margin-left: 0;
+}
+
+.source-stack-label {
+  font-size: 0.77rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.source-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  width: min(360px, 78vw);
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--elevated);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.source-stack:hover .source-popover,
+.source-stack:focus-within .source-popover {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.source-popover-title {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.source-popover ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.source-popover li {
+  display: flex;
+  gap: 9px;
+}
+
+.source-popover-index {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.64rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.source-popover-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.source-popover-name {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.source-popover-snippet {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.source-popover-score {
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
 /* ============================================================
    Composer
    ============================================================ */
@@ -694,29 +848,39 @@ body {
 }
 
 .msg-actions {
-  margin-top: 12px;
+  margin-top: 14px;
   display: flex;
-  gap: 8px;
-}
-
-.msg-action {
-  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--field);
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: 0.74rem;
-  cursor: pointer;
-  transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
+  gap: 2px;
 }
 
-.msg-action:hover {
-  border-color: var(--border-strong);
+.msg-action-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+
+.msg-action-icon:hover {
   color: var(--text);
+  background: var(--field);
+}
+
+.msg-action-icon.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* Sources trigger sits at the end of the action row */
+.msg-actions .source-stack {
+  margin-left: 6px;
 }
 
 /* ============================================================
