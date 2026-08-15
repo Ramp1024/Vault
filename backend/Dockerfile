@@ -1,14 +1,16 @@
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    UV_LINK_MODE=copy
 
 WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
 
-RUN pip install --no-cache-dir uv \
-    && uv sync --frozen --no-dev
+RUN pip install --no-cache-dir uv
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
 
 # Copy entire app directory with all subdirectories (core, models, services, processors, connectors, api)
 COPY app ./app
