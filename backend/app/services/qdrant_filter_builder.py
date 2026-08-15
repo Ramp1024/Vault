@@ -31,6 +31,11 @@ class QdrantFilterBuilder:
 
     PROPERTY_PREFIX = "properties"
 
+    # System timestamps are stored at the payload top level (spread from chunk
+    # metadata), not under the nested ``properties`` object, so they must not be
+    # prefixed like page properties.
+    SYSTEM_FIELDS = frozenset({"last_edited_time", "created_time"})
+
     def build(self, filters: Sequence[Filter]) -> QdrantFilter | None:
         """Build a Qdrant filter from generic filters, or None if there are none."""
         if not filters:
@@ -40,6 +45,8 @@ class QdrantFilterBuilder:
         return QdrantFilter(must=conditions)
 
     def _payload_key(self, field: str) -> str:
+        if field in self.SYSTEM_FIELDS:
+            return field
         return f"{self.PROPERTY_PREFIX}.{field}"
 
     def _condition(self, f: Filter) -> FieldCondition:

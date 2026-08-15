@@ -22,3 +22,11 @@ Next phases
 
 ->  Consider Cross Document Synthesis
 ->  Add parsing of Code block in ingestion
+->  Rate limits
+
+->  Fix dates
+    ->  Use dateparser python library
+    ->  Use LLM intent parser only for grammar
+    ->  Make datetime system fields on notion pages are indexable
+
+-> Debug Weekly Report pages

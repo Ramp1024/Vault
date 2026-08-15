@@ -29,6 +29,11 @@ class PayloadIndexManager:
 
     PROPERTY_PREFIX = "properties"
 
+    # System timestamps stored at the payload top level (not under ``properties``).
+    # They are not part of the connector schema but must still be datetime-indexed
+    # so deterministic authorship-date range filters execute server-side.
+    SYSTEM_DATETIME_FIELDS = frozenset({"last_edited_time", "created_time"})
+
     # Map each logical field type onto the Qdrant payload index that makes its
     # operators executable server-side.
     #   DATE    -> DATETIME: enables server-side date range/equality filters.
@@ -66,6 +71,13 @@ class PayloadIndexManager:
 
         existing = self._existing_indexes()
         created = 0
+        # Top-level system timestamps first, so authorship-date filters work even
+        # though these fields are intentionally absent from the schema.
+        for field_name in self.SYSTEM_DATETIME_FIELDS:
+            if existing.get(field_name) == PayloadSchemaType.DATETIME:
+                continue
+            if self._create_index(field_name, PayloadSchemaType.DATETIME):
+                created += 1
         for field in schema.fields:
             schema_type = self._TYPE_MAP.get(field.type)
             if schema_type is None:

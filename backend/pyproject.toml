@@ -17,6 +17,7 @@ dependencies = [
     "rank-bm25>=0.2.2",
     "sentence-transformers>=3.0.0",
     "torch>=2.13.0",
+    "dateparser>=1.2.0",
 ]
 
 [dependency-groups]

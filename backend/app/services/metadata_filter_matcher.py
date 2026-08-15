@@ -32,16 +32,22 @@ class MetadataFilterMatcher:
 
     PROPERTY_KEY = "properties"
 
+    # System timestamps live at the top level of chunk metadata, not under the
+    # nested ``properties`` map, so they are looked up directly.
+    SYSTEM_FIELDS = frozenset({"last_edited_time", "created_time"})
+
     def matches(self, chunk: Chunk, filters: Sequence[Filter]) -> bool:
         """Return True if the chunk satisfies every filter."""
         return all(self._matches_one(chunk, f) for f in filters)
 
     def _matches_one(self, chunk: Chunk, f: Filter) -> bool:
-        properties = chunk.metadata.get(self.PROPERTY_KEY)
-        if not isinstance(properties, dict):
-            return False
-
-        stored = properties.get(f.field)
+        if f.field in self.SYSTEM_FIELDS:
+            stored = chunk.metadata.get(f.field)
+        else:
+            properties = chunk.metadata.get(self.PROPERTY_KEY)
+            if not isinstance(properties, dict):
+                return False
+            stored = properties.get(f.field)
         if stored is None:
             return False
 

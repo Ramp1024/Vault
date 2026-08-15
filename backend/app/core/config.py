@@ -93,6 +93,21 @@ class Settings(BaseSettings):
     # Token cap for the intent analyzer's structured JSON response. The output is
     # a small search request, so a tight cap keeps generation fast and bounded.
     INTENT_LLM_MAX_TOKENS: int = int(os.environ.get("INTENT_LLM_MAX_TOKENS", "512"))
+    # Fixed decoding seed for the intent analyzer. Combined with temperature 0
+    # this makes filter inference reproducible run-to-run, so the same query
+    # resolves to the same date filter instead of drifting between requests.
+    INTENT_LLM_SEED: int = int(os.environ.get("INTENT_LLM_SEED", "0"))
+    # IANA timezone (e.g. "Asia/Kolkata", "America/New_York") used to anchor
+    # relative-date resolution ("yesterday", "day before yesterday"). Containers
+    # default to UTC, which shifts relative dates by a day for users ahead of or
+    # behind UTC; set this to your local zone so "today" matches your wall clock.
+    APP_TIMEZONE: str = os.environ.get("APP_TIMEZONE", "UTC")
+    # The record timestamp field that authoring-activity questions ("what did I
+    # write/do <when>") filter on. The LLM emits a temporal descriptor, resolved
+    # in code to a range over this top-level field (defaults to last-edited time).
+    AUTHORSHIP_DATE_FIELD: str = os.environ.get(
+        "AUTHORSHIP_DATE_FIELD", "last_edited_time"
+    )
 
     class Config:
         env_file = str(Path(__file__).resolve().parents[2] / ".env")

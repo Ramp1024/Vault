@@ -40,6 +40,7 @@ class OllamaLLM(LLM):
         temperature: float | None = None,
         max_tokens: int | None = None,
         response_format: str | dict | None = None,
+        seed: int | None = None,
     ) -> None:
         self.model = model or settings.LLM_MODEL
         self.temperature = (
@@ -50,6 +51,9 @@ class OllamaLLM(LLM):
         # When set, Ollama constrains generation to valid output of that shape,
         # which both guarantees parseable results and keeps generation short.
         self.response_format = response_format
+        # Optional fixed decoding seed. With temperature 0 this makes generation
+        # reproducible run-to-run; None leaves seeding to the backend default.
+        self.seed = seed
         self.client = get_ollama_client()
 
     def _options(self) -> dict[str, float | int]:
@@ -58,6 +62,8 @@ class OllamaLLM(LLM):
         options: dict[str, float | int] = {"temperature": self.temperature}
         if self.max_tokens and self.max_tokens > 0:
             options["num_predict"] = self.max_tokens
+        if self.seed is not None:
+            options["seed"] = self.seed
         return options
 
     def _format_kwargs(self) -> dict:
@@ -160,6 +166,7 @@ def build_intent_llm(backend: str | None = None) -> LLM:
             temperature=0.0,
             max_tokens=settings.INTENT_LLM_MAX_TOKENS,
             response_format="json",
+            seed=settings.INTENT_LLM_SEED,
         )
     if name == "mock":
         return MockLLM()

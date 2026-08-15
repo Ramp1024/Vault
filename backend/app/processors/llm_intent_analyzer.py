@@ -6,9 +6,13 @@ import re
 
 from app.models.metadata_schema import MetadataSchema
 from app.models.search_request import SearchRequest
+from app.models.filter import Filter, Operator
+from app.core.clock import today as current_date
+from app.core.config import settings
 from app.processors.filter_validator import FilterValidator
 from app.processors.intent_prompt import build_intent_prompt
 from app.processors.query_analyzer import QueryAnalyzer
+from app.processors.temporal_query import resolve_temporal_descriptor
 from app.services.llm import LLM
 
 logger = logging.getLogger(__name__)
@@ -53,8 +57,13 @@ class LLMIntentAnalyzer(QueryAnalyzer):
         if not self.schema:
             return self._fallback(normalized)
 
+        # Anchor every relative/year-less date to one timezone-correct reference
+        # shared by the prompt and the validator, so they never disagree by a day.
+        reference = current_date()
         try:
-            raw = self.llm.generate(build_intent_prompt(normalized, self.schema))
+            raw = self.llm.generate(
+                build_intent_prompt(normalized, self.schema, today=reference)
+            )
         except Exception:  # pragma: no cover - defensive, backend-dependent
             logger.warning("LLM intent analysis failed; using semantic fallback", exc_info=True)
             return self._fallback(normalized)
@@ -65,7 +74,12 @@ class LLMIntentAnalyzer(QueryAnalyzer):
             return self._fallback(normalized)
 
         semantic_query = self._semantic_query(parsed, normalized)
-        filters = self.validator.validate(parsed.get("filters"), query=normalized)
+        filters = self.validator.validate(
+            parsed.get("filters"), query=normalized, today=reference
+        )
+        filters = self._apply_temporal(
+            parsed.get("temporal"), filters, reference, normalized
+        )
         return SearchRequest(
             semantic_query=semantic_query,
             filters=filters,
@@ -78,6 +92,24 @@ class LLMIntentAnalyzer(QueryAnalyzer):
             filters=[],
             top_k=self.default_top_k,
         )
+
+    @staticmethod
+    def _apply_temporal(descriptor, filters, reference, query):
+        """Fold an LLM temporal descriptor into an authoring-time range filter.
+
+        Resolution (dateparser + boundary snapping) lives in ``temporal_query``.
+        When it yields bounds, the authoring-time axis is authoritative, so any
+        competing content-date filter is dropped to avoid an empty AND. A missing
+        or unresolvable descriptor leaves ``filters`` untouched.
+        """
+        bounds = resolve_temporal_descriptor(descriptor, reference, query)
+        if bounds is None:
+            return filters
+        low, high = bounds
+        field = settings.AUTHORSHIP_DATE_FIELD
+        kept = [f for f in filters if f.field not in {field, "date"}]
+        kept.append(Filter(field=field, operator=Operator.BETWEEN, value=[low, high]))
+        return kept
 
     @staticmethod
     def _parse(raw: str) -> dict | None:

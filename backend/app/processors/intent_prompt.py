@@ -21,18 +21,19 @@ _SYSTEM = (
     "invent field names, and never use an operator a field does not list.\n"
     "3. Every value must match the field's type: booleans are true/false, dates "
     "are ISO 'YYYY-MM-DD' strings, numbers are numeric, strings are text.\n"
-    "4. Resolve every date to an absolute ISO 'YYYY-MM-DD' value using the "
-    "current date provided below as the reference point. When the user omits "
-    "the year (e.g. 'Jul 20', 'March 3'), you MUST use the year from the "
-    "current date, choosing the previous year only if that day has not yet "
-    "occurred this year. NEVER invent or default to an earlier year (such as "
-    "2023) and never use a year unless the user explicitly states one. Resolve "
-    "relative expressions such as 'last week' or 'yesterday' from the current "
-    "date the same way.\n"
-    "5. For dates, choose the operator by scope: a SINGLE specific day uses '=' "
-    "with that day's date; only use 'between' for an explicit span of days (a "
-    "week, a month, a date range), providing value as a two-element array "
-    "[low, high]. Use '<' / '>' / '<=' / '>=' for open-ended 'before'/'after'.\n"
+    "4. AUTHORING ACTIVITY OVER TIME: When the user asks about WHEN THEY wrote, "
+    "edited, created, noted, journaled, logged, added, or did something (e.g. "
+    "'what did I write yesterday', 'notes from last week', 'what did I do day "
+    "before yesterday'), DO NOT resolve the date and DO NOT emit a date filter. "
+    "Instead populate the `temporal` object. Copy the date expression VERBATIM "
+    "from the user's question into `anchor` (e.g. 'yesterday', 'day before "
+    "yesterday', 'last week', 'aug 11'); never compute, shift, or reword it. Set "
+    "`kind` to 'range' when they mean a whole week or month ('this week', 'last "
+    "month') and put the matching `unit` ('week' or 'month'); otherwise set "
+    "`kind` to 'single'. When you populate `temporal`, do not also add a date "
+    "filter for the same time expression.\n"
+    "5. If the question is NOT about authoring activity over time, set "
+    "`temporal` to null and rely on filters and semantic_query as usual.\n"
     "6. If no filter clearly applies, return an empty filters array. When in "
     "doubt, prefer fewer filters and rely on the semantic_query.\n"
     "7. Respond with a SINGLE valid JSON object and nothing else."
@@ -44,7 +45,9 @@ _OUTPUT_CONTRACT = (
     '  "semantic_query": "<rewritten query text>",\n'
     '  "filters": [\n'
     '    {"field": "<field name>", "operator": "<operator>", "value": <value>}\n'
-    "  ]\n"
+    "  ],\n"
+    '  "temporal": {"kind": "single|range", "unit": "week|month", '
+    '"anchor": "<verbatim date phrase>"}  // or null when not applicable\n'
     "}"
 )
 
@@ -58,17 +61,15 @@ def build_intent_prompt(
     through the supplied :class:`MetadataSchema`, so new connectors change the
     available fields without any change to this template.
 
-    ``today`` anchors relative and year-less dates (e.g. "Jul 20", "last week")
-    to an absolute reference, defaulting to the current date.
+    ``today`` is passed only as context; the model never resolves dates itself —
+    it copies authoring-time expressions verbatim into ``temporal.anchor`` for
+    downstream resolution.
     """
     reference_date = (today or date.today()).isoformat()
-    reference = today or date.today()
     schema_json = json.dumps(schema.to_dict(), indent=2, ensure_ascii=False)
     user = (
-        f"Current date (reference for resolving dates): {reference_date}\n"
-        f"Current year: {reference.year}. Any date whose year the user does not "
-        "state must use this year (or the previous year only if that day is "
-        "still in the future).\n\n"
+        f"Current date (context only; do not resolve dates yourself): "
+        f"{reference_date}\n\n"
         "Available metadata schema (the only fields and operators you may use):\n"
         f"{schema_json}\n\n"
         f"{_OUTPUT_CONTRACT}\n\n"

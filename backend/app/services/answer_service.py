@@ -164,7 +164,8 @@ class AnswerService:
         The deterministic rule-based analyzer is always present. When
         ``INTENT_ANALYZER_ENABLED`` is set and a metadata schema is available, it
         is wrapped in a :class:`CompositeQueryAnalyzer` that also consults the
-        schema-aware LLM intent analyzer. The retrieval engine remains unaware of
+        schema-aware LLM intent analyzer (which owns authoring-time date routing
+        via its temporal descriptor). The retrieval engine remains unaware of
         which analyzer produced the ``SearchRequest``.
         """
         rule_based = RuleBasedQueryAnalyzer(
