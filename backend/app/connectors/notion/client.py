@@ -92,6 +92,41 @@ class NotionClient:
             # Log the error if needed
             return []
 
+    def discover_pages(self) -> list[dict[str, Any]]:
+        """Discover all pages accessible to the integration via search.
+
+        Notion search returns every accessible page individually (flattened),
+        regardless of whether it is a data-source row or a standalone page, so
+        no parent-child traversal is required here.
+        """
+        if self.client is None:
+            return []
+
+        try:
+            pages: list[dict[str, Any]] = []
+            start_cursor: str | None = None
+
+            while True:
+                response = self.client.search(
+                    page_size=100,
+                    start_cursor=start_cursor,
+                    filter={"property": "object", "value": "page"},
+                )
+                pages.extend(response.get("results", []))
+
+                if not response.get("has_more", False):
+                    break
+
+                next_cursor = response.get("next_cursor")
+                if not isinstance(next_cursor, str) or not next_cursor:
+                    break
+                start_cursor = next_cursor
+
+            return pages
+        except APIResponseError:
+            # Log the error if needed
+            return []
+
     def get_pages(self, data_source_id: str) -> list[dict[str, Any]]:
         """Return all pages for a given Notion data source."""
         if self.client is None:

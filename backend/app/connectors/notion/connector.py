@@ -4,6 +4,7 @@ from app.connectors.notion.discovery import (
     ChildPageDiscovery,
     DataSourcePageDiscovery,
     NotionPageDiscovery,
+    StandalonePageDiscovery,
 )
 from app.connectors.notion.loader import NotionPageLoader
 from app.connectors.notion.parser import NotionParser
@@ -28,6 +29,7 @@ class NotionConnector(DocumentConnector):
             else [
                 DataSourcePageDiscovery(self.client),
                 ChildPageDiscovery(self.client),
+                StandalonePageDiscovery(self.client),
             ]
         )
         self.loader = loader or NotionPageLoader(self.client, self.parser)

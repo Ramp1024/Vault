@@ -20,9 +20,11 @@ class NotionParser:
 
     def parse_page(
         self,
-        data_source: NotionDataSource,
+        data_source: NotionDataSource | None,
         page: dict[str, Any],
         blocks: list[dict[str, Any]],
+        parent_type: str | None = None,
+        parent_id: str | None = None,
     ) -> Document:
         page_id = str(page.get("id", ""))
         title = self._extract_page_title(page)
@@ -36,12 +38,16 @@ class NotionParser:
 
         metadata: dict[str, Any] = {
             "source": "notion",
-            "data_source_id": data_source.id,
-            "data_source_name": data_source.name,
+            "data_source_id": data_source.id if data_source else None,
+            "data_source_name": data_source.name if data_source else None,
             "last_edited_time": last_edited_time,
             "url": page.get("url"),
             "properties": filterable,
         }
+        if parent_type is not None:
+            metadata["parent_type"] = parent_type
+        if parent_id is not None:
+            metadata["parent_id"] = parent_id
         if semantic:
             metadata[SEMANTIC_PROPERTIES_KEY] = semantic
 

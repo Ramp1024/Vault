@@ -22,8 +22,9 @@ Next phases
 
 ->  Consider Cross Document Synthesis
 ->  Add parsing of Code block in ingestion
-->  Rate limits
 
+->  Rate limits
+    ->  Refer Chat
 ->  Fix dates
     ->  Use dateparser python library
     ->  Use LLM intent parser only for grammar

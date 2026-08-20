@@ -17,8 +17,16 @@ class NotionPageLoader:
             return None
 
         blocks = self.client.get_page_blocks(discovered_page.id)
-        data_source = NotionDataSource(
-            id=discovered_page.data_source_id,
-            name=discovered_page.data_source_name,
+        data_source = None
+        if discovered_page.data_source_id is not None:
+            data_source = NotionDataSource(
+                id=discovered_page.data_source_id,
+                name=discovered_page.data_source_name or "",
+            )
+        return self.parser.parse_page(
+            data_source,
+            page,
+            blocks,
+            parent_type=discovered_page.parent_type,
+            parent_id=discovered_page.parent_id,
         )
-        return self.parser.parse_page(data_source, page, blocks)
