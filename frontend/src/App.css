@@ -269,6 +269,13 @@ body {
   transition: opacity 0.16s ease, transform 0.16s ease, color 0.16s ease;
 }
 
+.prompt-placeholder {
+  color: var(--accent);
+  font-weight: 600;
+  border-bottom: 1px dashed var(--accent);
+  padding-bottom: 1px;
+}
+
 .prompt-row:hover {
   background: var(--surface-2);
   color: var(--text);

@@ -2,19 +2,42 @@ import { useEffect, useRef } from 'react'
 import type { ChatMessage } from '../../pages/ChatPage/ChatPage'
 import { MessageBubble } from '../MessageBubble/MessageBubble'
 
+// A prefill drops a ready-to-edit sentence into the composer with the pluggable
+// part pre-selected, so the user can immediately type over it (or send as-is).
+export type PromptPrefill = {
+  text: string
+  selectionStart: number
+  selectionEnd: number
+}
+
 type ChatWindowProps = {
   messages: ChatMessage[]
   isStreaming: boolean
-  onPromptSelect?: (prompt: string) => void
+  onPromptSelect?: (prefill: PromptPrefill) => void
   onRegenerate?: (assistantId: string) => void
 }
 
-const EXAMPLE_PROMPTS = [
-  'Summarize my most recent notes',
-  'What decisions did I capture last week?',
-  'Find open questions across my Vault',
-  'Explain a concept from my knowledge base',
+// Generic, reusable templates. Each has a fixed frame (`before`/`after`) and a
+// pluggable example value the user swaps out. The example doubles as a valid
+// query, so pressing Enter without editing still asks a real question.
+type PromptTemplate = {
+  before: string
+  placeholder: string
+  after: string
+}
+
+const EXAMPLE_PROMPTS: PromptTemplate[] = [
+  { before: 'What did I do on ', placeholder: 'August 15', after: '?' },
+  { before: 'Show me my ', placeholder: 'System Design', after: ' notes' },
+  { before: 'Explain ', placeholder: 'tree shaking', after: ' from my notes' },
+  { before: 'Why did I choose ', placeholder: 'FastAPI', after: '?' },
 ]
+
+const toPrefill = (template: PromptTemplate): PromptPrefill => ({
+  text: `${template.before}${template.placeholder}${template.after}`,
+  selectionStart: template.before.length,
+  selectionEnd: template.before.length + template.placeholder.length,
+})
 
 export function ChatWindow({ messages, isStreaming, onPromptSelect, onRegenerate }: ChatWindowProps) {
   const endRef = useRef<HTMLDivElement | null>(null)
@@ -34,13 +57,17 @@ export function ChatWindow({ messages, isStreaming, onPromptSelect, onRegenerate
           </p>
           <ul className="empty-state-prompts">
             {EXAMPLE_PROMPTS.map((prompt) => (
-              <li key={prompt}>
+              <li key={`${prompt.before}${prompt.placeholder}`}>
                 <button
                   type="button"
                   className="prompt-row"
-                  onClick={() => onPromptSelect?.(prompt)}
+                  onClick={() => onPromptSelect?.(toPrefill(prompt))}
                 >
-                  <span className="prompt-row-text">{prompt}</span>
+                  <span className="prompt-row-text">
+                    {prompt.before}
+                    <span className="prompt-placeholder">{prompt.placeholder}</span>
+                    {prompt.after}
+                  </span>
                   <span className="prompt-row-arrow" aria-hidden="true">
                     <svg viewBox="0 0 24 24" width="14" height="14">
                       <path

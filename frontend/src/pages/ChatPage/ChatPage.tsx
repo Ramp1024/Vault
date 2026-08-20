@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChatInput } from '../../components/ChatInput/ChatInput'
 import { ChatWindow } from '../../components/ChatWindow/ChatWindow'
+import type { PromptPrefill } from '../../components/ChatWindow/ChatWindow'
 import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle'
 import { useTheme } from '../../hooks/useTheme'
 
@@ -104,6 +105,7 @@ const finalizeTrace = (trace: TraceStep[] | undefined): TraceStep[] | undefined 
 export function ChatPage() {
     const [messages, setMessages] = useState<ChatMessage[]>([])
     const [isSending, setIsSending] = useState(false)
+    const [prefill, setPrefill] = useState<(PromptPrefill & { nonce: number }) | null>(null)
     const { theme, setTheme } = useTheme()
 
     // Keep a live snapshot of messages so regenerate can read the current thread
@@ -331,6 +333,11 @@ export function ChatPage() {
         [isSending, runStream],
     )
 
+    const handleSelectTemplate = useCallback((selected: PromptPrefill) => {
+        // Bump the nonce so clicking the same template twice still re-applies it.
+        setPrefill({ ...selected, nonce: Date.now() })
+    }, [])
+
     const handleRegenerate = useCallback(
         (assistantId: string) => {
             if (isSending) {
@@ -374,11 +381,11 @@ export function ChatPage() {
             <ChatWindow
                 messages={messages}
                 isStreaming={isSending}
-                onPromptSelect={handleSend}
+                onPromptSelect={handleSelectTemplate}
                 onRegenerate={handleRegenerate}
             />
 
-            <ChatInput onSend={handleSend} disabled={!canSend} />
+            <ChatInput onSend={handleSend} disabled={!canSend} prefill={prefill} />
         </main>
     )
 }
