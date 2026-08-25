@@ -32,6 +32,15 @@ OP_BETWEEN = "between"
 OP_CONTAINS = "contains"
 
 
+# Temporal roles classify how a date field relates to a note, so temporal
+# queries can pick the right axis (a user-assigned content date vs. a system
+# activity timestamp) without hardcoding field names.
+TEMPORAL_CONTENT = "content_date"
+TEMPORAL_ACTIVITY = "activity_date"
+TEMPORAL_GENERIC = "generic"
+TEMPORAL_ROLES = frozenset({TEMPORAL_CONTENT, TEMPORAL_ACTIVITY, TEMPORAL_GENERIC})
+
+
 # Default operators derived from a field's type. This is the single place that
 # encodes "which operators make sense for which type", so schema discovery never
 # has to hardcode operator lists per connector.
@@ -74,10 +83,38 @@ class MetadataField:
     operators: tuple[str, ...]
     multi: bool = False
     description: str | None = None
+    allowed_values: tuple[str, ...] = ()
+    temporal_role: str | None = None
 
     def supports(self, operator: str) -> bool:
         """Return True if ``operator`` is valid for this field."""
         return operator in self.operators
+
+    @property
+    def is_enumerable(self) -> bool:
+        """True when this field draws from a small, known set of values.
+
+        Only enumerable string fields (e.g. a status or category with a handful
+        of legal values) can have candidate filter values validated against a
+        closed set. Free-text fields (long notes, tags with unbounded values)
+        are not enumerable, so the analyzer must never turn their content into a
+        metadata filter — that content is a *search subject*, not a constraint.
+        """
+        return self.type is FieldType.STRING and bool(self.allowed_values)
+
+    def canonical_value(self, value: str) -> str | None:
+        """Return the canonically-cased allowed value matching ``value``, or None.
+
+        Comparison is case- and whitespace-insensitive. Non-enumerable fields
+        match nothing, since their values cannot be checked against a known set.
+        """
+        if not self.is_enumerable:
+            return None
+        needle = value.strip().casefold()
+        for allowed in self.allowed_values:
+            if needle == allowed.strip().casefold():
+                return allowed
+        return None
 
     def to_dict(self) -> dict[str, Any]:
         data: dict[str, Any] = {
@@ -89,6 +126,10 @@ class MetadataField:
             data["multi"] = True
         if self.description:
             data["description"] = self.description
+        if self.allowed_values:
+            data["allowed_values"] = list(self.allowed_values)
+        if self.temporal_role:
+            data["temporal_role"] = self.temporal_role
         return data
 
 
@@ -120,6 +161,10 @@ class MetadataSchema:
     def names(self) -> list[str]:
         return [f.name for f in self.fields]
 
+    def date_fields(self) -> list[MetadataField]:
+        """Return every date-typed field (candidates for temporal filtering)."""
+        return [f for f in self.fields if f.type is FieldType.DATE]
+
     def to_dict(self) -> dict[str, Any]:
         return {"fields": [f.to_dict() for f in self.fields]}
 
@@ -146,6 +191,14 @@ class MetadataSchema:
                 else operators_for_type(field_type, multi=multi)
             )
             description = item.get("description")
+            allowed_raw = item.get("allowed_values")
+            allowed_values = (
+                tuple(str(v) for v in allowed_raw)
+                if isinstance(allowed_raw, (list, tuple))
+                else ()
+            )
+            role = item.get("temporal_role")
+            temporal_role = role if role in TEMPORAL_ROLES else None
             fields.append(
                 MetadataField(
                     name=name,
@@ -153,6 +206,8 @@ class MetadataSchema:
                     operators=operators,
                     multi=multi,
                     description=description if isinstance(description, str) else None,
+                    allowed_values=allowed_values,
+                    temporal_role=temporal_role,
                 )
             )
         return cls(fields=tuple(fields))

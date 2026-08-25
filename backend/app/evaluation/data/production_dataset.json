@@ -1,0 +1,2073 @@
+[
+  {
+    "id": "metadata-nl-category-ai-engineering",
+    "query": "What AI engineering notes do I have?",
+    "category": "metadata",
+    "difficulty": "medium",
+    "expected_documents": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d",
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537",
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5",
+      "3b1f37cd-5024-80d0-9008-d5d872a2b71c",
+      "3bbf37cd-5024-80a9-8f82-efac83f87ebe"
+    ],
+    "expected_chunks": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_0",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_1",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_2",
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537_0",
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5_0",
+      "3b1f37cd-5024-80d0-9008-d5d872a2b71c_0",
+      "3bbf37cd-5024-80a9-8f82-efac83f87ebe_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "category",
+        "operator": "equals",
+        "value": "AI Engineering"
+      }
+    ]
+  },
+  {
+    "id": "metadata-nl-category-system-design",
+    "query": "Show my system design notes.",
+    "category": "metadata",
+    "difficulty": "medium",
+    "expected_documents": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d",
+      "3bff37cd-5024-808b-ad3e-c7e40ce249d1"
+    ],
+    "expected_chunks": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_1",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_2",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d_0",
+      "3bff37cd-5024-808b-ad3e-c7e40ce249d1_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "category",
+        "operator": "equals",
+        "value": "System Design"
+      }
+    ]
+  },
+  {
+    "id": "metadata-nl-category-front-end-system-design",
+    "query": "What front-end system design notes do I have?",
+    "category": "metadata",
+    "difficulty": "medium",
+    "expected_documents": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2"
+    ],
+    "expected_chunks": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_0",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_1",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_2",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_3",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_4",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_5",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_6",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_7",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_8",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_9",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_10",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_11",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_12"
+    ],
+    "expected_filters": [
+      {
+        "field": "category",
+        "operator": "equals",
+        "value": "Front end System Design"
+      }
+    ]
+  },
+  {
+    "id": "metadata-nl-category-leetcode-notes",
+    "query": "Show my leetcode concept notes.",
+    "category": "metadata",
+    "difficulty": "medium",
+    "expected_documents": [
+      "383f37cd-5024-803a-8e0f-c7168bcac780",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31",
+      "3a8f37cd-5024-8036-ad90-f5250bc563bc",
+      "3bff37cd-5024-80d6-8b81-c1efd3fee91f"
+    ],
+    "expected_chunks": [
+      "383f37cd-5024-803a-8e0f-c7168bcac780_0",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_0",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_1",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_2",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_3",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_4",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_5",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_6",
+      "3a8f37cd-5024-8036-ad90-f5250bc563bc_0",
+      "3bff37cd-5024-80d6-8b81-c1efd3fee91f_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "category",
+        "operator": "equals",
+        "value": "Leetcode Notes"
+      }
+    ]
+  },
+  {
+    "id": "metadata-nl-leetcodetopic-backtracking",
+    "query": "What backtracking leetcode problems have I solved?",
+    "category": "metadata",
+    "difficulty": "medium",
+    "expected_documents": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8",
+      "384f37cd-5024-816f-beb6-de894a757922"
+    ],
+    "expected_chunks": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8_0",
+      "384f37cd-5024-816f-beb6-de894a757922_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "leetcodeTopic",
+        "operator": "equals",
+        "value": "Backtracking"
+      }
+    ]
+  },
+  {
+    "id": "metadata-nl-leetcodetopic-heap-priority-queue",
+    "query": "Which heap or priority queue problems did I practice?",
+    "category": "metadata",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3acf37cd-5024-8147-b42c-f3afc4d80be6"
+    ],
+    "expected_chunks": [
+      "3acf37cd-5024-8147-b42c-f3afc4d80be6_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "leetcodeTopic",
+        "operator": "equals",
+        "value": "Heap/Priority Queue"
+      }
+    ]
+  },
+  {
+    "id": "metadata-nl-leetcodetopic-arrays-hashing",
+    "query": "What arrays and hashing problems have I done?",
+    "category": "metadata",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3a8f37cd-5024-81a5-8582-de7d5b39b4cf"
+    ],
+    "expected_chunks": [
+      "3a8f37cd-5024-81a5-8582-de7d5b39b4cf_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "leetcodeTopic",
+        "operator": "equals",
+        "value": "Arrays & Hashing"
+      }
+    ]
+  },
+  {
+    "id": "metadata-nl-status-not-started",
+    "query": "What tasks have I not started yet?",
+    "category": "metadata",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3bdf37cd-5024-8027-988a-d544fb18346a",
+      "3bdf37cd-5024-8062-a58e-d93fb3449273",
+      "3bdf37cd-5024-8069-b440-d74b18ddee9d",
+      "3bdf37cd-5024-8081-a7dd-ee32b3381bf0"
+    ],
+    "expected_chunks": [
+      "3bdf37cd-5024-8027-988a-d544fb18346a_0",
+      "3bdf37cd-5024-8062-a58e-d93fb3449273_0",
+      "3bdf37cd-5024-8069-b440-d74b18ddee9d_0",
+      "3bdf37cd-5024-8081-a7dd-ee32b3381bf0_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "status",
+        "operator": "equals",
+        "value": "Not started"
+      }
+    ]
+  },
+  {
+    "id": "metadata-nl-status-in-progress",
+    "query": "What tasks are currently in progress?",
+    "category": "metadata",
+    "difficulty": "medium",
+    "expected_documents": [
+      "38ef37cd-5024-8090-af70-c42e6d8b720a",
+      "3bdf37cd-5024-80ac-806b-dcfcf9ce85c4"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-8090-af70-c42e6d8b720a_0",
+      "38ef37cd-5024-8090-af70-c42e6d8b720a_1",
+      "3bdf37cd-5024-80ac-806b-dcfcf9ce85c4_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "status",
+        "operator": "equals",
+        "value": "In progress"
+      }
+    ]
+  },
+  {
+    "id": "metadata-nl-status-done",
+    "query": "What tasks have I already completed?",
+    "category": "metadata",
+    "difficulty": "medium",
+    "expected_documents": [
+      "38ef37cd-5024-800f-85aa-cb4938a4c032",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7",
+      "38ef37cd-5024-809f-9676-ca30880e5192",
+      "38ef37cd-5024-80fe-8886-cb58228599fc"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-800f-85aa-cb4938a4c032_0",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7_0",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7_1",
+      "38ef37cd-5024-809f-9676-ca30880e5192_0",
+      "38ef37cd-5024-80fe-8886-cb58228599fc_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "status",
+        "operator": "equals",
+        "value": "Done"
+      }
+    ]
+  },
+  {
+    "id": "metadata-syntax-category-ai-engineering",
+    "query": "category: AI Engineering",
+    "category": "metadata",
+    "difficulty": "easy",
+    "expected_documents": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d",
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537",
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5",
+      "3b1f37cd-5024-80d0-9008-d5d872a2b71c",
+      "3bbf37cd-5024-80a9-8f82-efac83f87ebe"
+    ],
+    "expected_chunks": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_0",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_1",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_2",
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537_0",
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5_0",
+      "3b1f37cd-5024-80d0-9008-d5d872a2b71c_0",
+      "3bbf37cd-5024-80a9-8f82-efac83f87ebe_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "category",
+        "operator": "equals",
+        "value": "AI Engineering"
+      }
+    ]
+  },
+  {
+    "id": "metadata-syntax-category-system-design",
+    "query": "category: System Design",
+    "category": "metadata",
+    "difficulty": "easy",
+    "expected_documents": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d",
+      "3bff37cd-5024-808b-ad3e-c7e40ce249d1"
+    ],
+    "expected_chunks": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_1",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_2",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d_0",
+      "3bff37cd-5024-808b-ad3e-c7e40ce249d1_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "category",
+        "operator": "equals",
+        "value": "System Design"
+      }
+    ]
+  },
+  {
+    "id": "metadata-syntax-leetcodetopic-backtracking",
+    "query": "leetcode topic: Backtracking",
+    "category": "metadata",
+    "difficulty": "easy",
+    "expected_documents": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8",
+      "384f37cd-5024-816f-beb6-de894a757922"
+    ],
+    "expected_chunks": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8_0",
+      "384f37cd-5024-816f-beb6-de894a757922_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "leetcodeTopic",
+        "operator": "equals",
+        "value": "Backtracking"
+      }
+    ]
+  },
+  {
+    "id": "metadata-syntax-status-done",
+    "query": "status: Done",
+    "category": "metadata",
+    "difficulty": "easy",
+    "expected_documents": [
+      "38ef37cd-5024-800f-85aa-cb4938a4c032",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7",
+      "38ef37cd-5024-809f-9676-ca30880e5192",
+      "38ef37cd-5024-80fe-8886-cb58228599fc"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-800f-85aa-cb4938a4c032_0",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7_0",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7_1",
+      "38ef37cd-5024-809f-9676-ca30880e5192_0",
+      "38ef37cd-5024-80fe-8886-cb58228599fc_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "status",
+        "operator": "equals",
+        "value": "Done"
+      }
+    ]
+  },
+  {
+    "id": "metadata-nl-leetcodetopic-graphs",
+    "query": "Which leetcode graph problems have I worked on?",
+    "category": "metadata",
+    "difficulty": "hard",
+    "expected_documents": [
+      "389f37cd-5024-818c-9e47-fcdceb91cc7d",
+      "38bf37cd-5024-8113-9282-ebe8982e6428",
+      "390f37cd-5024-8147-a38a-de26dfb1fd04",
+      "391f37cd-5024-81a4-a6c4-d248e8b7287e",
+      "392f37cd-5024-818c-968e-d6a7872c854d",
+      "394f37cd-5024-8178-b679-f866b61eb148",
+      "396f37cd-5024-81b8-b574-dc773f64bc0b",
+      "397f37cd-5024-8175-8fba-e36a0e89ab15",
+      "3a1f37cd-5024-8181-b165-e9a349892788",
+      "3a4f37cd-5024-8167-9a60-e301acaec4dd",
+      "3a5f37cd-5024-816b-8d60-f2f3114feb3d",
+      "3a6f37cd-5024-8138-993d-f085c8d88c24",
+      "3abf37cd-5024-81d2-a88a-fbbadfbbf8df",
+      "3b1f37cd-5024-81d3-b8c9-f2516e843e8c",
+      "3b2f37cd-5024-810f-bccb-e50dbaf5996d",
+      "3b3f37cd-5024-813d-aebe-f78092975586",
+      "3bff37cd-5024-81f1-845f-e85201a1c300"
+    ],
+    "expected_chunks": [
+      "389f37cd-5024-818c-9e47-fcdceb91cc7d_0",
+      "38bf37cd-5024-8113-9282-ebe8982e6428_0",
+      "390f37cd-5024-8147-a38a-de26dfb1fd04_0",
+      "391f37cd-5024-81a4-a6c4-d248e8b7287e_0",
+      "392f37cd-5024-818c-968e-d6a7872c854d_0",
+      "394f37cd-5024-8178-b679-f866b61eb148_0",
+      "396f37cd-5024-81b8-b574-dc773f64bc0b_0",
+      "397f37cd-5024-8175-8fba-e36a0e89ab15_0",
+      "3a1f37cd-5024-8181-b165-e9a349892788_0",
+      "3a4f37cd-5024-8167-9a60-e301acaec4dd_0",
+      "3a5f37cd-5024-816b-8d60-f2f3114feb3d_0",
+      "3a6f37cd-5024-8138-993d-f085c8d88c24_0",
+      "3abf37cd-5024-81d2-a88a-fbbadfbbf8df_0",
+      "3b1f37cd-5024-81d3-b8c9-f2516e843e8c_0",
+      "3b2f37cd-5024-810f-bccb-e50dbaf5996d_0",
+      "3b3f37cd-5024-813d-aebe-f78092975586_0",
+      "3bff37cd-5024-81f1-845f-e85201a1c300_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "leetcodeTopic",
+        "operator": "equals",
+        "value": "Graphs"
+      }
+    ]
+  },
+  {
+    "id": "lexical-grep",
+    "query": "Where did I mention grep?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "395f37cd-5024-805f-97e5-fc3bee2607ec"
+    ],
+    "expected_chunks": [
+      "395f37cd-5024-805f-97e5-fc3bee2607ec_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-conda",
+    "query": "Which note talks about conda?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-indegree",
+    "query": "What note contains the word indegree?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "396f37cd-5024-802f-b610-f4e8d9c91a31",
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6"
+    ],
+    "expected_chunks": [
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_0",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_1",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_2",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_3",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_4",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_5",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_6",
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-orthonormal",
+    "query": "Where did I write about orthonormal vectors?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3b1f37cd-5024-8040-970d-e993d4796d03"
+    ],
+    "expected_chunks": [
+      "3b1f37cd-5024-8040-970d-e993d4796d03_0",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_1",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_2",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_3",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_4",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_5"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-cgroups",
+    "query": "Where did I mention cgroups?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3bff37cd-5024-808b-ad3e-c7e40ce249d1"
+    ],
+    "expected_chunks": [
+      "3bff37cd-5024-808b-ad3e-c7e40ce249d1_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-tree-shaking",
+    "query": "Where did I discuss tree shaking?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2"
+    ],
+    "expected_chunks": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_0",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_1",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_2",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_3",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_4",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_5",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_6",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_7",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_8",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_9",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_10",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_11",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_12"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-ackermann",
+    "query": "Where did I mention the Ackermann function?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3c2f37cd-5024-8067-89fa-fde0afa58aab"
+    ],
+    "expected_chunks": [
+      "3c2f37cd-5024-8067-89fa-fde0afa58aab_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-hallucination",
+    "query": "Where did I write about hallucinations?",
+    "category": "lexical",
+    "difficulty": "medium",
+    "expected_documents": [
+      "38ef37cd-5024-8095-928d-d2f839d65184"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-8095-928d-d2f839d65184_0",
+      "38ef37cd-5024-8095-928d-d2f839d65184_1",
+      "38ef37cd-5024-8095-928d-d2f839d65184_2",
+      "38ef37cd-5024-8095-928d-d2f839d65184_3",
+      "38ef37cd-5024-8095-928d-d2f839d65184_4",
+      "38ef37cd-5024-8095-928d-d2f839d65184_5",
+      "38ef37cd-5024-8095-928d-d2f839d65184_6",
+      "38ef37cd-5024-8095-928d-d2f839d65184_7",
+      "38ef37cd-5024-8095-928d-d2f839d65184_8",
+      "38ef37cd-5024-8095-928d-d2f839d65184_9",
+      "38ef37cd-5024-8095-928d-d2f839d65184_10",
+      "38ef37cd-5024-8095-928d-d2f839d65184_11",
+      "38ef37cd-5024-8095-928d-d2f839d65184_12",
+      "38ef37cd-5024-8095-928d-d2f839d65184_13",
+      "38ef37cd-5024-8095-928d-d2f839d65184_14"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-materialized-read-model",
+    "query": "Where did I mention a materialized read model?",
+    "category": "lexical",
+    "difficulty": "medium",
+    "expected_documents": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b"
+    ],
+    "expected_chunks": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_1",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_2"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-denormalization",
+    "query": "Which note discusses denormalization?",
+    "category": "lexical",
+    "difficulty": "medium",
+    "expected_documents": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b"
+    ],
+    "expected_chunks": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_1",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_2"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-eigenvalues",
+    "query": "Where did I write about eigenvalues?",
+    "category": "lexical",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3bbf37cd-5024-80a9-8f82-efac83f87ebe"
+    ],
+    "expected_chunks": [
+      "3bbf37cd-5024-80a9-8f82-efac83f87ebe_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-eulerian",
+    "query": "Where did I mention Eulerian paths?",
+    "category": "lexical",
+    "difficulty": "medium",
+    "expected_documents": [
+      "396f37cd-5024-802f-b610-f4e8d9c91a31",
+      "3bff37cd-5024-8042-8982-f5c3fbb35d8f"
+    ],
+    "expected_chunks": [
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_0",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_1",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_2",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_3",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_4",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_5",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_6",
+      "3bff37cd-5024-8042-8982-f5c3fbb35d8f_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-kahn",
+    "query": "Where did I write about Kahn's algorithm?",
+    "category": "lexical",
+    "difficulty": "medium",
+    "expected_documents": [
+      "396f37cd-5024-802f-b610-f4e8d9c91a31",
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6"
+    ],
+    "expected_chunks": [
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_0",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_1",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_2",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_3",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_4",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_5",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_6",
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-apache-arrow",
+    "query": "Where did I mention Apache Arrow?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-gradient-descent",
+    "query": "Where did I write about gradient descent?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3b8f37cd-5024-81aa-9ada-e8ceabdf8a5e"
+    ],
+    "expected_chunks": [
+      "3b8f37cd-5024-81aa-9ada-e8ceabdf8a5e_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-chain-rule",
+    "query": "Which note mentions the chain rule?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3bff37cd-5024-81f1-845f-e85201a1c300"
+    ],
+    "expected_chunks": [
+      "3bff37cd-5024-81f1-845f-e85201a1c300_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-hessian",
+    "query": "Where did I mention the Hessian?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3baf37cd-5024-81a2-868f-fe7dc1f6db37"
+    ],
+    "expected_chunks": [
+      "3baf37cd-5024-81a2-868f-fe7dc1f6db37_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-cross-encoder",
+    "query": "Where did I write about the cross encoder?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3aaf37cd-5024-816e-a044-e273c9ddca59"
+    ],
+    "expected_chunks": [
+      "3aaf37cd-5024-816e-a044-e273c9ddca59_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-bm25",
+    "query": "Where did I mention BM25?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3acf37cd-5024-8147-b42c-f3afc4d80be6"
+    ],
+    "expected_chunks": [
+      "3acf37cd-5024-8147-b42c-f3afc4d80be6_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-sideeffects",
+    "query": "Which note mentions the sideEffects flag?",
+    "category": "lexical",
+    "difficulty": "medium",
+    "expected_documents": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2"
+    ],
+    "expected_chunks": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_0",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_1",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_2",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_3",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_4",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_5",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_6",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_7",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_8",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_9",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_10",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_11",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_12"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-pyproject",
+    "query": "Where did I mention pyproject.toml?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-columnar",
+    "query": "Where did I write about columnar storage?",
+    "category": "lexical",
+    "difficulty": "medium",
+    "expected_documents": [
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-amortization",
+    "query": "Where did I mention amortization?",
+    "category": "lexical",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3c2f37cd-5024-8067-89fa-fde0afa58aab"
+    ],
+    "expected_chunks": [
+      "3c2f37cd-5024-8067-89fa-fde0afa58aab_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-recursion-path",
+    "query": "Where did I write about the recursion path?",
+    "category": "lexical",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3a3f37cd-5024-80e1-bbbd-ee5d72b036a5"
+    ],
+    "expected_chunks": [
+      "3a3f37cd-5024-80e1-bbbd-ee5d72b036a5_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-kodaikkanal",
+    "query": "Where did I mention my trip to Kodaikkanal?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3b7f37cd-5024-81b5-8a08-c6a00ea12aa5"
+    ],
+    "expected_chunks": [
+      "3b7f37cd-5024-81b5-8a08-c6a00ea12aa5_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-air-fryer",
+    "query": "Which note talks about the air fryer?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3b9f37cd-5024-81b5-84b1-f089e6301882"
+    ],
+    "expected_chunks": [
+      "3b9f37cd-5024-81b5-84b1-f089e6301882_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "lexical-sick-leave",
+    "query": "Where did I mention taking a sick leave?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "390f37cd-5024-8147-a38a-de26dfb1fd04"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-8147-a38a-de26dfb1fd04_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-permutations",
+    "query": "Which day did I solve the Permutations problem?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8"
+    ],
+    "expected_chunks": [
+      "383f37cd-5024-8166-bb25-d5644c0605f8_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-subsets-ii",
+    "query": "When did I work on Subsets II?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "383f37cd-5024-803a-8e0f-c7168bcac780",
+      "384f37cd-5024-816f-beb6-de894a757922"
+    ],
+    "expected_chunks": [
+      "383f37cd-5024-803a-8e0f-c7168bcac780_0",
+      "384f37cd-5024-816f-beb6-de894a757922_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-number-of-islands",
+    "query": "Which note has my Number of Islands solution?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "38bf37cd-5024-8113-9282-ebe8982e6428"
+    ],
+    "expected_chunks": [
+      "38bf37cd-5024-8113-9282-ebe8982e6428_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-max-area-of-islands",
+    "query": "When did I do Max Area of Islands?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "390f37cd-5024-8147-a38a-de26dfb1fd04"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-8147-a38a-de26dfb1fd04_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-clone-graph",
+    "query": "Which day did I solve Clone Graph?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "391f37cd-5024-81a4-a6c4-d248e8b7287e"
+    ],
+    "expected_chunks": [
+      "391f37cd-5024-81a4-a6c4-d248e8b7287e_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-walls-and-gates",
+    "query": "When did I practice Walls and Gates?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "394f37cd-5024-8178-b679-f866b61eb148"
+    ],
+    "expected_chunks": [
+      "394f37cd-5024-8178-b679-f866b61eb148_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-rotten-oranges",
+    "query": "Where did I mention Rotten Oranges?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "392f37cd-5024-818c-968e-d6a7872c854d",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31"
+    ],
+    "expected_chunks": [
+      "392f37cd-5024-818c-968e-d6a7872c854d_0",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_0",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_1",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_2",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_3",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_4",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_5",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_6"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-pacific-atlantic-water-flow",
+    "query": "When did I solve Pacific Atlantic Water Flow?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "396f37cd-5024-81b8-b574-dc773f64bc0b"
+    ],
+    "expected_chunks": [
+      "396f37cd-5024-81b8-b574-dc773f64bc0b_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-surrounded-regions",
+    "query": "Which day did I do Surrounded Regions?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "397f37cd-5024-8175-8fba-e36a0e89ab15"
+    ],
+    "expected_chunks": [
+      "397f37cd-5024-8175-8fba-e36a0e89ab15_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-course-schedule-ii",
+    "query": "When did I solve Course Schedule II?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3a4f37cd-5024-8167-9a60-e301acaec4dd"
+    ],
+    "expected_chunks": [
+      "3a4f37cd-5024-8167-9a60-e301acaec4dd_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-graph-valid-tree",
+    "query": "Which note mentions Graph valid tree?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3a5f37cd-5024-816b-8d60-f2f3114feb3d"
+    ],
+    "expected_chunks": [
+      "3a5f37cd-5024-816b-8d60-f2f3114feb3d_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-recreate-itinerary",
+    "query": "When did I work on Recreate Itinerary?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3b1f37cd-5024-81d3-b8c9-f2516e843e8c"
+    ],
+    "expected_chunks": [
+      "3b1f37cd-5024-81d3-b8c9-f2516e843e8c_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-swim-in-rising-water",
+    "query": "Where did I mention Swim in Rising Water?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "396f37cd-5024-802f-b610-f4e8d9c91a31",
+      "3b3f37cd-5024-813d-aebe-f78092975586"
+    ],
+    "expected_chunks": [
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_0",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_1",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_2",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_3",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_4",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_5",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_6",
+      "3b3f37cd-5024-813d-aebe-f78092975586_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "leetcode-kth-largest-element-in-a-stream",
+    "query": "When did I do Kth largest element in a stream?",
+    "category": "lexical",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3acf37cd-5024-8147-b42c-f3afc4d80be6"
+    ],
+    "expected_chunks": [
+      "3acf37cd-5024-8147-b42c-f3afc4d80be6_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "temporal-week-jul13",
+    "query": "What did I work on during the week of July 13?",
+    "category": "temporal",
+    "difficulty": "hard",
+    "expected_documents": [
+      "386f37cd-5024-8021-8a2c-f251671a4822",
+      "38ef37cd-5024-800f-85aa-cb4938a4c032",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7",
+      "38ef37cd-5024-8090-af70-c42e6d8b720a",
+      "397f37cd-5024-8175-8fba-e36a0e89ab15",
+      "399f37cd-5024-81a8-b5e0-d58610001d37",
+      "39af37cd-5024-81d6-bbd4-d35da3fd460c",
+      "39bf37cd-5024-81d2-8e66-d7372afb7c62",
+      "39cf37cd-5024-8092-bf54-f69cd858db57",
+      "39cf37cd-5024-81e7-a5f0-d3e19cbfe57a",
+      "39df37cd-5024-81ec-ba50-f47da87afed1",
+      "39ff37cd-5024-81a9-b31c-f5d5c963200a",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb"
+    ],
+    "expected_chunks": [
+      "386f37cd-5024-8021-8a2c-f251671a4822_0",
+      "38ef37cd-5024-800f-85aa-cb4938a4c032_0",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7_0",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7_1",
+      "38ef37cd-5024-8090-af70-c42e6d8b720a_0",
+      "38ef37cd-5024-8090-af70-c42e6d8b720a_1",
+      "397f37cd-5024-8175-8fba-e36a0e89ab15_0",
+      "399f37cd-5024-81a8-b5e0-d58610001d37_0",
+      "39af37cd-5024-81d6-bbd4-d35da3fd460c_0",
+      "39bf37cd-5024-81d2-8e66-d7372afb7c62_0",
+      "39cf37cd-5024-8092-bf54-f69cd858db57_0",
+      "39cf37cd-5024-81e7-a5f0-d3e19cbfe57a_0",
+      "39df37cd-5024-81ec-ba50-f47da87afed1_0",
+      "39ff37cd-5024-81a9-b31c-f5d5c963200a_0",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb_0",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb_1",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb_2"
+    ],
+    "expected_filters": [
+      {
+        "field": "last_edited_time",
+        "operator": "between",
+        "value": [
+          "2026-07-13",
+          "2026-07-19"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "temporal-week-aug17",
+    "query": "What was I working on in the week of August 17?",
+    "category": "temporal",
+    "difficulty": "hard",
+    "expected_documents": [
+      "380f37cd-5024-80db-ba90-f4974732483d",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31",
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6",
+      "3adf37cd-5024-803c-aea9-cbcb8cc69e03",
+      "3bbf37cd-5024-8127-b37c-f3ebca45f50a",
+      "3bcf37cd-5024-8165-be08-ca889a56fdc2",
+      "3bdf37cd-5024-81cc-b5f5-d62e6fe20956",
+      "3bef37cd-5024-81a5-b09f-e1c0c5a9a174",
+      "3bff37cd-5024-8042-8982-f5c3fbb35d8f",
+      "3bff37cd-5024-8072-b6b8-ec6619271d66",
+      "3bff37cd-5024-808b-ad3e-c7e40ce249d1",
+      "3bff37cd-5024-80d6-8b81-c1efd3fee91f",
+      "3bff37cd-5024-80fb-abe3-dee5713f2738",
+      "3bff37cd-5024-81f1-845f-e85201a1c300",
+      "3c0f37cd-5024-80c1-8865-df5185b740c3",
+      "3c0f37cd-5024-81c7-b2a8-df6f62957a6b",
+      "3c1f37cd-5024-8133-8cb3-fd549e3ec570",
+      "3c2f37cd-5024-8067-89fa-fde0afa58aab",
+      "3c2f37cd-5024-8074-8270-f310194c1280"
+    ],
+    "expected_chunks": [
+      "380f37cd-5024-80db-ba90-f4974732483d_0",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_0",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_1",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_2",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_3",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_4",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_5",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_6",
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6_0",
+      "3adf37cd-5024-803c-aea9-cbcb8cc69e03_0",
+      "3bbf37cd-5024-8127-b37c-f3ebca45f50a_0",
+      "3bcf37cd-5024-8165-be08-ca889a56fdc2_0",
+      "3bdf37cd-5024-81cc-b5f5-d62e6fe20956_0",
+      "3bef37cd-5024-81a5-b09f-e1c0c5a9a174_0",
+      "3bff37cd-5024-8042-8982-f5c3fbb35d8f_0",
+      "3bff37cd-5024-8072-b6b8-ec6619271d66_0",
+      "3bff37cd-5024-808b-ad3e-c7e40ce249d1_0",
+      "3bff37cd-5024-80d6-8b81-c1efd3fee91f_0",
+      "3bff37cd-5024-80fb-abe3-dee5713f2738_0",
+      "3bff37cd-5024-81f1-845f-e85201a1c300_0",
+      "3c0f37cd-5024-80c1-8865-df5185b740c3_0",
+      "3c0f37cd-5024-81c7-b2a8-df6f62957a6b_0",
+      "3c1f37cd-5024-8133-8cb3-fd549e3ec570_0",
+      "3c2f37cd-5024-8067-89fa-fde0afa58aab_0",
+      "3c2f37cd-5024-8074-8270-f310194c1280_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "last_edited_time",
+        "operator": "between",
+        "value": [
+          "2026-08-17",
+          "2026-08-23"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "temporal-week-jun28",
+    "query": "What did I do in the last week of June?",
+    "category": "temporal",
+    "difficulty": "hard",
+    "expected_documents": [
+      "382f37cd-5024-800a-a8cd-d1cae8ac94e2",
+      "383f37cd-5024-80aa-acf4-cf608d9470a8",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d",
+      "388f37cd-5024-804a-a1ec-fb4f7c19b51a",
+      "38af37cd-5024-8118-ad6b-f5374e49f5c7",
+      "38bf37cd-5024-8005-b568-e1d65a943e82",
+      "38bf37cd-5024-8032-8fc5-dcdf3cc1e09f",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4",
+      "38ef37cd-5024-8095-928d-d2f839d65184",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b",
+      "38ef37cd-5024-80fe-8886-cb58228599fc",
+      "38ef37cd-5024-8121-953a-ca27cde0cac5",
+      "38ff37cd-5024-80f0-bb41-edb3a7dce1df",
+      "38ff37cd-5024-81b9-9c61-cfaacd83fd31",
+      "38ff37cd-5024-81e7-b25f-fe5b0a4c73e5",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d",
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537",
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5",
+      "390f37cd-5024-8147-a38a-de26dfb1fd04",
+      "391f37cd-5024-81a4-a6c4-d248e8b7287e",
+      "393f37cd-5024-8100-bb4b-dd2924732927",
+      "394f37cd-5024-801d-973a-c7dfebad5d2e",
+      "394f37cd-5024-8067-8834-c63bb982717d",
+      "394f37cd-5024-80f6-976d-da0eec31a4f5",
+      "394f37cd-5024-8178-b679-f866b61eb148"
+    ],
+    "expected_chunks": [
+      "382f37cd-5024-800a-a8cd-d1cae8ac94e2_0",
+      "383f37cd-5024-80aa-acf4-cf608d9470a8_0",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_0",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_1",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_2",
+      "388f37cd-5024-804a-a1ec-fb4f7c19b51a_0",
+      "38af37cd-5024-8118-ad6b-f5374e49f5c7_0",
+      "38bf37cd-5024-8005-b568-e1d65a943e82_0",
+      "38bf37cd-5024-8032-8fc5-dcdf3cc1e09f_0",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_0",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_1",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_2",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_3",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_4",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_5",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_6",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_7",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_8",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_9",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_10",
+      "38ef37cd-5024-8095-928d-d2f839d65184_0",
+      "38ef37cd-5024-8095-928d-d2f839d65184_1",
+      "38ef37cd-5024-8095-928d-d2f839d65184_2",
+      "38ef37cd-5024-8095-928d-d2f839d65184_3",
+      "38ef37cd-5024-8095-928d-d2f839d65184_4",
+      "38ef37cd-5024-8095-928d-d2f839d65184_5",
+      "38ef37cd-5024-8095-928d-d2f839d65184_6",
+      "38ef37cd-5024-8095-928d-d2f839d65184_7",
+      "38ef37cd-5024-8095-928d-d2f839d65184_8",
+      "38ef37cd-5024-8095-928d-d2f839d65184_9",
+      "38ef37cd-5024-8095-928d-d2f839d65184_10",
+      "38ef37cd-5024-8095-928d-d2f839d65184_11",
+      "38ef37cd-5024-8095-928d-d2f839d65184_12",
+      "38ef37cd-5024-8095-928d-d2f839d65184_13",
+      "38ef37cd-5024-8095-928d-d2f839d65184_14",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_0",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_1",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_2",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_3",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_4",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_5",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_6",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_7",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_8",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_9",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_10",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_11",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_12",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_13",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_14",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_15",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_16",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_17",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_18",
+      "38ef37cd-5024-80fe-8886-cb58228599fc_0",
+      "38ef37cd-5024-8121-953a-ca27cde0cac5_0",
+      "38ff37cd-5024-80f0-bb41-edb3a7dce1df_0",
+      "38ff37cd-5024-81b9-9c61-cfaacd83fd31_0",
+      "38ff37cd-5024-81e7-b25f-fe5b0a4c73e5_0",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d_0",
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537_0",
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5_0",
+      "390f37cd-5024-8147-a38a-de26dfb1fd04_0",
+      "391f37cd-5024-81a4-a6c4-d248e8b7287e_0",
+      "393f37cd-5024-8100-bb4b-dd2924732927_0",
+      "394f37cd-5024-801d-973a-c7dfebad5d2e_0",
+      "394f37cd-5024-801d-973a-c7dfebad5d2e_1",
+      "394f37cd-5024-8067-8834-c63bb982717d_0",
+      "394f37cd-5024-80f6-976d-da0eec31a4f5_0",
+      "394f37cd-5024-8178-b679-f866b61eb148_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "last_edited_time",
+        "operator": "between",
+        "value": [
+          "2026-06-29",
+          "2026-07-05"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "temporal-graphs-august",
+    "query": "Which graph problems did I practice in August?",
+    "category": "temporal",
+    "difficulty": "hard",
+    "expected_documents": [
+      "3b1f37cd-5024-81d3-b8c9-f2516e843e8c",
+      "3b2f37cd-5024-810f-bccb-e50dbaf5996d",
+      "3b3f37cd-5024-813d-aebe-f78092975586",
+      "3bff37cd-5024-81f1-845f-e85201a1c300"
+    ],
+    "expected_chunks": [
+      "3b1f37cd-5024-81d3-b8c9-f2516e843e8c_0",
+      "3b2f37cd-5024-810f-bccb-e50dbaf5996d_0",
+      "3b3f37cd-5024-813d-aebe-f78092975586_0",
+      "3bff37cd-5024-81f1-845f-e85201a1c300_0"
+    ],
+    "expected_filters": [
+      {
+        "field": "leetcodeTopic",
+        "operator": "equals",
+        "value": "Graphs"
+      },
+      {
+        "field": "last_edited_time",
+        "operator": "between",
+        "value": [
+          "2026-08-01",
+          "2026-08-31"
+        ]
+      }
+    ],
+    "expected_intent": "temporal"
+  },
+  {
+    "id": "factual-workout-shoulder",
+    "query": "What shoulder workouts have I logged?",
+    "category": "factual",
+    "difficulty": "medium",
+    "expected_documents": [
+      "38bf37cd-5024-8005-b568-e1d65a943e82",
+      "394f37cd-5024-8067-8834-c63bb982717d",
+      "3a5f37cd-5024-803b-a85f-ff7a8929e374",
+      "3bbf37cd-5024-8034-8072-e41ef3d33033"
+    ],
+    "expected_chunks": [
+      "38bf37cd-5024-8005-b568-e1d65a943e82_0",
+      "394f37cd-5024-8067-8834-c63bb982717d_0",
+      "3a5f37cd-5024-803b-a85f-ff7a8929e374_0",
+      "3bbf37cd-5024-8034-8072-e41ef3d33033_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "factual-workout-leg",
+    "query": "Show my leg day workouts.",
+    "category": "factual",
+    "difficulty": "medium",
+    "expected_documents": [
+      "388f37cd-5024-804a-a1ec-fb4f7c19b51a",
+      "394f37cd-5024-80f6-976d-da0eec31a4f5"
+    ],
+    "expected_chunks": [
+      "388f37cd-5024-804a-a1ec-fb4f7c19b51a_0",
+      "394f37cd-5024-80f6-976d-da0eec31a4f5_0"
+    ],
+    "expected_intent": "semantic"
+  },
+  {
+    "id": "factual-union-find",
+    "query": "What did I write about union find?",
+    "category": "factual",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3c2f37cd-5024-8067-89fa-fde0afa58aab"
+    ],
+    "expected_chunks": [
+      "3c2f37cd-5024-8067-89fa-fde0afa58aab_0"
+    ]
+  },
+  {
+    "id": "factual-dijkstra",
+    "query": "What did I note about Dijkstra's algorithm?",
+    "category": "factual",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3bff37cd-5024-80fb-abe3-dee5713f2738"
+    ],
+    "expected_chunks": [
+      "3bff37cd-5024-80fb-abe3-dee5713f2738_0"
+    ]
+  },
+  {
+    "id": "factual-prims",
+    "query": "What did I write about Prim's algorithm?",
+    "category": "factual",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3bff37cd-5024-8072-b6b8-ec6619271d66"
+    ],
+    "expected_chunks": [
+      "3bff37cd-5024-8072-b6b8-ec6619271d66_0"
+    ]
+  },
+  {
+    "id": "factual-gram-schmidt",
+    "query": "What did I learn about the Gram-Schmidt process?",
+    "category": "factual",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3b1f37cd-5024-8040-970d-e993d4796d03"
+    ],
+    "expected_chunks": [
+      "3b1f37cd-5024-8040-970d-e993d4796d03_0",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_1",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_2",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_3",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_4",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_5"
+    ]
+  },
+  {
+    "id": "factual-eigenvalues",
+    "query": "What did I write about eigenvalues and eigenvectors?",
+    "category": "factual",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3bbf37cd-5024-80a9-8f82-efac83f87ebe"
+    ],
+    "expected_chunks": [
+      "3bbf37cd-5024-80a9-8f82-efac83f87ebe_0"
+    ]
+  },
+  {
+    "id": "factual-webpack",
+    "query": "What did I write about Webpack?",
+    "category": "factual",
+    "difficulty": "easy",
+    "expected_documents": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2"
+    ],
+    "expected_chunks": [
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_0",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_1",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_2",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_3",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_4",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_5",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_6",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_7",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_8",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_9",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_10",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_11",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_12"
+    ]
+  },
+  {
+    "id": "factual-docker",
+    "query": "What did I note about how Docker works?",
+    "category": "factual",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3bff37cd-5024-808b-ad3e-c7e40ce249d1",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d"
+    ],
+    "expected_chunks": [
+      "3bff37cd-5024-808b-ad3e-c7e40ce249d1_0",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d_0"
+    ]
+  },
+  {
+    "id": "factual-conga",
+    "query": "What did I write about the Conga platform architecture?",
+    "category": "factual",
+    "difficulty": "easy",
+    "expected_documents": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b"
+    ],
+    "expected_chunks": [
+      "382f37cd-5024-800a-b22e-eca13d16a73b_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_1",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_2"
+    ]
+  },
+  {
+    "id": "factual-harness",
+    "query": "What did I write about harness engineering?",
+    "category": "factual",
+    "difficulty": "easy",
+    "expected_documents": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d"
+    ],
+    "expected_chunks": [
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_0",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_1",
+      "386f37cd-5024-807f-9b60-e666cc9d3a4d_2"
+    ]
+  },
+  {
+    "id": "factual-apache-arrow",
+    "query": "What did I note about Apache Arrow?",
+    "category": "factual",
+    "difficulty": "easy",
+    "expected_documents": [
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-80d8-a0e9-e4a22bfae2f5_0"
+    ]
+  },
+  {
+    "id": "factual-topological-sort",
+    "query": "What did I write about topological sort?",
+    "category": "factual",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6"
+    ],
+    "expected_chunks": [
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6_0"
+    ]
+  },
+  {
+    "id": "factual-linear-algebra",
+    "query": "What did I write about linear algebra?",
+    "category": "factual",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3b1f37cd-5024-80d0-9008-d5d872a2b71c",
+      "3b1f37cd-5024-8075-8892-d0aa0e02b938"
+    ],
+    "expected_chunks": [
+      "3b1f37cd-5024-80d0-9008-d5d872a2b71c_0",
+      "3b1f37cd-5024-8075-8892-d0aa0e02b938_0",
+      "3b1f37cd-5024-8075-8892-d0aa0e02b938_1",
+      "3b1f37cd-5024-8075-8892-d0aa0e02b938_2",
+      "3b1f37cd-5024-8075-8892-d0aa0e02b938_3"
+    ]
+  },
+  {
+    "id": "factual-embeddings",
+    "query": "What did I write about embeddings and semantic indexing?",
+    "category": "factual",
+    "difficulty": "medium",
+    "expected_documents": [
+      "38ef37cd-5024-800f-85aa-cb4938a4c032",
+      "395f37cd-5024-801d-aeb6-d10e396ab5ac"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-800f-85aa-cb4938a4c032_0",
+      "395f37cd-5024-801d-aeb6-d10e396ab5ac_0"
+    ]
+  },
+  {
+    "id": "factual-bst",
+    "query": "What did I write about binary search trees?",
+    "category": "factual",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3a8f37cd-5024-80d3-bd20-ce4d4aee6d45"
+    ],
+    "expected_chunks": [
+      "3a8f37cd-5024-80d3-bd20-ce4d4aee6d45_0"
+    ]
+  },
+  {
+    "id": "factual-priority-queue",
+    "query": "What did I note about priority queues and heaps?",
+    "category": "factual",
+    "difficulty": "easy",
+    "expected_documents": [
+      "3bff37cd-5024-80d6-8b81-c1efd3fee91f"
+    ],
+    "expected_chunks": [
+      "3bff37cd-5024-80d6-8b81-c1efd3fee91f_0"
+    ]
+  },
+  {
+    "id": "factual-trees",
+    "query": "What are my notes on trees?",
+    "category": "factual",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3a8f37cd-5024-8036-ad90-f5250bc563bc"
+    ],
+    "expected_chunks": [
+      "3a8f37cd-5024-8036-ad90-f5250bc563bc_0"
+    ]
+  },
+  {
+    "id": "factual-backtracking-notes",
+    "query": "What did I write about the backtracking pattern?",
+    "category": "factual",
+    "difficulty": "medium",
+    "expected_documents": [
+      "383f37cd-5024-803a-8e0f-c7168bcac780"
+    ],
+    "expected_chunks": [
+      "383f37cd-5024-803a-8e0f-c7168bcac780_0"
+    ]
+  },
+  {
+    "id": "factual-ingestion",
+    "query": "What did I write about the knowledge ingestion pipeline?",
+    "category": "factual",
+    "difficulty": "easy",
+    "expected_documents": [
+      "38ef37cd-5024-809f-9676-ca30880e5192"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-809f-9676-ca30880e5192_0"
+    ]
+  },
+  {
+    "id": "factual-terminal",
+    "query": "What did I note about the terminal and shell pipes?",
+    "category": "factual",
+    "difficulty": "medium",
+    "expected_documents": [
+      "395f37cd-5024-805f-97e5-fc3bee2607ec"
+    ],
+    "expected_chunks": [
+      "395f37cd-5024-805f-97e5-fc3bee2607ec_0"
+    ]
+  },
+  {
+    "id": "factual-python-envs",
+    "query": "What did I write about Python environments and uv?",
+    "category": "factual",
+    "difficulty": "easy",
+    "expected_documents": [
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537_0"
+    ]
+  },
+  {
+    "id": "factual-dfs-cycle",
+    "query": "What did I write about detecting cycles with DFS?",
+    "category": "factual",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3a3f37cd-5024-80e1-bbbd-ee5d72b036a5"
+    ],
+    "expected_chunks": [
+      "3a3f37cd-5024-80e1-bbbd-ee5d72b036a5_0"
+    ]
+  },
+  {
+    "id": "factual-knowledge-graph",
+    "query": "What tools did I list under knowledge graph?",
+    "category": "factual",
+    "difficulty": "medium",
+    "expected_documents": [
+      "38df37cd-5024-809a-aa98-e19537f56b4c"
+    ],
+    "expected_chunks": [
+      "38df37cd-5024-809a-aa98-e19537f56b4c_0"
+    ]
+  },
+  {
+    "id": "semantic-privacy",
+    "query": "How does the project keep all my data private without using the cloud?",
+    "category": "semantic",
+    "difficulty": "medium",
+    "expected_documents": [
+      "38ef37cd-5024-8095-928d-d2f839d65184",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-8095-928d-d2f839d65184_0",
+      "38ef37cd-5024-8095-928d-d2f839d65184_1",
+      "38ef37cd-5024-8095-928d-d2f839d65184_2",
+      "38ef37cd-5024-8095-928d-d2f839d65184_3",
+      "38ef37cd-5024-8095-928d-d2f839d65184_4",
+      "38ef37cd-5024-8095-928d-d2f839d65184_5",
+      "38ef37cd-5024-8095-928d-d2f839d65184_6",
+      "38ef37cd-5024-8095-928d-d2f839d65184_7",
+      "38ef37cd-5024-8095-928d-d2f839d65184_8",
+      "38ef37cd-5024-8095-928d-d2f839d65184_9",
+      "38ef37cd-5024-8095-928d-d2f839d65184_10",
+      "38ef37cd-5024-8095-928d-d2f839d65184_11",
+      "38ef37cd-5024-8095-928d-d2f839d65184_12",
+      "38ef37cd-5024-8095-928d-d2f839d65184_13",
+      "38ef37cd-5024-8095-928d-d2f839d65184_14",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_0",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_1",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_2",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_3",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_4",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_5",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_6",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_7",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_8",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_9",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_10"
+    ]
+  },
+  {
+    "id": "semantic-masters-research",
+    "query": "What were my thoughts on pursuing a master's and a research career?",
+    "category": "semantic",
+    "difficulty": "medium",
+    "expected_documents": [
+      "386f37cd-5024-8021-8a2c-f251671a4822",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb"
+    ],
+    "expected_chunks": [
+      "386f37cd-5024-8021-8a2c-f251671a4822_0",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb_0",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb_1",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb_2"
+    ]
+  },
+  {
+    "id": "semantic-why-ai",
+    "query": "What first got me curious about machine learning?",
+    "category": "semantic",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3a1f37cd-5024-808d-842c-cbf567adfffb"
+    ],
+    "expected_chunks": [
+      "3a1f37cd-5024-808d-842c-cbf567adfffb_0",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb_1",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb_2"
+    ]
+  },
+  {
+    "id": "semantic-burnout",
+    "query": "What did I write about feeling drained or avoiding burnout?",
+    "category": "semantic",
+    "difficulty": "hard",
+    "expected_documents": [
+      "3b1f37cd-5024-805a-8741-e3302649b139",
+      "3b9f37cd-5024-8024-925e-f33542d7da4d",
+      "3b8f37cd-5024-81aa-9ada-e8ceabdf8a5e"
+    ],
+    "expected_chunks": [
+      "3b1f37cd-5024-805a-8741-e3302649b139_0",
+      "3b9f37cd-5024-8024-925e-f33542d7da4d_0",
+      "3b8f37cd-5024-81aa-9ada-e8ceabdf8a5e_0"
+    ]
+  },
+  {
+    "id": "semantic-online-presence",
+    "query": "What are my plans for building an online presence and audience?",
+    "category": "semantic",
+    "difficulty": "hard",
+    "expected_documents": [
+      "3b1f37cd-5024-8018-b36b-f60b1cc6f73c"
+    ],
+    "expected_chunks": [
+      "3b1f37cd-5024-8018-b36b-f60b1cc6f73c_0"
+    ]
+  },
+  {
+    "id": "semantic-scaling",
+    "query": "How would I keep retrieval quality high as the knowledge base grows?",
+    "category": "semantic",
+    "difficulty": "medium",
+    "expected_documents": [
+      "394f37cd-5024-801d-973a-c7dfebad5d2e"
+    ],
+    "expected_chunks": [
+      "394f37cd-5024-801d-973a-c7dfebad5d2e_0",
+      "394f37cd-5024-801d-973a-c7dfebad5d2e_1"
+    ]
+  },
+  {
+    "id": "semantic-isolation",
+    "query": "How do I stop different projects' dependencies from clashing?",
+    "category": "semantic",
+    "difficulty": "medium",
+    "expected_documents": [
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-80b1-9cb7-c9daf04d5537_0"
+    ]
+  },
+  {
+    "id": "semantic-startup-speed",
+    "query": "Why do containers start so much faster than full virtual machines?",
+    "category": "semantic",
+    "difficulty": "medium",
+    "expected_documents": [
+      "390f37cd-5024-8044-8c49-ced6f93dca0d"
+    ],
+    "expected_chunks": [
+      "390f37cd-5024-8044-8c49-ced6f93dca0d_0"
+    ]
+  },
+  {
+    "id": "semantic-side-idea",
+    "query": "What product idea did I jot down for an automated job hunter?",
+    "category": "semantic",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3c2f37cd-5024-8074-8270-f310194c1280"
+    ],
+    "expected_chunks": [
+      "3c2f37cd-5024-8074-8270-f310194c1280_0"
+    ]
+  },
+  {
+    "id": "synthesis-rag-learnings",
+    "query": "What have I learned about building retrieval and RAG systems?",
+    "category": "synthesis",
+    "difficulty": "hard",
+    "expected_documents": [
+      "38ef37cd-5024-8095-928d-d2f839d65184",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4",
+      "395f37cd-5024-801d-aeb6-d10e396ab5ac",
+      "394f37cd-5024-801d-973a-c7dfebad5d2e",
+      "38ef37cd-5024-800f-85aa-cb4938a4c032",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-8095-928d-d2f839d65184_0",
+      "38ef37cd-5024-8095-928d-d2f839d65184_1",
+      "38ef37cd-5024-8095-928d-d2f839d65184_2",
+      "38ef37cd-5024-8095-928d-d2f839d65184_3",
+      "38ef37cd-5024-8095-928d-d2f839d65184_4",
+      "38ef37cd-5024-8095-928d-d2f839d65184_5",
+      "38ef37cd-5024-8095-928d-d2f839d65184_6",
+      "38ef37cd-5024-8095-928d-d2f839d65184_7",
+      "38ef37cd-5024-8095-928d-d2f839d65184_8",
+      "38ef37cd-5024-8095-928d-d2f839d65184_9",
+      "38ef37cd-5024-8095-928d-d2f839d65184_10",
+      "38ef37cd-5024-8095-928d-d2f839d65184_11",
+      "38ef37cd-5024-8095-928d-d2f839d65184_12",
+      "38ef37cd-5024-8095-928d-d2f839d65184_13",
+      "38ef37cd-5024-8095-928d-d2f839d65184_14",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_0",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_1",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_2",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_3",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_4",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_5",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_6",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_7",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_8",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_9",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_10",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_11",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_12",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_13",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_14",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_15",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_16",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_17",
+      "38ef37cd-5024-80e5-bfc0-d7d0e789d52b_18",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_0",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_1",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_2",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_3",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_4",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_5",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_6",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_7",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_8",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_9",
+      "38ef37cd-5024-8007-a4c0-d45385700bd4_10",
+      "395f37cd-5024-801d-aeb6-d10e396ab5ac_0",
+      "394f37cd-5024-801d-973a-c7dfebad5d2e_0",
+      "394f37cd-5024-801d-973a-c7dfebad5d2e_1",
+      "38ef37cd-5024-800f-85aa-cb4938a4c032_0",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7_0",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7_1"
+    ]
+  },
+  {
+    "id": "synthesis-graph-algorithms",
+    "query": "What graph algorithms have I studied and taken notes on?",
+    "category": "synthesis",
+    "difficulty": "hard",
+    "expected_documents": [
+      "396f37cd-5024-802f-b610-f4e8d9c91a31",
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6",
+      "3a3f37cd-5024-80e1-bbbd-ee5d72b036a5",
+      "3bff37cd-5024-8042-8982-f5c3fbb35d8f",
+      "3bff37cd-5024-8072-b6b8-ec6619271d66",
+      "3bff37cd-5024-80fb-abe3-dee5713f2738",
+      "3c2f37cd-5024-8067-89fa-fde0afa58aab"
+    ],
+    "expected_chunks": [
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_0",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_1",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_2",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_3",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_4",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_5",
+      "396f37cd-5024-802f-b610-f4e8d9c91a31_6",
+      "3a3f37cd-5024-8031-976f-e1d40ba64fc6_0",
+      "3a3f37cd-5024-80e1-bbbd-ee5d72b036a5_0",
+      "3bff37cd-5024-8042-8982-f5c3fbb35d8f_0",
+      "3bff37cd-5024-8072-b6b8-ec6619271d66_0",
+      "3bff37cd-5024-80fb-abe3-dee5713f2738_0",
+      "3c2f37cd-5024-8067-89fa-fde0afa58aab_0"
+    ]
+  },
+  {
+    "id": "synthesis-math-foundations",
+    "query": "What have I been learning across the math foundations chapters?",
+    "category": "synthesis",
+    "difficulty": "hard",
+    "expected_documents": [
+      "3b1f37cd-5024-80d0-9008-d5d872a2b71c",
+      "3b1f37cd-5024-8075-8892-d0aa0e02b938",
+      "3b1f37cd-5024-8040-970d-e993d4796d03",
+      "3bbf37cd-5024-80a9-8f82-efac83f87ebe"
+    ],
+    "expected_chunks": [
+      "3b1f37cd-5024-80d0-9008-d5d872a2b71c_0",
+      "3b1f37cd-5024-8075-8892-d0aa0e02b938_0",
+      "3b1f37cd-5024-8075-8892-d0aa0e02b938_1",
+      "3b1f37cd-5024-8075-8892-d0aa0e02b938_2",
+      "3b1f37cd-5024-8075-8892-d0aa0e02b938_3",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_0",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_1",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_2",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_3",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_4",
+      "3b1f37cd-5024-8040-970d-e993d4796d03_5",
+      "3bbf37cd-5024-80a9-8f82-efac83f87ebe_0"
+    ]
+  },
+  {
+    "id": "synthesis-masters-evolution",
+    "query": "How has my thinking about doing a master's evolved over time?",
+    "category": "synthesis",
+    "difficulty": "hard",
+    "expected_documents": [
+      "386f37cd-5024-8021-8a2c-f251671a4822",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb"
+    ],
+    "expected_chunks": [
+      "386f37cd-5024-8021-8a2c-f251671a4822_0",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb_0",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb_1",
+      "3a1f37cd-5024-808d-842c-cbf567adfffb_2"
+    ]
+  },
+  {
+    "id": "synthesis-project-stories",
+    "query": "What were the main user stories and epics for the LifeRAG project?",
+    "category": "synthesis",
+    "difficulty": "hard",
+    "expected_documents": [
+      "38ef37cd-5024-80fe-8886-cb58228599fc",
+      "38ef37cd-5024-809f-9676-ca30880e5192",
+      "38ef37cd-5024-800f-85aa-cb4938a4c032",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7",
+      "38ef37cd-5024-8090-af70-c42e6d8b720a"
+    ],
+    "expected_chunks": [
+      "38ef37cd-5024-80fe-8886-cb58228599fc_0",
+      "38ef37cd-5024-809f-9676-ca30880e5192_0",
+      "38ef37cd-5024-800f-85aa-cb4938a4c032_0",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7_0",
+      "38ef37cd-5024-806d-aa7b-ecf937e635c7_1",
+      "38ef37cd-5024-8090-af70-c42e6d8b720a_0",
+      "38ef37cd-5024-8090-af70-c42e6d8b720a_1"
+    ]
+  },
+  {
+    "id": "synthesis-system-design",
+    "query": "What system design topics have I taken notes on?",
+    "category": "synthesis",
+    "difficulty": "hard",
+    "expected_documents": [
+      "3bff37cd-5024-808b-ad3e-c7e40ce249d1",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d",
+      "382f37cd-5024-800a-b22e-eca13d16a73b",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2"
+    ],
+    "expected_chunks": [
+      "3bff37cd-5024-808b-ad3e-c7e40ce249d1_0",
+      "390f37cd-5024-8044-8c49-ced6f93dca0d_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_0",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_1",
+      "382f37cd-5024-800a-b22e-eca13d16a73b_2",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_0",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_1",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_2",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_3",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_4",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_5",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_6",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_7",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_8",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_9",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_10",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_11",
+      "397f37cd-5024-80b7-afcf-cebda96e11a2_12"
+    ]
+  },
+  {
+    "id": "ambiguous-birthday",
+    "query": "What was I doing around my birthday?",
+    "category": "ambiguous",
+    "difficulty": "hard",
+    "expected_documents": [
+      "38af37cd-5024-8118-ad6b-f5374e49f5c7"
+    ],
+    "expected_chunks": [
+      "38af37cd-5024-8118-ad6b-f5374e49f5c7_0"
+    ]
+  },
+  {
+    "id": "ambiguous-ai-infra",
+    "query": "When did I last think about AI infrastructure and GPU work?",
+    "category": "ambiguous",
+    "difficulty": "medium",
+    "expected_documents": [
+      "386f37cd-5024-8021-8a2c-f251671a4822"
+    ],
+    "expected_chunks": [
+      "386f37cd-5024-8021-8a2c-f251671a4822_0"
+    ]
+  },
+  {
+    "id": "ambiguous-rag-stories",
+    "query": "When did I finish the stories for the RAG project?",
+    "category": "ambiguous",
+    "difficulty": "medium",
+    "expected_documents": [
+      "39af37cd-5024-81d6-bbd4-d35da3fd460c",
+      "399f37cd-5024-81a8-b5e0-d58610001d37"
+    ],
+    "expected_chunks": [
+      "39af37cd-5024-81d6-bbd4-d35da3fd460c_0",
+      "399f37cd-5024-81a8-b5e0-d58610001d37_0"
+    ]
+  },
+  {
+    "id": "assistant-goals",
+    "query": "What goals have I set for this month?",
+    "category": "assistant",
+    "difficulty": "medium",
+    "expected_documents": [
+      "3aef37cd-5024-8197-bc02-d9e679f02fd3"
+    ],
+    "expected_chunks": [
+      "3aef37cd-5024-8197-bc02-d9e679f02fd3_0"
+    ]
+  },
+  {
+    "id": "assistant-focus",
+    "query": "What am I currently focused on?",
+    "category": "assistant",
+    "difficulty": "hard",
+    "expected_documents": [
+      "3aef37cd-5024-8197-bc02-d9e679f02fd3",
+      "3b9f37cd-5024-8024-925e-f33542d7da4d"
+    ],
+    "expected_chunks": [
+      "3aef37cd-5024-8197-bc02-d9e679f02fd3_0",
+      "3b9f37cd-5024-8024-925e-f33542d7da4d_0"
+    ]
+  },
+  {
+    "id": "assistant-active-projects",
+    "query": "What projects am I actively working on?",
+    "category": "assistant",
+    "difficulty": "hard",
+    "expected_documents": [
+      "3bdf37cd-5024-80ac-806b-dcfcf9ce85c4",
+      "38ef37cd-5024-8090-af70-c42e6d8b720a"
+    ],
+    "expected_chunks": [
+      "3bdf37cd-5024-80ac-806b-dcfcf9ce85c4_0",
+      "38ef37cd-5024-8090-af70-c42e6d8b720a_0",
+      "38ef37cd-5024-8090-af70-c42e6d8b720a_1"
+    ]
+  },
+  {
+    "id": "assistant-routine",
+    "query": "What did I say I want to improve about my daily routine?",
+    "category": "assistant",
+    "difficulty": "hard",
+    "expected_documents": [
+      "3b1f37cd-5024-8037-8556-cedb7e8bf542",
+      "3b9f37cd-5024-8024-925e-f33542d7da4d"
+    ],
+    "expected_chunks": [
+      "3b1f37cd-5024-8037-8556-cedb7e8bf542_0",
+      "3b9f37cd-5024-8024-925e-f33542d7da4d_0"
+    ]
+  },
+  {
+    "id": "assistant-procrastinating",
+    "query": "What have I been putting off or not started yet?",
+    "category": "assistant",
+    "difficulty": "hard",
+    "expected_documents": [
+      "3b1f37cd-5024-8018-b36b-f60b1cc6f73c"
+    ],
+    "expected_chunks": [
+      "3b1f37cd-5024-8018-b36b-f60b1cc6f73c_0"
+    ]
+  },
+  {
+    "id": "assistant-portfolio",
+    "query": "What am I planning to do about my portfolio and personal brand?",
+    "category": "assistant",
+    "difficulty": "hard",
+    "expected_documents": [
+      "3b1f37cd-5024-8018-b36b-f60b1cc6f73c",
+      "3aef37cd-5024-8197-bc02-d9e679f02fd3"
+    ],
+    "expected_chunks": [
+      "3b1f37cd-5024-8018-b36b-f60b1cc6f73c_0",
+      "3aef37cd-5024-8197-bc02-d9e679f02fd3_0"
+    ]
+  }
+]

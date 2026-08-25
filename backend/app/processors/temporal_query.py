@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from datetime import date, datetime, time, timedelta, timezone
+import re
+from datetime import date, datetime, time, timedelta
 
 import dateparser
 
-from app.core.clock import local_timezone
 from app.core.config import settings
 
 # Whole-period units the LLM may request. Boundary policy is owned HERE, never by
@@ -58,28 +58,19 @@ def _parse_anchor(anchor: str, today: date) -> date | None:
     return parsed.date() if parsed is not None else None
 
 
-def _utc_bounds(low_day: date, high_day: date) -> tuple[str, str]:
-    """Convert an inclusive day span to UTC RFC3339 [start, end] instants."""
-    tz = local_timezone()
-    start = datetime.combine(low_day, time.min, tzinfo=tz)
-    end = datetime.combine(high_day, time.max, tzinfo=tz)
-    return (
-        start.astimezone(timezone.utc).isoformat(),
-        end.astimezone(timezone.utc).isoformat(),
-    )
-
-
 def resolve_temporal_descriptor(
     descriptor: object, today: date, query: str
 ) -> tuple[str, str] | None:
-    """Resolve an LLM temporal descriptor to UTC [low, high] bounds, or None.
+    """Resolve a temporal descriptor to inclusive LOCAL date-only ``[low, high]``.
 
     The descriptor is ``{"kind": "single"|"range", "unit": "week"|"month",
-    "anchor": "<verbatim phrase>"}``: the LLM only classifies structure and copies
-    the phrase, dateparser resolves the phrase to one date, and this module owns
-    the range boundary policy. Anything malformed (missing/hallucinated anchor,
-    unparseable phrase, unknown range unit) returns None so retrieval fails safe
-    to plain semantic search.
+    "anchor": "<verbatim phrase>"}``: only structure is classified and the phrase
+    copied, dateparser resolves the phrase to one date, and this module owns the
+    range boundary policy. The result is a pair of ``YYYY-MM-DD`` local days — the
+    single human-meaningful representation used throughout; the storage/timezone
+    translation is applied later by the filter builder/matcher. Anything malformed
+    (missing/hallucinated anchor, unparseable phrase, unknown range unit) returns
+    None so retrieval fails safe to plain semantic search.
     """
     if not isinstance(descriptor, dict):
         return None
@@ -104,4 +95,73 @@ def resolve_temporal_descriptor(
     else:
         span = (day, day)
 
-    return _utc_bounds(*span)
+    return _day_bounds(*span)
+
+
+def _day_bounds(low_day: date, high_day: date) -> tuple[str, str]:
+    """Return an inclusive local-day span as ``YYYY-MM-DD`` date-only strings."""
+    return low_day.isoformat(), high_day.isoformat()
+
+
+_MONTH = (
+    r"(?:january|february|march|april|may|june|july|august|september|october"
+    r"|november|december)"
+)
+
+# Deterministic temporal phrasings, tried in order. Each yields (unit, anchor,
+# month_end): the anchor is a phrase dateparser can resolve; month_end snaps a
+# month anchor to its final day before taking the week.
+_TEMPORAL_PATTERNS: tuple[tuple[re.Pattern[str], str, bool], ...] = (
+    (re.compile(rf"\blast week of ({_MONTH})\b"), "week", True),
+    (re.compile(rf"\bfirst week of ({_MONTH})\b"), "week", False),
+    (re.compile(r"\bweek of ([a-z]+(?:\s+\d{1,2})?(?:,?\s+\d{4})?)"), "week", False),
+    (re.compile(r"\b(?:in|during|for|throughout)\s+(" + _MONTH + r")\b"), "month", False),
+    (re.compile(r"\b(last week|this week|past week)\b"), "week", False),
+    (re.compile(r"\b(last month|this month|past month)\b"), "month", False),
+    (re.compile(r"\b(yesterday|today)\b"), "day", False),
+)
+
+
+def resolve_range(
+    anchor: str, unit: str, today: date, *, month_end: bool = False
+) -> tuple[str, str] | None:
+    """Resolve a verbatim anchor phrase + unit to inclusive local-day bounds.
+
+    dateparser owns phrase-to-date resolution; boundary policy (week = Mon–Sun,
+    month = 1st–last) lives here. ``month_end`` snaps a month anchor to its final
+    day first, so "last week of June" resolves to the week containing June's last
+    day. Returns None when the phrase cannot be resolved.
+    """
+    day = _parse_anchor(anchor.strip(), today)
+    if day is None:
+        return None
+    if month_end:
+        day = _month_span(day)[1]
+    if unit == "week":
+        span = _week_span(day)
+    elif unit == "month":
+        span = _month_span(day)
+    else:
+        span = (day, day)
+    return _day_bounds(*span)
+
+
+def detect_temporal_range(query: str, today: date) -> tuple[str, str] | None:
+    """Deterministically detect a temporal expression and resolve its day bounds.
+
+    Recognizes the common natural phrasings ("week of July 13", "last week of
+    June", "in August", "last week/month", "yesterday/today") without any LLM,
+    returning inclusive local-day ``[low, high]`` bounds or None. No date
+    arithmetic is hardcoded — dateparser resolves anchors and this module owns
+    only week/month boundary policy.
+    """
+    normalized = " ".join(query.split()).lower()
+    for pattern, unit, month_end in _TEMPORAL_PATTERNS:
+        match = pattern.search(normalized)
+        if match is None:
+            continue
+        anchor = match.group(1)
+        bounds = resolve_range(anchor, unit, today, month_end=month_end)
+        if bounds is not None:
+            return bounds
+    return None

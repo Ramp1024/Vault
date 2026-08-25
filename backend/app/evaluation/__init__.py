@@ -8,7 +8,15 @@ The data model is intentionally designed so it can grow into answer and citation
 evaluation later (see ``EvaluationCase``) without a redesign.
 """
 
+from app.evaluation.analysis_metrics import (
+    AnalysisReport,
+    AnalyzedCase,
+    analyze_dataset,
+    build_analysis_report,
+)
 from app.evaluation.dataset import EvaluationCase, EvaluationDataset
+from app.evaluation.hybrid_metrics import HybridContribution, hybrid_contribution
+from app.evaluation.latency_metrics import StageLatency, run_latencies
 from app.evaluation.metrics import (
     MeanReciprocalRank,
     QueryEvaluation,
@@ -65,4 +73,12 @@ __all__ = [
     "format_performance_table",
     "format_latency_breakdown",
     "format_rerank_diagnostics",
+    "AnalysisReport",
+    "AnalyzedCase",
+    "analyze_dataset",
+    "build_analysis_report",
+    "HybridContribution",
+    "hybrid_contribution",
+    "StageLatency",
+    "run_latencies",
 ]

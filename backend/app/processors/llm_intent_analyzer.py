@@ -8,10 +8,10 @@ from app.models.metadata_schema import MetadataSchema
 from app.models.search_request import SearchRequest
 from app.models.filter import Filter, Operator
 from app.core.clock import today as current_date
-from app.core.config import settings
 from app.processors.filter_validator import FilterValidator
 from app.processors.intent_prompt import build_intent_prompt
 from app.processors.query_analyzer import QueryAnalyzer
+from app.processors.temporal_field_selector import TemporalFieldSelector
 from app.processors.temporal_query import resolve_temporal_descriptor
 from app.services.llm import LLM
 
@@ -48,6 +48,7 @@ class LLMIntentAnalyzer(QueryAnalyzer):
         self.schema = schema
         self.default_top_k = default_top_k
         self.validator = validator or FilterValidator(schema)
+        self.temporal_selector = TemporalFieldSelector(schema, llm=llm)
 
     def analyze(self, query: str) -> SearchRequest:
         normalized = " ".join(query.split()).strip()
@@ -93,22 +94,31 @@ class LLMIntentAnalyzer(QueryAnalyzer):
             top_k=self.default_top_k,
         )
 
-    @staticmethod
-    def _apply_temporal(descriptor, filters, reference, query):
-        """Fold an LLM temporal descriptor into an authoring-time range filter.
+    def _apply_temporal(self, descriptor, filters, reference, query):
+        """Fold a temporal descriptor into a date-range filter on the chosen field.
 
-        Resolution (dateparser + boundary snapping) lives in ``temporal_query``.
-        When it yields bounds, the authoring-time axis is authoritative, so any
-        competing content-date filter is dropped to avoid an empty AND. A missing
-        or unresolvable descriptor leaves ``filters`` untouched.
+        Date resolution (dateparser + boundary snapping) lives in
+        ``temporal_query`` and yields local-day bounds; the date *field* is chosen
+        by the schema-driven :class:`TemporalFieldSelector` (never a hardcoded
+        name). When a range resolves, any competing date filter is dropped so the
+        selected axis is authoritative. If no field can be selected confidently,
+        the temporal filter is dropped entirely — a wrong axis would silently
+        return plausible-but-wrong results, so retrieval fails safe to search.
         """
         bounds = resolve_temporal_descriptor(descriptor, reference, query)
         if bounds is None:
             return filters
+        selection = self.temporal_selector.select(query)
+        if not selection.selected:
+            return filters
         low, high = bounds
-        field = settings.AUTHORSHIP_DATE_FIELD
-        kept = [f for f in filters if f.field not in {field, "date"}]
-        kept.append(Filter(field=field, operator=Operator.BETWEEN, value=[low, high]))
+        date_fields = {f.name for f in self.schema.date_fields()} | {"date"}
+        kept = [f for f in filters if f.field not in date_fields]
+        kept.append(
+            Filter(
+                field=selection.field, operator=Operator.BETWEEN, value=[low, high]
+            )
+        )
         return kept
 
     @staticmethod

@@ -199,6 +199,44 @@ class QdrantService:
 
         return sorted(fields), multi_fields
 
+    def discover_property_values(
+        self, sample_limit: int = 512
+    ) -> dict[str, list[str]]:
+        """Collect observed string values for each metadata property field.
+
+        Scans a sample of stored points and gathers, per ``properties`` key, the
+        string values seen (flattening list-valued properties). The result feeds
+        schema enrichment, which classifies each field as an enumerable
+        (closed-set) field or free text based on how few and how repeated its
+        values are. Duplicates are kept so that classification can reason about
+        value repetition across chunks.
+        """
+        if not self.collection_exists():
+            return {}
+
+        try:
+            points, _ = self.client.scroll(
+                collection_name=settings.QDRANT_COLLECTION_NAME,
+                limit=sample_limit,
+                with_payload=True,
+                with_vectors=False,
+            )
+        except Exception:
+            return {}
+
+        values: dict[str, list[str]] = {}
+        for point in points:
+            properties = (point.payload or {}).get("properties")
+            if not isinstance(properties, dict):
+                continue
+            for name, value in properties.items():
+                bucket = values.setdefault(name, [])
+                if isinstance(value, list):
+                    bucket.extend(str(item) for item in value if isinstance(item, str))
+                elif isinstance(value, str):
+                    bucket.append(value)
+        return values
+
     def delete_document(self, document_id: str) -> None:
         """Delete every vector associated with a document."""
         if not self.collection_exists():

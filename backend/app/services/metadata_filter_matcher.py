@@ -4,6 +4,7 @@ from collections.abc import Sequence
 from datetime import date
 from typing import Any
 
+from app.core.clock import to_local_day
 from app.models.chunk import Chunk
 from app.models.filter import Filter, Operator
 
@@ -71,18 +72,23 @@ class MetadataFilterMatcher:
             # Ordered comparisons are undefined for multi-valued fields.
             return False
 
+        # Activity-date fields are stored as UTC timestamps; compare them by the
+        # local calendar day so a note edited near midnight matches the day the
+        # user means. Bounds are always local date-only strings.
+        activity = f.field in self.SYSTEM_FIELDS
+
         if f.operator is Operator.BETWEEN:
             if not isinstance(f.value, (list, tuple)) or len(f.value) != 2:
                 return False
-            low = self._coerce(stored, f.value[0])
-            high = self._coerce(stored, f.value[1])
-            value = self._coerce(stored, stored)
+            low = self._coerce(stored, f.value[0], activity)
+            high = self._coerce(stored, f.value[1], activity)
+            value = self._coerce(stored, stored, activity)
             if low is None or high is None or value is None:
                 return False
             return low <= value <= high
 
-        bound = self._coerce(stored, f.value)
-        value = self._coerce(stored, stored)
+        bound = self._coerce(stored, f.value, activity)
+        value = self._coerce(stored, stored, activity)
         if bound is None or value is None:
             return False
         if f.operator is Operator.GT:
@@ -94,13 +100,17 @@ class MetadataFilterMatcher:
         return value <= bound  # LTE
 
     @staticmethod
-    def _coerce(stored: Any, value: Any) -> Any:
+    def _coerce(stored: Any, value: Any, activity: bool = False) -> Any:
         """Coerce ``value`` to a comparable form aligned with ``stored``.
 
-        Dates compare as ISO strings, numbers as floats. Returns None when the
-        value cannot be compared, so the filter simply fails closed.
+        Dates compare as calendar days, numbers as floats. When the field is an
+        activity date and ``value`` is the stored UTC timestamp, its day is taken
+        in the local timezone; bounds and content dates use their plain day.
+        Returns None when the value cannot be compared, so the filter fails closed.
         """
         if _looks_like_date(stored):
+            if activity and value is stored:
+                return to_local_day(str(value))
             return _as_date(value)
         try:
             return float(value)

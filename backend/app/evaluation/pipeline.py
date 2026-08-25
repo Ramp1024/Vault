@@ -39,7 +39,18 @@ class StageTiming:
     strategies: dict[str, float] = field(default_factory=dict)
     fusion: float = 0.0
     rerank: float = 0.0
+    answer_generation: float = 0.0
     total: float = 0.0
+
+    @property
+    def retrieval(self) -> float:
+        """Total time across the retrieval strategies for this query."""
+        return sum(self.strategies.values())
+
+    @property
+    def end_to_end(self) -> float:
+        """Full request latency: retrieval pipeline plus answer generation."""
+        return self.total + self.answer_generation
 
 
 @dataclass(frozen=True)

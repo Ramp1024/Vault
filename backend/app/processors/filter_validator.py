@@ -109,7 +109,35 @@ class FilterValidator:
         if value is None:
             return None
 
+        value = self._validate_membership(field, value)
+        if value is None:
+            return None
+
         return Filter(field=field.name, operator=operator, value=value)
+
+    @staticmethod
+    def _validate_membership(field: MetadataField, value: Any) -> Any:
+        """Enforce value-level validity for string fields.
+
+        Enumerable fields (a closed set of known values) accept only values that
+        match one of those values, snapped to their canonical casing; anything
+        else is dropped. Free-text string fields (e.g. long notes) are never
+        filterable — their content is a search *subject*, not a constraint — so
+        any proposed filter on them is rejected. Non-string fields are unaffected.
+        """
+        if field.type is not FieldType.STRING:
+            return value
+
+        if not field.is_enumerable:
+            # Free-text field: refuse to turn its content into a metadata filter.
+            return None
+
+        if isinstance(value, list):
+            snapped = [field.canonical_value(str(item)) for item in value]
+            snapped = [item for item in snapped if item is not None]
+            return snapped or None
+
+        return field.canonical_value(str(value))
 
     def _coerce_value(
         self,

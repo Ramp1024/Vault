@@ -20,8 +20,13 @@ from app.processors.query_analyzer import (
     QueryAnalyzer,
     RuleBasedQueryAnalyzer,
 )
-from app.processors.schema_discovery import schema_from_indexed_fields
+from app.processors.schema_discovery import (
+    enrich_schema_with_values,
+    schema_from_indexed_fields,
+    with_temporal_metadata,
+)
 from app.processors.llm_intent_analyzer import LLMIntentAnalyzer
+from app.processors.query_intent import DeterministicIntentAnalyzer
 from app.models.metadata_schema import MetadataSchema
 from app.services.metadata_schema_store import MetadataSchemaStore
 from app.search import (
@@ -159,44 +164,66 @@ class AnswerService:
         return MetadataRegistry.from_indexed_fields(fields, multi_fields)
 
     def _build_query_analyzer(self, retrieval_depth: int) -> QueryAnalyzer:
-        """Build the query analyzer, optionally composing rule-based + LLM intent.
+        """Build the query analyzer used to turn a query into a SearchRequest.
 
-        The deterministic rule-based analyzer is always present. When
-        ``INTENT_ANALYZER_ENABLED`` is set and a metadata schema is available, it
-        is wrapped in a :class:`CompositeQueryAnalyzer` that also consults the
-        schema-aware LLM intent analyzer (which owns authoring-time date routing
-        via its temporal descriptor). The retrieval engine remains unaware of
-        which analyzer produced the ``SearchRequest``.
+        When a metadata schema is available the default is the deterministic,
+        schema-aware :class:`DeterministicIntentAnalyzer` (lexical routing, value
+        validated metadata filters, and schema-driven temporal ranges — no LLM).
+        With ``INTENT_ANALYZER_ENABLED`` it is composed with the schema-aware LLM
+        intent analyzer for additional conversational understanding. Without a
+        schema it falls back to the rule-based analyzer. The retrieval engine
+        stays unaware of which analyzer produced the ``SearchRequest``.
         """
         rule_based = RuleBasedQueryAnalyzer(
             registry=self._build_registry(),
             default_top_k=retrieval_depth,
         )
 
-        if not settings.INTENT_ANALYZER_ENABLED:
-            return rule_based
-
         schema = self._load_metadata_schema()
         if not schema:
             return rule_based
+
+        deterministic = DeterministicIntentAnalyzer(
+            schema, default_top_k=retrieval_depth
+        )
+        if not settings.INTENT_ANALYZER_ENABLED:
+            return deterministic
 
         llm_analyzer = LLMIntentAnalyzer(
             build_intent_llm(),
             schema,
             default_top_k=retrieval_depth,
         )
-        return CompositeQueryAnalyzer(rule_based=rule_based, llm_based=llm_analyzer)
+        return CompositeQueryAnalyzer(
+            rule_based=deterministic, llm_based=llm_analyzer
+        )
 
     def _load_metadata_schema(self) -> MetadataSchema:
-        """Load the persisted schema, falling back to indexed field discovery."""
+        """Load the schema and ensure value + temporal enrichment.
+
+        The persisted schema may predate value/temporal-role enrichment, so
+        observed field values are folded in (populating ``allowed_values`` and
+        temporal roles). This keeps the live analyzer aligned with discovery even
+        when the on-disk schema is stale; if no values can be read, temporal
+        metadata is still applied so date fields remain query-selectable.
+        """
         schema = MetadataSchemaStore().load()
-        if schema:
-            return schema
+        if not schema:
+            try:
+                fields, multi_fields = self.qdrant_service.discover_property_fields()
+            except Exception:
+                fields, multi_fields = [], set()
+            schema = schema_from_indexed_fields(fields, multi_fields)
+
         try:
-            fields, multi_fields = self.qdrant_service.discover_property_fields()
+            values = self.qdrant_service.discover_property_values()
         except Exception:
-            fields, multi_fields = [], set()
-        return schema_from_indexed_fields(fields, multi_fields)
+            values = {}
+        return (
+            enrich_schema_with_values(schema, values)
+            if values
+            else with_temporal_metadata(schema)
+        )
 
     def retrieve(self, query: str) -> list[SearchResult]:
         """Run retrieval and cap to the configured number of sources."""

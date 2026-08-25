@@ -12,6 +12,7 @@ from qdrant_client.http.models import (
     Range,
 )
 
+from app.core.clock import local_day_bounds_to_utc
 from app.models.filter import Filter, Operator
 
 # Operators that select a bounded/ordered slice of an ordered field.
@@ -72,35 +73,62 @@ class QdrantFilterBuilder:
         Date-valued fields use ``DatetimeRange`` (comparing ISO date strings);
         numeric fields use the numeric ``Range``. ``BETWEEN`` expects a
         two-element ``[low, high]`` value and maps to an inclusive gte/lte range.
+        For system activity-date fields (stored as UTC timestamps) a local-day
+        bound is converted to the matching UTC instant, so a note edited near
+        midnight is matched against the day the user means, not the UTC day.
         """
+        activity = f.field in self.SYSTEM_FIELDS
         if f.operator is Operator.BETWEEN:
             low, high = self._between_bounds(f.value)
-            return self._bounded_range(low, high, inclusive=True)
+            return self._bounded_range(low, high, inclusive=True, activity=activity)
 
         bound = f.value
         if f.operator is Operator.GT:
-            return self._bounded_range(bound, None, inclusive=False)
+            return self._bounded_range(bound, None, inclusive=False, activity=activity)
         if f.operator is Operator.GTE:
-            return self._bounded_range(bound, None, inclusive=True)
+            return self._bounded_range(bound, None, inclusive=True, activity=activity)
         if f.operator is Operator.LT:
-            return self._bounded_range(None, bound, inclusive=False)
+            return self._bounded_range(None, bound, inclusive=False, activity=activity)
         # LTE
-        return self._bounded_range(None, bound, inclusive=True)
+        return self._bounded_range(None, bound, inclusive=True, activity=activity)
 
     def _bounded_range(
-        self, low: object, high: object, *, inclusive: bool
+        self, low: object, high: object, *, inclusive: bool, activity: bool = False
     ) -> Range | DatetimeRange:
         # Choose the datetime range when either bound is a date string; Qdrant's
         # DatetimeRange compares RFC3339/ISO values, which the payload stores.
         if self._is_date(low) or self._is_date(high):
+            low_v, high_v = self._date_bounds(low, high, activity)
             if inclusive:
-                return DatetimeRange(gte=low, lte=high)
-            return DatetimeRange(gt=low, lt=high)
+                return DatetimeRange(gte=low_v, lte=high_v)
+            return DatetimeRange(gt=low_v, lt=high_v)
         low_num = self._as_number(low)
         high_num = self._as_number(high)
         if inclusive:
             return Range(gte=low_num, lte=high_num)
         return Range(gt=low_num, lt=high_num)
+
+    @staticmethod
+    def _date_bounds(
+        low: object, high: object, activity: bool
+    ) -> tuple[object, object]:
+        """Return comparison bounds for a date range.
+
+        Content dates are stored as calendar days, so their date-only bounds are
+        used as-is. Activity dates are stored as UTC timestamps, so each local-day
+        bound is expanded to the UTC instant at that day's start (low) or end
+        (high).
+        """
+        if not activity:
+            return low, high
+        low_v = high_v = None
+        if isinstance(low, str):
+            day = date.fromisoformat(low.strip()[:10])
+            low_v = local_day_bounds_to_utc(day, day)[0]
+        if isinstance(high, str):
+            day = date.fromisoformat(high.strip()[:10])
+            high_v = local_day_bounds_to_utc(day, day)[1]
+        return low_v, high_v
 
     @staticmethod
     def _between_bounds(value: object) -> tuple[object, object]:
