@@ -53,11 +53,13 @@ from app.processors.metadata_registry import (
     default_metadata_registry,
 )
 from app.processors.query_analyzer import (
-    CompositeQueryAnalyzer,
     QueryAnalyzer,
     RuleBasedQueryAnalyzer,
 )
 from app.processors.query_intent import DeterministicIntentAnalyzer
+from app.processors.augmenting_analyzer import AugmentingIntentAnalyzer
+from app.processors.constraint_proposal import LLMConstraintProposer
+from app.processors.constraint_validation import ConstraintValidator
 from app.processors.schema_discovery import (
     enrich_schema_with_values,
     schema_from_indexed_fields,
@@ -84,8 +86,10 @@ RETRIEVAL_DEPTH = 10
 PRIMARY_K = 5
 
 # Analyzer used for the retrieval-strategy (hybrid contribution) breakdown and
-# the detailed failure analysis — the production default.
-REFERENCE_ANALYZER = "Composite (Rule+LLM)"
+# the detailed failure analysis — the production default. The augmenting
+# analyzer keeps the deterministic result authoritative and only adds validated,
+# grounded LLM constraints, so it can never score below the deterministic run.
+REFERENCE_ANALYZER = "Augmenting (Det+LLM)"
 
 
 class _SafeCachingAnalyzer(QueryAnalyzer):
@@ -164,11 +168,24 @@ def _build_analyzers(
             build_intent_llm(), schema, default_top_k=RETRIEVAL_DEPTH
         )
 
+    def augmenting() -> AugmentingIntentAnalyzer:
+        return AugmentingIntentAnalyzer(
+            deterministic=DeterministicIntentAnalyzer(
+                schema, default_top_k=RETRIEVAL_DEPTH
+            ),
+            proposer=LLMConstraintProposer(build_intent_llm(), schema),
+            validator=ConstraintValidator(
+                schema,
+                min_confidence=settings.INTENT_LLM_MIN_CONFIDENCE,
+                min_grounding=settings.INTENT_GROUNDING_THRESHOLD,
+            ),
+        )
+
     analyzers["LLM-only"] = _SafeCachingAnalyzer(
         llm(), default_top_k=RETRIEVAL_DEPTH
     )
     analyzers[REFERENCE_ANALYZER] = _SafeCachingAnalyzer(
-        CompositeQueryAnalyzer(rule_based=rule(), llm_based=llm()),
+        augmenting(),
         default_top_k=RETRIEVAL_DEPTH,
     )
     return analyzers

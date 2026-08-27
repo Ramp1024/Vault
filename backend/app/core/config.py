@@ -97,6 +97,17 @@ class Settings(BaseSettings):
     # this makes filter inference reproducible run-to-run, so the same query
     # resolves to the same date filter instead of drifting between requests.
     INTENT_LLM_SEED: int = int(os.environ.get("INTENT_LLM_SEED", "0"))
+    # Acceptance thresholds for LLM-proposed constraints (augmenting analyzer).
+    # A candidate constraint is only allowed to influence retrieval when its
+    # grounding score AND model confidence both clear these bars — the LLM is a
+    # proposal engine, never the decision-maker. Conservative by design: raising
+    # them makes the analyzer accept fewer LLM constraints (safer, narrower).
+    INTENT_LLM_MIN_CONFIDENCE: float = float(
+        os.environ.get("INTENT_LLM_MIN_CONFIDENCE", "0.6")
+    )
+    INTENT_GROUNDING_THRESHOLD: float = float(
+        os.environ.get("INTENT_GROUNDING_THRESHOLD", "0.6")
+    )
     # IANA timezone (e.g. "Asia/Kolkata", "America/New_York") used to anchor
     # relative-date resolution ("yesterday", "day before yesterday"). Containers
     # default to UTC, which shifts relative dates by a day for users ahead of or

@@ -238,6 +238,14 @@ class DeterministicIntentAnalyzer(QueryAnalyzer):
         )
         return kept
 
+    def is_lexical(self, query: str) -> bool:
+        """True when ``query`` is a lexical-lookup phrasing (subject-only, never filtered).
+
+        Public so an augmenting analyzer can honour the same routing decision: a
+        lexical query must not receive LLM-proposed filters either.
+        """
+        return self._is_lexical(" ".join(query.split()).strip())
+
     @staticmethod
     def _is_lexical(query: str) -> bool:
         lowered = query.casefold()

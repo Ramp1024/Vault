@@ -16,7 +16,6 @@ from app.processors.metadata_registry import (
 )
 from app.processors.prompt_template import PromptTemplate, build_prompt_template
 from app.processors.query_analyzer import (
-    CompositeQueryAnalyzer,
     QueryAnalyzer,
     RuleBasedQueryAnalyzer,
 )
@@ -25,7 +24,9 @@ from app.processors.schema_discovery import (
     schema_from_indexed_fields,
     with_temporal_metadata,
 )
-from app.processors.llm_intent_analyzer import LLMIntentAnalyzer
+from app.processors.augmenting_analyzer import AugmentingIntentAnalyzer
+from app.processors.constraint_proposal import LLMConstraintProposer
+from app.processors.constraint_validation import ConstraintValidator
 from app.processors.query_intent import DeterministicIntentAnalyzer
 from app.models.metadata_schema import MetadataSchema
 from app.services.metadata_schema_store import MetadataSchemaStore
@@ -169,10 +170,13 @@ class AnswerService:
         When a metadata schema is available the default is the deterministic,
         schema-aware :class:`DeterministicIntentAnalyzer` (lexical routing, value
         validated metadata filters, and schema-driven temporal ranges — no LLM).
-        With ``INTENT_ANALYZER_ENABLED`` it is composed with the schema-aware LLM
-        intent analyzer for additional conversational understanding. Without a
-        schema it falls back to the rule-based analyzer. The retrieval engine
-        stays unaware of which analyzer produced the ``SearchRequest``.
+        With ``INTENT_ANALYZER_ENABLED`` it is wrapped in an
+        :class:`AugmentingIntentAnalyzer`: the deterministic result stays
+        authoritative and the LLM may only add validated, grounded constraints
+        for fields the deterministic stage left unclaimed — it can never override
+        a trusted filter or rewrite the subject. Without a schema it falls back to
+        the rule-based analyzer. The retrieval engine stays unaware of which
+        analyzer produced the ``SearchRequest``.
         """
         rule_based = RuleBasedQueryAnalyzer(
             registry=self._build_registry(),
@@ -189,13 +193,14 @@ class AnswerService:
         if not settings.INTENT_ANALYZER_ENABLED:
             return deterministic
 
-        llm_analyzer = LLMIntentAnalyzer(
-            build_intent_llm(),
-            schema,
-            default_top_k=retrieval_depth,
-        )
-        return CompositeQueryAnalyzer(
-            rule_based=deterministic, llm_based=llm_analyzer
+        return AugmentingIntentAnalyzer(
+            deterministic=deterministic,
+            proposer=LLMConstraintProposer(build_intent_llm(), schema),
+            validator=ConstraintValidator(
+                schema,
+                min_confidence=settings.INTENT_LLM_MIN_CONFIDENCE,
+                min_grounding=settings.INTENT_GROUNDING_THRESHOLD,
+            ),
         )
 
     def _load_metadata_schema(self) -> MetadataSchema:
