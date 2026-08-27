@@ -34,6 +34,7 @@ from app.models.metadata_schema import (
     MetadataField,
     MetadataSchema,
 )
+from app.models.prompt import Prompt
 from app.services.llm import LLM
 
 logger = logging.getLogger(__name__)
@@ -148,7 +149,7 @@ class TemporalFieldSelector:
         return field.strip(), confidence
 
     @staticmethod
-    def _build_prompt(query: str, candidates: list[MetadataField]) -> str:
+    def _build_prompt(query: str, candidates: list[MetadataField]) -> Prompt:
         lines = [
             "Choose which date field a user's question refers to.",
             "You may ONLY pick a field name from the list. Do NOT compute dates,",
@@ -166,4 +167,7 @@ class TemporalFieldSelector:
             "",
             'Respond as JSON: {"field": "<name>", "confidence": <0..1>}',
         ]
-        return "\n".join(lines)
+        system = (
+            "You select the most relevant date field for a query. Output only JSON."
+        )
+        return Prompt(system=system, user="\n".join(lines))

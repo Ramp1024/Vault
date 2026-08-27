@@ -85,6 +85,11 @@ class MetadataField:
     description: str | None = None
     allowed_values: tuple[str, ...] = ()
     temporal_role: str | None = None
+    # Natural-language synonyms per canonical value, e.g. ("Done", ("completed",
+    # "finished")). Generated offline so the deterministic analyzer can match a
+    # paraphrased query ("what have I completed") to the real value ("Done")
+    # without any query-time LLM call.
+    value_aliases: tuple[tuple[str, tuple[str, ...]], ...] = ()
 
     def supports(self, operator: str) -> bool:
         """Return True if ``operator`` is valid for this field."""
@@ -130,6 +135,10 @@ class MetadataField:
             data["allowed_values"] = list(self.allowed_values)
         if self.temporal_role:
             data["temporal_role"] = self.temporal_role
+        if self.value_aliases:
+            data["value_aliases"] = {
+                value: list(aliases) for value, aliases in self.value_aliases
+            }
         return data
 
 
@@ -199,6 +208,14 @@ class MetadataSchema:
             )
             role = item.get("temporal_role")
             temporal_role = role if role in TEMPORAL_ROLES else None
+            aliases_raw = item.get("value_aliases")
+            value_aliases: tuple[tuple[str, tuple[str, ...]], ...] = ()
+            if isinstance(aliases_raw, Mapping):
+                value_aliases = tuple(
+                    (str(value), tuple(str(a) for a in aliases))
+                    for value, aliases in aliases_raw.items()
+                    if isinstance(aliases, (list, tuple))
+                )
             fields.append(
                 MetadataField(
                     name=name,
@@ -208,6 +225,7 @@ class MetadataSchema:
                     description=description if isinstance(description, str) else None,
                     allowed_values=allowed_values,
                     temporal_role=temporal_role,
+                    value_aliases=value_aliases,
                 )
             )
         return cls(fields=tuple(fields))

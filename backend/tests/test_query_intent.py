@@ -39,7 +39,13 @@ def _schema() -> MetadataSchema:
                 "leetcodeTopic",
                 ("Arrays & Hashing", "Backtracking", "Graphs", "Heap/Priority Queue"),
             ),
-            string_field("status", ("Done", "In progress", "Not started")),
+            MetadataField(
+                name="status",
+                type=FieldType.STRING,
+                operators=operators_for_type(FieldType.STRING),
+                allowed_values=("Done", "In progress", "Not started"),
+                value_aliases=(("Done", ("completed", "finished")),),
+            ),
             MetadataField(
                 name="techNotes",
                 type=FieldType.STRING,
@@ -101,6 +107,16 @@ def test_subject_strips_the_matched_evidence():
     assert request.filters  # a status filter was produced
     subject = request.semantic_query.casefold()
     assert "not started" not in subject
+
+
+def test_value_alias_resolves_paraphrase_with_a_cue():
+    # "completed" is an LLM-generated synonym of Done; fires only with a field cue.
+    assert _filters("What tasks have I completed?") == {"status=Done"}
+
+
+def test_value_alias_does_not_fire_without_a_cue():
+    # Same synonym, no status/task cue -> no filter (avoids over-firing).
+    assert _filters("I completed the marathon this morning") == set()
 
 
 def test_extractor_reports_evidence_and_confidence():

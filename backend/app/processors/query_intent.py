@@ -127,6 +127,17 @@ class ConstraintExtractor:
                     continue
                 distinctive = len(tokens) >= 2 or len(tokens[0]) >= 7
                 self._entries.append((field.name, value, tokens, distinctive, cues))
+            # LLM-generated synonyms map a paraphrase to the canonical value. They
+            # are inferred rather than literal, so they always require a field cue
+            # (distinctive=False) to fire — never on the value word alone.
+            for value, aliases in field.value_aliases:
+                canonical = field.canonical_value(value) or value
+                for alias in aliases:
+                    tokens = tuple(_content_tokens(alias))
+                    if tokens:
+                        self._entries.append(
+                            (field.name, canonical, tokens, False, cues)
+                        )
 
     @staticmethod
     def _field_cues(field_name: str) -> frozenset[str]:
