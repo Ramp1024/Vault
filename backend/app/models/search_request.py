@@ -19,3 +19,4 @@ class SearchRequest:
     semantic_query: str
     filters: List[Filter] = field(default_factory=list)
     top_k: int = 5
+

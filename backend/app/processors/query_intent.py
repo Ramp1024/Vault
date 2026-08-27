@@ -202,7 +202,9 @@ class DeterministicIntentAnalyzer(QueryAnalyzer):
 
         if self._is_lexical(normalized):
             return SearchRequest(
-                semantic_query=normalized, filters=[], top_k=self.default_top_k
+                semantic_query=normalized,
+                filters=[],
+                top_k=self.default_top_k,
             )
 
         candidates = self.extractor.extract(normalized)
@@ -211,7 +213,9 @@ class DeterministicIntentAnalyzer(QueryAnalyzer):
         filters = self._with_temporal(normalized, filters)
         subject = self._subject(normalized, evidence) or normalized
         return SearchRequest(
-            semantic_query=subject, filters=filters, top_k=self.default_top_k
+            semantic_query=subject,
+            filters=filters,
+            top_k=self.default_top_k,
         )
 
     def _with_temporal(self, query: str, filters: list[Filter]) -> list[Filter]:
