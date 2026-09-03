@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChatInput } from '../../components/ChatInput/ChatInput'
 import { ChatWindow } from '../../components/ChatWindow/ChatWindow'
 import type { PromptPrefill } from '../../components/ChatWindow/ChatWindow'
+import { SyncButton } from '../../components/SyncButton/SyncButton'
 import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle'
 import { useTheme } from '../../hooks/useTheme'
 
@@ -375,7 +376,10 @@ export function ChatPage() {
                         <p>Answers grounded in your indexed knowledge base.</p>
                     </div>
                 </div>
-                <ThemeToggle theme={theme} onSelect={setTheme} />
+                <div className="chat-header-actions">
+                    <SyncButton />
+                    <ThemeToggle theme={theme} onSelect={setTheme} />
+                </div>
             </header>
 
             <ChatWindow
