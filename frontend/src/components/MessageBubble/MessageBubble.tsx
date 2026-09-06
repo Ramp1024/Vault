@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { ChatMessage } from '../../pages/ChatPage/ChatPage'
-import { LoadingState } from '../LoadingState/LoadingState'
 import { ThinkingTrace } from '../ThinkingTrace/ThinkingTrace'
 
 type MessageBubbleProps = {
@@ -72,18 +71,18 @@ export function MessageBubble({ message, onRegenerate }: MessageBubbleProps) {
 
   return (
     <article className="msg msg-assistant">
-      <div className="msg-role">
-        <span className="msg-role-dot" aria-hidden="true" />
-        Vault
-      </div>
+      {!isLoading ? (
+        <div className="msg-role">
+          <span className="msg-role-dot" aria-hidden="true" />
+          Vault
+        </div>
+      ) : null}
 
       {trace && trace.length > 0 ? (
         <ThinkingTrace steps={trace} startedAt={startedAt ?? Date.now()} finishedAt={finishedAt} />
       ) : null}
 
-      {isLoading ? (
-        <LoadingState label="Retrieving" startedAt={startedAt ?? Date.now()} />
-      ) : (
+      {isLoading ? null : (
         <div className="msg-body">
           <p>
             {content}

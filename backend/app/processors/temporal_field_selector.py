@@ -93,10 +93,19 @@ class TemporalFieldSelector:
                     return by_name[field.name]
         return candidates[0] if candidates else None
 
-    def select(self, query: str) -> TemporalSelection:
+    def select(self, query: str, prefer_role: str | None = None) -> TemporalSelection:
         candidates = self._candidates()
         if not candidates:
             return TemporalSelection(None, 0.0, "no date fields in schema")
+        # An explicit single-day date means the note's content date, so when the
+        # caller signals a preferred role and a matching field exists, honour it
+        # deterministically before the generic single-candidate/LLM routing.
+        if prefer_role is not None:
+            for field in candidates:
+                if field.temporal_role == prefer_role:
+                    return TemporalSelection(
+                        field.name, 0.9, f"preferred role ({prefer_role})"
+                    )
         if len(candidates) == 1:
             return TemporalSelection(candidates[0].name, 1.0, "only date field")
 

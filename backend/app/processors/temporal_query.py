@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 
 import dateparser
@@ -105,7 +106,10 @@ def _day_bounds(low_day: date, high_day: date) -> tuple[str, str]:
 
 _MONTH = (
     r"(?:january|february|march|april|may|june|july|august|september|october"
-    r"|november|december)"
+    r"|november|december"
+    # Common abbreviations (full names listed first so they win the alternation);
+    # an optional trailing '.' allows forms like "Aug.".
+    r"|jan|feb|mar|apr|jun|jul|aug|sept|sep|oct|nov|dec)\.?"
 )
 
 # Deterministic temporal phrasings, tried in order. Each yields (unit, anchor,
@@ -115,6 +119,24 @@ _TEMPORAL_PATTERNS: tuple[tuple[re.Pattern[str], str, bool], ...] = (
     (re.compile(rf"\blast week of ({_MONTH})\b"), "week", True),
     (re.compile(rf"\bfirst week of ({_MONTH})\b"), "week", False),
     (re.compile(r"\bweek of ([a-z]+(?:\s+\d{1,2})?(?:,?\s+\d{4})?)"), "week", False),
+    # Explicit calendar dates resolve to a single day. Placed before the bare
+    # "in <month>" rule so "August 4" selects that day, not the whole month; the
+    # (?!\d) guard stops "August 2026" from being read as "August 20".
+    (
+        re.compile(
+            rf"\b({_MONTH}\s+\d{{1,2}}(?!\d)(?:st|nd|rd|th)?(?:,?\s+\d{{4}})?)\b"
+        ),
+        "day",
+        False,
+    ),
+    (
+        re.compile(
+            rf"\b(\d{{1,2}}(?!\d)(?:st|nd|rd|th)?\s+(?:of\s+)?{_MONTH}(?:,?\s+\d{{4}})?)\b"
+        ),
+        "day",
+        False,
+    ),
+    (re.compile(r"\b(\d{4}-\d{2}-\d{2})\b"), "day", False),
     (re.compile(r"\b(?:in|during|for|throughout)\s+(" + _MONTH + r")\b"), "month", False),
     (re.compile(r"\b(last week|this week|past week)\b"), "week", False),
     (re.compile(r"\b(last month|this month|past month)\b"), "month", False),
@@ -155,6 +177,30 @@ def detect_temporal_range(query: str, today: date) -> tuple[str, str] | None:
     arithmetic is hardcoded — dateparser resolves anchors and this module owns
     only week/month boundary policy.
     """
+    match = detect_temporal(query, today)
+    return (match.low, match.high) if match is not None else None
+
+
+@dataclass(frozen=True)
+class TemporalMatch:
+    """A resolved temporal expression: inclusive day bounds plus its granularity.
+
+    ``unit`` ("day"/"week"/"month") lets callers distinguish an explicit calendar
+    date ("August 4") from a relative range ("last week"), which matters for
+    choosing whether to filter the note's content date or its activity date.
+    """
+
+    low: str
+    high: str
+    unit: str
+
+
+def detect_temporal(query: str, today: date) -> TemporalMatch | None:
+    """Detect a temporal expression and resolve it to bounds plus granularity.
+
+    Like :func:`detect_temporal_range` but also reports the matched ``unit`` so
+    callers can route explicit single-day dates differently from relative ranges.
+    """
     normalized = " ".join(query.split()).lower()
     for pattern, unit, month_end in _TEMPORAL_PATTERNS:
         match = pattern.search(normalized)
@@ -163,5 +209,5 @@ def detect_temporal_range(query: str, today: date) -> tuple[str, str] | None:
         anchor = match.group(1)
         bounds = resolve_range(anchor, unit, today, month_end=month_end)
         if bounds is not None:
-            return bounds
+            return TemporalMatch(bounds[0], bounds[1], unit)
     return None

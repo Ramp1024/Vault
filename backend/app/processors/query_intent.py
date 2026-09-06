@@ -29,12 +29,16 @@ from dataclasses import dataclass
 
 from app.core.clock import today as current_date
 from app.models.filter import Filter, Operator
-from app.models.metadata_schema import FieldType, MetadataSchema
+from app.models.metadata_schema import (
+    TEMPORAL_CONTENT,
+    FieldType,
+    MetadataSchema,
+)
 from app.models.search_request import SearchRequest
 from app.processors.filter_validator import FilterValidator
 from app.processors.query_analyzer import QueryAnalyzer
 from app.processors.temporal_field_selector import TemporalFieldSelector
-from app.processors.temporal_query import detect_temporal_range
+from app.processors.temporal_query import detect_temporal
 
 # Lookup phrasings whose subject is the thing being searched for, never a filter.
 # Deliberately verb-anchored: possessive/restriction phrasings ("my … notes",
@@ -201,9 +205,11 @@ class DeterministicIntentAnalyzer(QueryAnalyzer):
         normalized = " ".join(query.split()).strip()
 
         if self._is_lexical(normalized):
+            # Lexical routing keeps the subject verbatim, but a temporal range is
+            # orthogonal to it and must still constrain retrieval.
             return SearchRequest(
                 semantic_query=normalized,
-                filters=[],
+                filters=self._with_temporal(normalized, []),
                 top_k=self.default_top_k,
             )
 
@@ -225,16 +231,22 @@ class DeterministicIntentAnalyzer(QueryAnalyzer):
         chosen by ``TemporalFieldSelector``. If no temporal expression is present
         or no field can be selected, ``filters`` is returned unchanged.
         """
-        bounds = detect_temporal_range(query, current_date())
-        if bounds is None:
+        match = detect_temporal(query, current_date())
+        if match is None:
             return filters
-        selection = self.temporal_selector.select(query)
+        # An explicit single-day date ("August 4") means the note's content date,
+        # not when it was last edited; relative ranges keep the default axis.
+        prefer = TEMPORAL_CONTENT if match.unit == "day" else None
+        selection = self.temporal_selector.select(query, prefer_role=prefer)
         if not selection.selected:
             return filters
-        low, high = bounds
         kept = [f for f in filters if f.field != selection.field]
         kept.append(
-            Filter(field=selection.field, operator=Operator.BETWEEN, value=[low, high])
+            Filter(
+                field=selection.field,
+                operator=Operator.BETWEEN,
+                value=[match.low, match.high],
+            )
         )
         return kept
 

@@ -1,12 +1,28 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass, replace
 
+from app.models.filter import Filter
+from app.models.search_request import SearchRequest
 from app.models.search_result import SearchResult
 from app.processors.query_analyzer import QueryAnalyzer
 from app.search.fusion import IdentityFusionStrategy, ResultFusionStrategy
 from app.search.reranker import NoOpReranker, Reranker
 from app.search.strategy import SearchStrategy
+
+
+@dataclass(frozen=True)
+class SearchOutcome:
+    """Retrieval results plus any filters fail-open had to drop to find them.
+
+    ``relaxed_filters`` is empty on a normal search; it lists the metadata
+    filters removed by the fail-open retry so callers can warn generation that
+    the returned sources may not satisfy the requested constraint (e.g. a date).
+    """
+
+    results: list[SearchResult]
+    relaxed_filters: tuple[Filter, ...] = ()
 
 
 class SearchEngine:
@@ -38,9 +54,25 @@ class SearchEngine:
         self.reranker = reranker or NoOpReranker()
 
     def search(self, query: str) -> list[SearchResult]:
+        """Return ranked results for ``query`` (fail-open, filters dropped silently)."""
+        return self.retrieve(query).results
+
+    def retrieve(self, query: str) -> SearchOutcome:
         # Query understanding happens exactly once; every strategy consumes the
         # same backend-agnostic SearchRequest.
         request = self.query_analyzer.analyze(query)
+        results = self._retrieve(request)
+        # Fail open: a metadata filter that matches nothing (e.g. a mis-resolved
+        # date or wrong axis) would otherwise starve generation of context. Retry
+        # once without filters so retrieval degrades to semantic search rather
+        # than returning an empty set — and report which filters were dropped so
+        # generation can flag that the sources may not satisfy them.
+        if not results and request.filters:
+            results = self._retrieve(replace(request, filters=[]))
+            return SearchOutcome(results, tuple(request.filters))
+        return SearchOutcome(results)
+
+    def _retrieve(self, request: SearchRequest) -> list[SearchResult]:
         per_strategy_results = [
             strategy.search(request) for strategy in self.strategies
         ]

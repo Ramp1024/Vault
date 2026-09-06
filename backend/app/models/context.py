@@ -25,10 +25,15 @@ class AssembledContext:
     The LLM never sees raw :class:`~app.models.search_result.SearchResult`
     objects; it only ever receives an ``AssembledContext``. Chunks are ordered by
     final reranked relevance and each carries a stable reference id.
+
+    ``notice`` carries an optional retrieval advisory for the prompt — e.g. that
+    a requested date filter matched nothing and the sources were fetched by
+    semantic relevance instead, so the model must not attribute them to that date.
     """
 
     chunks: tuple[ContextChunk, ...]
     token_count: int = 0
+    notice: str | None = None
 
     def is_empty(self) -> bool:
         """Return ``True`` when no chunks survived assembly."""

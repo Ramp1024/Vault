@@ -1,6 +1,13 @@
 import { useCallback, useState } from 'react'
+import { Toast } from '../Toast/Toast'
+import type { ToastVariant } from '../Toast/Toast'
 
 type SyncStatus = 'idle' | 'syncing' | 'success' | 'error'
+
+type ToastState = {
+    variant: ToastVariant
+    message: string
+}
 
 type SyncResult = {
     documents_processed: number
@@ -28,14 +35,13 @@ const SyncIcon = ({ spinning }: { spinning: boolean }) => (
 
 export function SyncButton() {
     const [status, setStatus] = useState<SyncStatus>('idle')
-    const [detail, setDetail] = useState<string>('')
+    const [toast, setToast] = useState<ToastState | null>(null)
 
     const handleSync = useCallback(async () => {
         if (status === 'syncing') {
             return
         }
         setStatus('syncing')
-        setDetail('')
 
         try {
             const response = await fetch('/api/sync', { method: 'POST' })
@@ -54,19 +60,23 @@ export function SyncButton() {
 
             const result = (await response.json()) as SyncResult
             setStatus('success')
-            setDetail(
-                `Processed ${result.documents_processed}, skipped ${result.documents_skipped} in ${result.duration}s`,
-            )
+            setToast({
+                variant: 'success',
+                message: `Sync complete — processed ${result.documents_processed}, skipped ${result.documents_skipped} in ${result.duration}s`,
+            })
         } catch (error) {
             setStatus('error')
-            setDetail(error instanceof Error ? error.message : 'Sync failed.')
+            setToast({
+                variant: 'error',
+                message: error instanceof Error ? error.message : 'Sync failed.',
+            })
         }
     }, [status])
 
     const label = status === 'syncing' ? 'Syncing…' : 'Sync'
 
     return (
-        <div className="sync-control">
+        <>
             <button
                 type="button"
                 className="sync-button"
@@ -77,14 +87,13 @@ export function SyncButton() {
                 <SyncIcon spinning={status === 'syncing'} />
                 <span>{label}</span>
             </button>
-            {detail && (
-                <span
-                    className={`sync-status sync-status-${status}`}
-                    role="status"
-                >
-                    {detail}
-                </span>
+            {toast && (
+                <Toast
+                    variant={toast.variant}
+                    message={toast.message}
+                    onDismiss={() => setToast(null)}
+                />
             )}
-        </div>
+        </>
     )
 }

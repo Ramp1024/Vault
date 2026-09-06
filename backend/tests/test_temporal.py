@@ -24,7 +24,7 @@ from app.models.metadata_schema import (
 )
 from app.processors.query_intent import DeterministicIntentAnalyzer
 from app.processors.temporal_field_selector import TemporalFieldSelector
-from app.processors.temporal_query import detect_temporal_range
+from app.processors.temporal_query import detect_temporal, detect_temporal_range
 from app.services.metadata_filter_matcher import MetadataFilterMatcher
 from app.services.qdrant_filter_builder import QdrantFilterBuilder
 
@@ -125,6 +125,55 @@ def test_detect_returns_none_without_temporal_expression():
 
 
 # ---------------------------------------------------------------------------
+# Explicit calendar dates (single-day resolution)
+# ---------------------------------------------------------------------------
+def test_detect_explicit_calendar_date_is_single_day():
+    for query in [
+        "August 4",
+        "What have I written about August 4",
+        "August 4th",
+        "4 August",
+        "on 4th of August",
+        "August 4, 2026",
+    ]:
+        assert detect_temporal_range(query, TODAY) == ("2026-08-04", "2026-08-04"), query
+
+
+def test_detect_iso_date_is_single_day():
+    assert detect_temporal_range("notes from 2026-08-04", TODAY) == (
+        "2026-08-04",
+        "2026-08-04",
+    )
+
+
+def test_detect_abbreviated_month_is_single_day():
+    # Abbreviated month names (with or without a trailing period) resolve too.
+    for query in [
+        "summarise what i did on Aug 4",
+        "Aug 4",
+        "Aug. 4",
+        "4 Aug",
+    ]:
+        assert detect_temporal_range(query, TODAY) == ("2026-08-04", "2026-08-04"), query
+
+
+def test_detect_reports_day_unit_for_explicit_date():
+    match = detect_temporal("What did I do on August 4?", TODAY)
+    assert match is not None
+    assert match.unit == "day"
+    assert (match.low, match.high) == ("2026-08-04", "2026-08-04")
+
+
+def test_bare_month_stays_a_month_range_not_a_day():
+    # "August 2026" (the whole month) must not be mis-read as "August 20".
+    assert detect_temporal_range("what I practiced in August 2026", TODAY) == (
+        "2026-08-01",
+        "2026-08-31",
+    )
+    assert detect_temporal("in August", TODAY).unit == "month"
+
+
+# ---------------------------------------------------------------------------
 # Temporal field selector — fail-safe fallback
 # ---------------------------------------------------------------------------
 def _date_field(name: str, role: str) -> MetadataField:
@@ -167,6 +216,30 @@ def test_selector_drops_filter_when_no_date_fields():
     assert selection.field is None
 
 
+def test_selector_prefers_requested_role_when_present():
+    schema = MetadataSchema.from_fields(
+        [
+            _date_field("date", TEMPORAL_CONTENT),
+            _date_field("last_edited_time", TEMPORAL_ACTIVITY),
+        ]
+    )
+    selection = TemporalFieldSelector(schema).select(
+        "August 4", prefer_role=TEMPORAL_CONTENT
+    )
+    assert selection.field == "date"
+
+
+def test_selector_prefer_role_falls_back_when_role_absent():
+    # No content-date field exists; the request degrades to the lone candidate.
+    schema = MetadataSchema.from_fields(
+        [_date_field("last_edited_time", TEMPORAL_ACTIVITY)]
+    )
+    selection = TemporalFieldSelector(schema).select(
+        "August 4", prefer_role=TEMPORAL_CONTENT
+    )
+    assert selection.field == "last_edited_time"
+
+
 # ---------------------------------------------------------------------------
 # Deterministic analyzer wires temporal onto the selected field
 # ---------------------------------------------------------------------------
@@ -183,3 +256,22 @@ def test_deterministic_analyzer_adds_temporal_filter_on_activity_field():
     date_filters = [f for f in request.filters if f.field == "last_edited_time"]
     assert len(date_filters) == 1
     assert date_filters[0].operator is Operator.BETWEEN
+
+
+def test_deterministic_analyzer_routes_explicit_date_to_content_field():
+    # An explicit calendar date means the note's content date, so it filters the
+    # content-date field (not the activity date) and resolves to a single day.
+    schema = MetadataSchema.from_fields(
+        [
+            _date_field("date", TEMPORAL_CONTENT),
+            _date_field("last_edited_time", TEMPORAL_ACTIVITY),
+        ]
+    )
+    request = DeterministicIntentAnalyzer(schema, default_top_k=10).analyze(
+        "What have I written about August 4?"
+    )
+    assert not any(f.field == "last_edited_time" for f in request.filters)
+    content_filters = [f for f in request.filters if f.field == "date"]
+    assert len(content_filters) == 1
+    assert content_filters[0].operator is Operator.BETWEEN
+    assert content_filters[0].value == ["2026-08-04", "2026-08-04"]

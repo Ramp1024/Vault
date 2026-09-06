@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from app.core.config import settings
 from app.models.answer import Citation, GeneratedAnswer
 from app.models.context import AssembledContext
+from app.models.filter import Filter, Operator
 from app.models.prompt import Prompt
 from app.models.search_result import SearchResult
 from app.processors.citation_mapper import CitationMapper
@@ -269,10 +270,39 @@ class AnswerService:
         if not normalized_query:
             raise ValueError("query must not be empty")
 
-        results = self.retrieve(normalized_query)
-        context = self.build_context(results)
+        outcome = self.search_engine.retrieve(normalized_query)
+        context = self.build_context(outcome.results[: self.RETRIEVAL_LIMIT])
+        notice = self._relaxation_notice(outcome.relaxed_filters)
+        if notice is not None:
+            context = replace(context, notice=notice)
         prompt = self.build_prompt(normalized_query, context)
         return AnswerContext(query=normalized_query, context=context, prompt=prompt)
+
+    @staticmethod
+    def _relaxation_notice(relaxed_filters: tuple[Filter, ...]) -> str | None:
+        """Warn generation when a requested date filter matched nothing.
+
+        Fail-open drops the filter and returns semantically similar sources that
+        may be from other dates; without this warning the model tends to relabel
+        them with the asked-for date. Only date ranges are surfaced — other
+        relaxed filters do not risk the same date-attribution error.
+        """
+        asked: list[str] = []
+        for f in relaxed_filters:
+            if f.operator is not Operator.BETWEEN:
+                continue
+            if not isinstance(f.value, (list, tuple)) or len(f.value) != 2:
+                continue
+            low, high = f.value
+            asked.append(str(low) if low == high else f"{low} to {high}")
+        if not asked:
+            return None
+        dates = ", ".join(asked)
+        return (
+            f"No stored entry matches the date(s) requested ({dates}). The sources "
+            f"below were retrieved by semantic relevance and may be from other "
+            f"dates; do not claim they are from {dates}."
+        )
 
     def answer(self, query: str) -> GeneratedAnswer:
         """Run the full generation pipeline and return a structured answer."""

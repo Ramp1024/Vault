@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from datetime import date
 from typing import Any
 
 from app.models.context import AssembledContext
@@ -43,10 +44,17 @@ class GroundedAnswerTemplate(PromptTemplate):
         "Only cite reference numbers that appear in the provided sources; never "
         "invent citations or facts.\n"
         "Do not add an offer to clarify, expand, or answer more questions.\n"
+        "State a date or day of the week only when a source's own properties give "
+        "it; never infer a source's date from the question, and never relabel a "
+        "source with a date or weekday other than the one its properties show.\n"
         "When the question specifies a constraint such as a date, time, or "
-        "category and a source satisfies that constraint, summarize that "
-        "source's content even if its topic wording differs from the question; "
-        "do not refuse just because the exact phrasing is absent.\n"
+        "category, treat a source as satisfying it only when the source's own "
+        "properties show it does; summarize that source's content even if its "
+        "topic wording differs, but never assume an unrelated source satisfies "
+        "the constraint.\n"
+        "If the question asks about a specific date and no source's properties "
+        "match that date, say you couldn't find an entry for that date rather "
+        "than attributing another source's content to it.\n"
         f"Only when no provided source is relevant to the question, respond "
         f"exactly: {_NO_ANSWER}"
     )
@@ -56,14 +64,13 @@ class GroundedAnswerTemplate(PromptTemplate):
         if not normalized_query:
             raise ValueError("query must not be empty")
 
-        user = (
-            "Sources:\n\n"
-            f"{self._format_context(context)}\n\n"
-            "Question:\n\n"
-            f"{normalized_query}\n\n"
-            "Answer (with bracketed citations):"
-        )
-        return Prompt(system=self._SYSTEM, user=user)
+        sections = ["Sources:\n\n", f"{self._format_context(context)}\n\n"]
+        if context.notice:
+            sections.append(f"Note: {context.notice}\n\n")
+        sections.append("Question:\n\n")
+        sections.append(f"{normalized_query}\n\n")
+        sections.append("Answer (with bracketed citations):")
+        return Prompt(system=self._SYSTEM, user="".join(sections))
 
     def _format_context(self, context: AssembledContext) -> str:
         """Render each context chunk as a numbered, citable source block."""
@@ -95,9 +102,25 @@ class GroundedAnswerTemplate(PromptTemplate):
             if isinstance(value, (list, tuple)):
                 rendered = ", ".join(str(item) for item in value)
             else:
-                rendered = str(value)
+                rendered = GroundedAnswerTemplate._annotate_weekday(str(value))
             lines.append(f"  {name}: {rendered}")
         return "\n".join(lines)
+
+    @staticmethod
+    def _annotate_weekday(value: str) -> str:
+        """Append the weekday to an ISO calendar date so the model never guesses it.
+
+        The weekday is computed from the date itself; a value that is not a plain
+        ``YYYY-MM-DD`` date is returned unchanged.
+        """
+        text = value.strip()
+        try:
+            day = date.fromisoformat(text)
+        except ValueError:
+            return value
+        if len(text) != 10:
+            return value
+        return f"{value} ({day.strftime('%A')})"
 
 
 # Registry of available templates, keyed by the name used in configuration.
